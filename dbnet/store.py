@@ -1,10 +1,11 @@
-import os, sys
+import os, sys, hashlib
+from xutil.database.base import SQLx, fwa, fwo
 from xutil.database.sqlite import SQLiteConn
 from xutil.helpers import get_home_path, log, now
 from sqlalchemy import MetaData, Table, Column, String, Numeric, DateTime
 from sqlalchemy.sql import func
 from collections import namedtuple
-import typing
+import typing, jmespath
 
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
 
@@ -30,6 +31,7 @@ engine = conn.get_engine()
 
 tables: typing.Dict[str, Table] = {}
 ntRec: typing.Dict[str, namedtuple] = {}
+sql_func_map = {}
 metadata = MetaData()
 
 # Workers, unique list per machine
@@ -46,7 +48,7 @@ tables['workers'] = Table(
   Column('task_args', String),
   Column('task_kwargs', String),
   Column('progress', Numeric),
-  Column('last_update', DateTime, default=func.now()),
+  Column('last_update', DateTime),
 )
 
 # Databases
@@ -57,7 +59,7 @@ tables['databases'] = Table(
   Column('editor_text', String),
   Column('active_tab_name', String),
   Column('state_json', String),
-  Column('last_update', DateTime, default=func.now()),
+  Column('last_update', DateTime),
 )
 
 # store of column metadata, fast full text search
@@ -70,7 +72,7 @@ tables['meta_tables'] = Table(
   Column('table_type', String),
   Column('row_count', Numeric),
   Column('last_analyzed', DateTime),
-  Column('last_update', DateTime, default=func.now()),
+  Column('last_update', DateTime),
 )
 
 # store of column metadata, fast full text search
@@ -87,7 +89,7 @@ tables['meta_columns'] = Table(
   Column('distinct_count', Numeric),
   Column('null_count', Numeric),
   Column('last_analyzed', DateTime),
-  Column('last_update', DateTime, default=func.now()),
+  Column('last_update', DateTime),
 )
 
 # state of tabs per database
@@ -99,7 +101,7 @@ tables['tabs'] = Table(
   Column('sql_text', String),
   Column('data_json', String),  # tab headers & rows
   Column('state_json', String),  # pinned, limit, duration, etc
-  Column('last_update', DateTime, default=func.now()),
+  Column('last_update', DateTime),
 )
 
 # All Tasks, queries, jobs
@@ -116,8 +118,7 @@ tables['tasks'] = Table(
   Column('error', String),
   Column('worker_name', String),
   Column('worker_pid', String),
-  Column('cached', String),
-  Column('last_update', DateTime, default=func.now()),
+  Column('last_update', DateTime),
 )
 
 # Query text, to enable full text search of history
@@ -130,17 +131,20 @@ tables['queries'] = Table(
   Column('duration_sec', Numeric),
   Column('row_count', Numeric),
   Column('limit', Numeric),
-  Column('last_update', DateTime, default=func.now()),
+  Column('cached', String),
+  Column('sql_md5', String),
+  Column('last_update', DateTime),
 )
 
 # store temporary cache of query results
 tables['cache'] = Table(
   'cache',
   metadata,
-  Column('task_id', Numeric, primary_key=True),  #same as task_id
+  Column('sql_md5', String, primary_key=True),
+  Column('sql_text', String),
   Column('data_json', String),
   Column('expire_date', DateTime),
-  Column('last_update', DateTime, default=func.now()),
+  Column('last_update', DateTime),
 )
 
 # store global settings & state
@@ -149,25 +153,27 @@ tables['state'] = Table(
   metadata,
   Column('key', String, primary_key=True),  # active_database, etc
   Column('value', String),
-  Column('last_update', DateTime, default=func.now()),
+  Column('last_update', DateTime),
 )
 
-for table in tables:
-  ntRec[table] = namedtuple(table, tables[table].columns.keys())
+make_rec = lambda **d: namedtuple('R', d.keys())(**d)
 
+sqlx = SQLx(conn, schema='main', tables=tables)
 
-def state_set(key, value):
-  rec = ntRec[table](key, value, now())
-  conn.replace('main.state', [rec], ['key'], echo=False)
+state_set = lambda key, value: sqlx.replace_rec(
+  'state', key=key, value=value, last_update=now(),)
+state_get = lambda key: sqlx.select_one(
+  'state', fwa(key=key), field='value',)
 
-
-def state_get(key):
-  rows = conn.select(
-    "select value from main.state where key = '{}'".format(key),
-    echo=False,
-  )
-  val = rows[0][0] if rows else None
-  return val
+cache_set = lambda sql_text, data_json, expire_date: sqlx.replace_rec(
+  'cache',
+  sql_md5=hashlib.md5(sql_text),
+  sql_text=sql_text,
+  expire_date=expire_date,
+  last_update=now(),
+)
+cache_get = lambda sql_text: sqlx.select_one(
+  'cache', fwa(sql_md5=hashlib.md5(sql_text)),)
 
 
 def create_tables(drop_first=False):
@@ -186,3 +192,8 @@ def create_tables(drop_first=False):
 
 if __name__ == '__main__':
   create_tables(drop_first=True)
+  state_set('key', 1)
+  state_set('key', 44)
+  print(state_get('key'))
+
+  # insert('cache', ntRec['cache'](key, value, now())

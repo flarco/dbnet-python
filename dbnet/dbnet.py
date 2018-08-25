@@ -32,6 +32,7 @@ def start_worker_webapp():
     args=(WEBAPP_PORT, ),
     pid_folder=DBNET_FOLDER)
   worker.start()
+  workers['webapp'] = worker
   return worker
 
 
@@ -122,7 +123,7 @@ def main():
   databases = get_databases(profile)
 
   # start web worker
-  workers['webapp'] = start_worker_webapp()
+  start_worker_webapp()
 
   while not exiting:
     try:
