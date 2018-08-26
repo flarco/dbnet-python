@@ -193,7 +193,8 @@ def handle_web_worker_req(worker: Worker, data_dict):
 
   # Confirm receipt to WebApp Worker
   # log('confirm_data: {}'.format(confirm_data))
-  worker.pipe.send_to_child(confirm_data)
+  with worker.lock:
+    worker.pipe.send_to_child(confirm_data)
 
 
 def main():
@@ -216,7 +217,8 @@ def main():
         worker = workers.get(wkr_key, None)
         if not worker: continue
 
-        recv_data = worker.pipe.recv_from_child(timeout=0)
+        with worker.lock:
+          recv_data = worker.pipe.recv_from_child(timeout=0)
 
         if recv_data:
           if wkr_key == 'webapp':

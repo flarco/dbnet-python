@@ -220,7 +220,8 @@ def execute_sql(worker: Worker, data_dict):
         sid=sid)
 
     finally:
-      worker.pipe.send_to_parent(data)
+      with worker.lock:
+        worker.pipe.send_to_parent(data)
 
   data_dict['limit'] = int(data_dict.get('limit', 500))
   data_dict['options'] = data_dict.get('options', {})
@@ -245,7 +246,10 @@ def run(db_prof, worker: Worker):
   worker_db_prof = db_prof
 
   while True:
-    time.sleep(0.005)  # brings down CPU loop usage
+    try:
+      time.sleep(0.005)  # brings down CPU loop usage
+    except (KeyboardInterrupt, SystemExit):
+      return
     data_dict = worker.pipe.recv_from_parent(timeout=0)
     if data_dict:
       conf_data = {'payload_type': 'confirmation'}
@@ -272,7 +276,8 @@ def run(db_prof, worker: Worker):
         log('+Queued task: {}'.format(data_dict))
 
       # Send receipt confirmation
-      worker.pipe.send_to_parent(conf_data)
+      with worker.lock:
+        worker.pipe.send_to_parent(conf_data)
 
     if len(worker_queue) and worker_status == 'IDLE':
       data_dict = worker_queue.popleft()
@@ -311,7 +316,8 @@ def run(db_prof, worker: Worker):
           payload_type='task-error',
           error=E,
         )
-        worker.pipe.send_to_parent(error_data)
+        with worker.lock:
+          worker.pipe.send_to_parent(error_data)
       finally:
         worker_status = 'IDLE'
 

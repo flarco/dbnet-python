@@ -50,7 +50,8 @@ def client_request(sid, data, *args, **kwargs):
   # print('args: {}'.format(args))
   # print('kwargs: {}'.format(kwargs))
   data['sid'] = sid
-  resp_data = app.pipe.emit_to_parent(data)
+  with app.worker.lock:
+    resp_data = app.pipe.emit_to_parent(data)
   return jtrans(resp_data)
 
 
@@ -60,4 +61,4 @@ def disconnect(sid):
 
 
 def run(port, worker):
-  app.run(port, log=worker.log, pipe=worker.pipe)
+  app.run(port, log=worker.log, worker=worker)
