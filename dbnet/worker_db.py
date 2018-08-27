@@ -1,4 +1,4 @@
-from xutil.parallelism import Worker
+from xutil.parallelism import Worker, Queue
 from xutil.diskio import write_csv
 from xutil.helpers import log, struct, now, epoch, jdumps, get_db_profile, get_exception_message
 from xutil import get_conn
@@ -33,10 +33,8 @@ def execute_sql(worker: Worker, data_dict):
     rows = fields = []
     get_fields = lambda r: r.__fields__ if hasattr(r, '__fields__') else r._fields
 
-    task_id = redb9.hget(id, hkey='cli-web_app-id_map')
-
     try:
-      s_t = now()
+      s_t = epoch()
 
       def exec_sql(sql):
         log(
@@ -44,7 +42,7 @@ def execute_sql(worker: Worker, data_dict):
           format(sql),
           color='blue')
         log('LIMIT: ' + str(limit), color='blue')
-        for field, rows in conn.execute_multi(
+        for fields, rows in conn.execute_multi(
             sql, dtype='tuple', limit=int(limit)):
           yield fields, rows
 
@@ -171,7 +169,8 @@ def execute_sql(worker: Worker, data_dict):
       #   if len(rows) > 100:
       #     rows = rows[:100]
 
-      secs = (now() - s_t).total_seconds()
+      e_t = epoch()
+      secs = e_t - s_t
 
       # Add query
       store.sqlx('queries').add(
@@ -180,18 +179,21 @@ def execute_sql(worker: Worker, data_dict):
         exec_date=s_t,
         duration_sec=secs,
         row_count=len(rows),
-        limit=limt,
+        limit_val=limit,
         cached=False,
-        sql_md5=hashlib.md5(sql),
+        sql_md5=hashlib.md5(sql.encode('utf-8')).hexdigest(),
         last_updated=epoch(),
       )
 
+      # time.sleep(0.5)
       data = dict(
         id=data_dict['id'],
         payload_type='query-data',
         database=database,
         rows=rows,
         headers=fields,
+        start_ts=s_t,
+        end_ts=e_t,
         execute_time=round(secs, 2),
         status='COMPLETED',
         options=options,
@@ -220,8 +222,8 @@ def execute_sql(worker: Worker, data_dict):
         sid=sid)
 
     finally:
-      with worker.lock:
-        worker.pipe.send_to_parent(data)
+      # worker.pipe.send_to_parent(data)
+      worker.put_parent_q(data)
 
   data_dict['limit'] = int(data_dict.get('limit', 500))
   data_dict['options'] = data_dict.get('options', {})
@@ -238,7 +240,7 @@ def execute_sql(worker: Worker, data_dict):
 func_map = {'submit-sql': execute_sql}
 
 
-def run(db_prof, worker: Worker):
+def run(db_prof, conf_queue: Queue, worker: Worker):
   log = worker.log
   worker_name = worker.name
   worker_status = store.sqlx('workers').select_one(
@@ -250,7 +252,8 @@ def run(db_prof, worker: Worker):
       time.sleep(0.005)  # brings down CPU loop usage
     except (KeyboardInterrupt, SystemExit):
       return
-    data_dict = worker.pipe.recv_from_parent(timeout=0)
+    # data_dict = worker.pipe.recv_from_parent(timeout=0)
+    data_dict = worker.get_child_q()
     if data_dict:
       conf_data = {'payload_type': 'confirmation'}
       if data_dict['req_type'] in func_map:
@@ -276,8 +279,8 @@ def run(db_prof, worker: Worker):
         log('+Queued task: {}'.format(data_dict))
 
       # Send receipt confirmation
-      with worker.lock:
-        worker.pipe.send_to_parent(conf_data)
+      # with worker.lock:
+      #   worker.pipe.send_to_parent(conf_data)
 
     if len(worker_queue) and worker_status == 'IDLE':
       data_dict = worker_queue.popleft()
@@ -316,8 +319,8 @@ def run(db_prof, worker: Worker):
           payload_type='task-error',
           error=E,
         )
-        with worker.lock:
-          worker.pipe.send_to_parent(error_data)
+        # worker.pipe.send_to_parent(error_data)
+        worker.put_parent_q(error_data)
       finally:
         worker_status = 'IDLE'
 

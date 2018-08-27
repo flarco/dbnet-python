@@ -1,9 +1,8 @@
 import sys
 sys.path.insert(1, '/Users/larco/__/Git/xutil')
 
-from xutil.web import WebApp
-from xutil.web import process_request
-from xutil.helpers import jdumps, jtrans
+from xutil.web import WebApp, process_request
+from xutil.helpers import jdumps, jtrans, log
 
 app = WebApp('dbnet')
 
@@ -47,12 +46,16 @@ def client_request(sid, data, *args, **kwargs):
    * stop-worker
    * get-workers
   """
-  # print('args: {}'.format(args))
-  # print('kwargs: {}'.format(kwargs))
   data['sid'] = sid
-  with app.worker.lock:
-    resp_data = app.pipe.emit_to_parent(data)
-  return jtrans(resp_data)
+
+  # with app.worker.lock:
+  #   resp_data = app.pipe.emit_to_parent(data)
+  # app.pipe.send_to_parent(data)
+  # print('resp_data: {}'.format(resp_data))
+  # return jtrans(resp_data)
+
+  app.worker.put_parent_q(data)
+  return 'OK'
 
 
 @app.on('disconnect')

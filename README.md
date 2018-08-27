@@ -10,21 +10,29 @@ dbnet
 
 **get & others**: initiated from client to server
 
-- stop-worker
-- get-workers
+- X stop-worker
+- X get-workers
 - send-workers (when changed by server / node)
-- add-worker
-- submit-sql
-- send-query-results
+- X add-worker
+- X submit-sql
+- X send-query-results (query-data)
 - send-query-progress
-- set-state
+- X set-state
 - send-state (when changed by node)
 - set-database
+- X get-database
 - send-database (when changed by node)
 - get-meta-tables
 - get-meta-columns
-- set-tab
+- X set-tab
+- X get-tab
 - send-tab (when changed by node)
-- get-tasks
-- get-queries
-- search-queries
+- X get-tasks
+- X get-queries
+- X search-queries
+
+## Tests
+
+-X Unit tests as SOI Client
+
+- Unit tests as Web Client

@@ -19,7 +19,8 @@ from xutil.helpers import (
   get_pid_path,
   cleanup_pid,
 )
-import xutil.database.base as xutil_db
+from xutil.database.base import fwa
+from xutil.parallelism import Queue
 import worker_web as webapp_worker
 import worker_db as db_worker
 from collections import OrderedDict
@@ -34,6 +35,7 @@ os.makedirs(DBNET_FOLDER, exist_ok=True)
 hostname = socket.gethostname()
 workers = OrderedDict()
 db_workers_map = OrderedDict()
+conf_queue = Queue()
 
 
 def start_worker_webapp():
@@ -83,7 +85,7 @@ def start_worker_db(db_name, start=False):
     'database-client',
     fn=db_worker.run,
     log=log,
-    args=(db_prof, ),
+    args=(db_prof, conf_queue),
     kwargs={},
     pid_folder=DBNET_FOLDER)
   worker.status = 'IDLE'
@@ -127,12 +129,15 @@ def handle_db_worker_req(worker: Worker, data_dict):
     send_to_webapp(data_dict)
 
 
-def handle_web_worker_req(worker: Worker, data_dict):
+def handle_web_worker_req(web_worker: Worker, data_dict):
   # print('data_dict: {}'.format(data_dict))
+  # return
   data = struct(data_dict)
-  confirm_data = {}
-  confirm_data_for_missing = {
+  response_data = {}
+  response_data_for_missing = {
     'completed': False,
+    'payload_type': 'client-response',
+    'sid': data.sid,
     'error': Exception('Request "{}" not handled!'.format(data.req_type))
   }
 
@@ -157,7 +162,8 @@ def handle_web_worker_req(worker: Worker, data_dict):
     db_worker = workers[db_workers_avail[0]]
 
     # send to worker queue
-    confirm_data = db_worker.pipe.emit_to_child(data_dict)
+    db_worker.put_child_q(data_dict)
+    response_data['queued'] = True
 
   elif data.req_type == 'stop-worker':
     if data.worker_name in workers:
@@ -170,7 +176,58 @@ def handle_web_worker_req(worker: Worker, data_dict):
         if len(db_workers_map[db]) == 0:
           del db_workers_map[db]
       del workers[data.worker_name]
-      confirm_data = dict(completed=True)
+      response_data = dict(completed=True)
+
+  elif data.req_type == 'add-worker':
+    start_worker_db(data.database, start=True)
+    response_data = dict(completed=True)
+
+  elif data.req_type == 'set-state':
+    store.state_set(data.key, data.value)
+    response_data = dict(completed=True)
+
+  elif data.req_type == 'set-database':
+    store.sqlx('databases').replace_rec(**data.db_states)
+    response_data = dict(completed=True)
+
+  elif data.req_type == 'get-database':
+    rec = store.sqlx('databases').select_one(fwa(db_name=data.db_name))
+    response_data = dict(completed=True, data=rec._asdict())
+
+  elif data.req_type == 'set-tab':
+    store.sqlx('tabs').replace_rec(**data.tab_state)
+    response_data = dict(completed=True)
+
+  elif data.req_type == 'get-tab':
+    rec = store.sqlx('tabs').select_one(
+      fwa(db_name=data.db_name, tab_name=data.tab_name))
+    response_data = dict(completed=True, data=rec._asdict())
+
+  elif data.req_type == 'get-tasks':
+    rows = store.sqlx('tasks').select(
+      where='1=1 order by end_date desc, start_date desc, queue_date desc',
+      limit=100)
+    recs = [row._asdict() for row in rows]
+    response_data = dict(data=recs, completed=True)
+
+  elif data.req_type == 'get-queries':
+    rows = store.sqlx('queries').select(
+      where='1=1 order by exec_date desc', limit=100)
+    recs = [row._asdict() for row in rows]
+    response_data = dict(data=recs, completed=True)
+
+  elif data.req_type == 'get-queries':
+    rows = store.sqlx('queries').select(
+      where='1=1 order by exec_date desc', limit=100)
+    recs = [row._asdict() for row in rows]
+    response_data = dict(data=recs, completed=True)
+
+  elif data.req_type == 'search-queries':
+    where = "sql_text like '%{}%' order by exec_date desc".format(
+      data.query_filter)
+    rows = store.sqlx('queries').select(where=where, limit=100)
+    recs = [row._asdict() for row in rows]
+    response_data = dict(data=recs, completed=True)
 
   elif data.req_type == 'get-workers':
     make_rec = lambda wkr: dict(
@@ -180,21 +237,22 @@ def handle_web_worker_req(worker: Worker, data_dict):
       pid=wkr.pid,
     )
     workers_data = [make_rec(wkr) for wkr in workers.values()]
-    confirm_data = dict(data=workers_data, completed=True)
+    response_data = dict(data=workers_data, completed=True)
 
   # In case handle is missing. Also checked for completed
-  if confirm_data:
-    confirm_data['orig_req'] = data_dict
-    confirm_data['completed'] = confirm_data.get('completed', False)
-    res = '+Completed' if confirm_data['completed'] else '~Did not Complete'
+  if response_data:
+    response_data['orig_req'] = data_dict
+    response_data['payload_type'] = 'client-response'
+    response_data['sid'] = data.sid
+    response_data['completed'] = response_data.get('completed', False)
+    res = '+Completed' if response_data[
+      'completed'] else '+Queued' if 'queued' in response_data and response_data['queued'] else '~Did not Complete'
     log('{} "{}" request "{}".'.format(res, data.req_type, data.id))
   else:
-    confirm_data = confirm_data_for_missing
+    response_data = response_data_for_missing
 
-  # Confirm receipt to WebApp Worker
-  # log('confirm_data: {}'.format(confirm_data))
-  with worker.lock:
-    worker.pipe.send_to_child(confirm_data)
+  # Respond to WebApp Worker
+  send_to_webapp(response_data)
 
 
 def main():
@@ -217,8 +275,9 @@ def main():
         worker = workers.get(wkr_key, None)
         if not worker: continue
 
-        with worker.lock:
-          recv_data = worker.pipe.recv_from_child(timeout=0)
+        # recv_data = worker.pipe.recv_from_child(timeout=0)
+
+        recv_data = worker.get_parent_q()
 
         if recv_data:
           if wkr_key == 'webapp':

@@ -44,7 +44,7 @@ tables['workers'] = Table(
   Column('worker_type', String),
   Column('worker_pid', Numeric),
   Column('status', String),  # IDLE, BUSY, OFF
-  Column('task_id', Numeric),
+  Column('task_id', String),
   Column('task_function', String),
   Column('task_start_date', DateTime),
   Column('task_args', String),
@@ -103,7 +103,7 @@ tables['tabs'] = Table(
   Column('tab_name', String, primary_key=True),
   Column('sql_text', String),
   Column('data_json', String),  # tab headers & rows
-  Column('state_json', String),  # pinned, limit, duration, etc
+  Column('props_json', String),  # pinned, limit, duration, etc
   Column('last_updated', DateTime, server_default=epoch_def),
 )
 
@@ -111,7 +111,7 @@ tables['tabs'] = Table(
 tables['tasks'] = Table(
   'tasks',
   metadata,
-  Column('task_id', Numeric, primary_key=True),
+  Column('task_id', String, primary_key=True),
   Column('function', String),
   Column('queue_date', DateTime),
   Column('start_date', DateTime),
@@ -128,12 +128,12 @@ tables['tasks'] = Table(
 tables['queries'] = Table(
   'queries',
   metadata,
-  Column('task_id', Numeric, primary_key=True),  #same as task_id
+  Column('task_id', String, primary_key=True),  #same as task_id
   Column('sql_text', String),
   Column('exec_date', DateTime),
   Column('duration_sec', Numeric),
   Column('row_count', Numeric),
-  Column('limit', Numeric),
+  Column('limit_val', Numeric),
   Column('cached', String),
   Column('sql_md5', String),
   Column('last_updated', DateTime, server_default=epoch_def),
