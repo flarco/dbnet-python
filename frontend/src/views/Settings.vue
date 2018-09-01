@@ -1,67 +1,88 @@
 <template>
-<div class="tile is-ancestor" style="margin: -5px">
-  <div class="tile is-parent is-2 animated fadeInLeftBig" style="padding-right: 6px;">
-    <article class="tile is-child box">
-      <aside class="menu" style=" height: 690px">
-        <p class="menu-label">
-          General
-        </p>
-        <ul class="menu-list">
-          <li><a>Dashboard</a></li>
-          <li><a>Customers</a></li>
-        </ul>
-        <p class="menu-label">
-          Administration
-        </p>
-        <ul class="menu-list">
-          <li><a>Team Settings</a></li>
-          <li>
-            <a class="is-active">Manage Your Team</a>
-            <ul>
-              <li><a>Members</a></li>
-              <li><a>Plugins</a></li>
-              <li><a>Add a member</a></li>
-            </ul>
-          </li>
-          <li><a>Invitations</a></li>
-          <li><a>Cloud Storage Environment Settings</a></li>
-          <li><a>Authentication</a></li>
-        </ul>
-        <p class="menu-label">
-          Transactions
-        </p>
-        <ul class="menu-list">
-          <li><a>Payments</a></li>
-          <li><a>Transfers</a></li>
-          <li><a>Balance</a></li>
-        </ul>
-      </aside>
-    </article>
+  <div style="padding: 20px">
+      <h1 class="title">Settings</h1>
+
+      <section>
+          <div class="field">
+            <b-field label="Performance Monitoring"/>
+              <b-switch v-model="$store.settings.perfMonitoringEnabled">
+                  {{ $store.settings.perfMonitoringEnabled? 'Enabled':'Disabled' }}
+              </b-switch>
+          </div>
+          <div class="field">
+            <b-field label="Hide Sidebase"/>
+              <b-switch v-model="$store.settings.sidebar_shown">
+                  {{ $store.settings.sidebar_shown? 'Shown':'Hidden' }}
+              </b-switch>
+          </div>
+      </section>
+      <br/>
+      <section>
+          <b-field label="Sidebar Width"/>
+          <b-field>
+              <b-radio-button v-model="$store.style.sidebar_width"
+                  native-value="180px">
+                  <span>180px</span>
+              </b-radio-button>
+
+              <b-radio-button v-model="$store.style.sidebar_width"
+                  native-value="200px">
+                  <span>200px</span>
+              </b-radio-button>
+
+              <b-radio-button v-model="$store.style.sidebar_width"
+                  native-value="220px">
+                  <span>220px</span>
+              </b-radio-button>
+
+              <b-radio-button v-model="$store.style.sidebar_width"
+                  native-value="250px">
+                  <span>250px</span>
+              </b-radio-button>
+          </b-field>
+      </section>
+      <br/>
+      <section>
+          <b-field label="Query Pane Width"/>
+          <b-field>
+              <b-radio-button v-model="$store.settings.pane_width"
+                  native-value="2">
+                  <span>Small</span>
+              </b-radio-button>
+
+              <b-radio-button v-model="$store.settings.pane_width"
+                  native-value="3">
+                  <span>Medium</span>
+              </b-radio-button>
+
+              <b-radio-button v-model="$store.settings.pane_width"
+                  native-value="4">
+                  <span>Large</span>
+              </b-radio-button>
+
+              <b-radio-button v-model="$store.settings.pane_width"
+                  native-value="5">
+                  <span>X-Large</span>
+              </b-radio-button>
+          </b-field>
+      </section>
   </div>
-  <div class="tile is-parent" style="padding-left: 6px">
-    <article class="tile is-child box">
-      555
-    </article>
-  </div>
-</div>
 </template>
 
 <script>
-import { codemirror, CodeMirror } from "vue-codemirror";
-import "codemirror/lib/codemirror.css";
-require("codemirror/addon/scroll/annotatescrollbar");
-require("codemirror/addon/search/matchesonscrollbar");
-require("codemirror/addon/search/searchcursor");
-require("codemirror/addon/search/match-highlighter");
+import { SideMenu } from "../components/layout/";
 
 export default {
   name: "Home",
   components: {
-    codemirror: codemirror
+    "side-menu": SideMenu
   },
   data() {
     return {
-      msg: "Vue.js starter with full-featured Webpack and Buefy"
+      msg: "Vue.js starter with full-featured Webpack and Buefy",
+      isSwitched: false,
+      isSwitchedCustom: "Yes",
+      radioButton: ""
     };
   }
 };

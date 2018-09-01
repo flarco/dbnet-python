@@ -1,6 +1,6 @@
 from xutil.parallelism import Worker, Queue
 from xutil.diskio import write_csv
-from xutil.helpers import log, struct, now, epoch, jdumps, get_db_profile, get_exception_message
+from xutil.helpers import log, struct, now, epoch, jdumps, get_db_profile, get_exception_message, get_error_str
 from xutil import get_conn
 from xutil.database.base import fwa, fwo
 from collections import deque
@@ -32,9 +32,9 @@ def execute_sql(worker: Worker, data_dict):
   def start_sql(sql, id, limit, options, sid):
     rows = fields = []
     get_fields = lambda r: r.__fields__ if hasattr(r, '__fields__') else r._fields
+    s_t = epoch()
 
     try:
-      s_t = epoch()
 
       def exec_sql(sql):
         log(
@@ -46,7 +46,14 @@ def execute_sql(worker: Worker, data_dict):
             sql, dtype='tuple', limit=int(limit)):
           yield fields, rows
 
-      if 'special' in options:
+      if 'meta' in options:
+        # get_schemas or
+        meta_func = options['meta']
+        rows = getattr(conn, meta_func)(**options['kwargs'])
+        rows = [tuple(r) for r in rows]
+        fields = conn._fields
+
+      elif 'special' in options:
         pass
       #   if options['special'] == 'join-analyze':
       #     rows = conn.join_analyze(sql)
@@ -195,17 +202,16 @@ def execute_sql(worker: Worker, data_dict):
         start_ts=s_t,
         end_ts=e_t,
         execute_time=round(secs, 2),
-        status='COMPLETED',
+        completed=True,
         options=options,
         pid=worker_pid,
-        error='',
         sid=sid,
       )
 
-    except Exception as e:
-      secs = (now() - s_t).total_seconds()
+    except Exception as E:
+      secs = epoch() - s_t
       err_msg_long = get_exception_message()
-      err_msg = get_exception_message(raw=True)
+      err_msg = get_error_str(E)
 
       log(err_msg_long, color='red')
       data = dict(
@@ -215,7 +221,7 @@ def execute_sql(worker: Worker, data_dict):
         rows=[],
         headers=[],
         execute_time=round(secs, 2),
-        status='FAILED',
+        completed=False,
         error='ERROR:\n' + err_msg,
         options=options,
         pid=worker_pid,
@@ -227,6 +233,7 @@ def execute_sql(worker: Worker, data_dict):
 
   data_dict['limit'] = int(data_dict.get('limit', 500))
   data_dict['options'] = data_dict.get('options', {})
+  data_dict['sql'] = data_dict.get('sql', '')
 
   start_sql(
     data_dict['sql'],
@@ -314,10 +321,10 @@ def run(db_prof, conf_queue: Queue, worker: Worker):
       except Exception as E:
         log(E)
         error_data = dict(
-          task_id=data_dict['id'],
+          id=data_dict['id'],
           sid=data_dict['sid'],
           payload_type='task-error',
-          error=E,
+          error=get_error_str(E),
         )
         # worker.pipe.send_to_parent(error_data)
         worker.put_parent_q(error_data)

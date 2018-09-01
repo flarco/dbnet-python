@@ -36,3 +36,44 @@ dbnet
 -X Unit tests as SOI Client
 
 - Unit tests as Web Client
+
+## Front-end
+
+### Side menu
+
+- Connections (drop-down) with plus sign to add
+  - list databases. Clicking a db activates last query state
+- Meta Explorer
+- Extract / Load
+- Settings
+
+### Activities
+
+- Query
+  - Left pane is multi pane
+    - Editor
+      - Codemirror
+    - Schema
+    - History
+  - A dropdown of sessions (past sessions are analysis sessions) with a plus button
+- Meta Explorer
+  - allows search accross databases for fields
+- Transfer
+  - Panes to select type of transfer, source, target, live search box, etc
+
+### Top nav
+
+- Logo brand (centered)
+- Right side (socket status, CPU, RAM, processes count)
+
+### Tabs
+
+- META (Permanent)
+
+## Shortcut Keys
+
+### Editor
+
+- F4 is to open schema tab
+- F9 is execute SQL block
+- F10 is to queue SQL block

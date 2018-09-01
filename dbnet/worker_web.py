@@ -2,7 +2,8 @@ import sys
 sys.path.insert(1, '/Users/larco/__/Git/xutil')
 
 from xutil.web import WebApp, process_request
-from xutil.helpers import jdumps, jtrans, log
+from xutil.helpers import jdumps, jtrans, log, get_error_str
+from store import store_func
 
 app = WebApp('dbnet')
 
@@ -22,6 +23,10 @@ def index():
 @app.route('/api/<payload_type>', methods=['POST'])
 def transmit_payload(payload_type):
   (val_dict, form_dict, data_dict) = app.proc_request()
+  if data_dict['payload_type'] != 'client-response':
+    app.log('-Response -> {}'.format(data_dict))
+  else:
+    app.log('Confirmation -> {}'.format(data_dict))
   app.emit(payload_type, data_dict, namespace='/', room=data_dict['sid'])
   return 'OK'
 
@@ -33,8 +38,33 @@ def connect(sid, environ):
 
 @app.on('message')
 def message(sid, data):
-  app.log('message ' + str(data))
+  app.log('message from "{}" => {}'.format(sid, data))
   # app.pipe.send_to_parent(data)
+  return 'OK'
+
+
+@app.on('store')
+def client_request(sid, data, *args, **kwargs):
+  """
+  Operation on Store. Returns Data as needed
+  """
+  data['sid'] = sid
+  app.log('+Got Store Req => {}'.format(data))
+  try:
+    data2 = dict(
+      payload=store_func[data['store_func']](**data['kwargs']),
+      completed=True,
+    )
+  except Exception as err:
+    app.log(err)
+    data2 = dict(
+      payload={},
+      completed=False,
+      error=get_error_str(err),
+      orig_req=data,
+    )
+  app.log('-Resp Data => {}'.format(data2))
+  return data2
 
 
 @app.on('client-request')

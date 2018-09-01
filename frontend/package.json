@@ -22,11 +22,18 @@
     "@handsontable/vue": "^2.0.0",
     "animate.css": "^3.5.2",
     "buefy": "^0.6.6",
+    "debounce": "^1.2.0",
     "font-awesome": "^4.7.0",
+    "handsontable": "^5.0.1",
+    "locallyjs": "^0.3.3",
+    "lz-string": "^1.4.4",
     "mdi": "^2.0.46",
+    "nanoid": "^1.2.2",
     "vue": "^2.5.2",
     "vue-codemirror": "^4.0.5",
-    "vue-router": "^3.0.1"
+    "vue-lodash": "^2.0.0",
+    "vue-router": "^3.0.1",
+    "vue-socket.io": "^2.1.1-b"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
@@ -89,6 +96,7 @@
     "sinon-chai": "^2.8.0",
     "url-loader": "^0.5.8",
     "vue-loader": "^13.3.0",
+    "vue-stash": "^2.0.1-beta",
     "vue-style-loader": "^3.0.1",
     "vue-template-compiler": "^2.5.2",
     "webpack": "^3.8.1",

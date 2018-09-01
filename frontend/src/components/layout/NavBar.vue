@@ -1,77 +1,73 @@
 <template>
-  <!--<section class="hero app-navbar is-bold">
-    <div class="hero-head">-->
-      <header class="navbar is-bold">
-        <div class="container">
-        <div class="navbar-brand">
-          <a class="navbar-item">
-            <!-- <i class="fa fa-cog fa-spin fa-2x fa-fw"></i> Logo -->
-            <!-- ref: http://fontawesome.io/examples/#animated -->
+    <div>
+      <header class="navbar is-bold" >
+        <a class="navbar-item" @click="$store.settings.sidebar_shown=!$store.settings.sidebar_shown">
+          <b-icon pack="fa" icon="bars" ></b-icon>
+        </a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">
+            <b-icon pack="fa" icon="bolt" ></b-icon>
           </a>
-          <a class="navbar-item is-hidden-desktop" href="https://github.com/ndro/vue-webpack-buefy" target="_blank">
-            <b-icon pack="fa" icon="github" type="is-black"></b-icon>
-          </a>
-          <div class="navbar-burger burger" data-target="navbarDropdown">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>
-
-        <div id="navbarDropdown" class="navbar-menu">
-          <div class="navbar-start">
-            <a class="navbar-item" href="#">
-              <router-link :to="{ name: 'Home' }">Home</router-link>
+          <!-- Favorite connections on top -->
+          <div class="navbar-dropdown is-boxed">
+            <a class="navbar-item is-active" href="#">
+              SPARK
             </a>
-            <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link" href="#">
-                Connections
-              </a>
-              <div class="navbar-dropdown is-boxed">
-                <a class="navbar-item is-active" href="#">
-                  SPARK
-                </a>
-                <a class="navbar-item" href="#">
-                  HIVE
-                </a>
-                <hr class="navbar-divider">
-                <a class="navbar-item" href="#">
-                  DW1
-                </a>
-                <a class="navbar-item" href="#">
-                  EDW2
-                </a>
-              </div>
-            </div>
+            <a class="navbar-item" href="#">
+              HIVE
+            </a>
+            <hr class="navbar-divider">
+            <a class="navbar-item" href="#">
+              DW1
+            </a>
+            <a class="navbar-item" href="#">
+              EDW2
+            </a>
           </div>
+        </div>
+        <div class="container">
 
-          <div class="navbar-end">
-            <!--<div class="navbar-item">-->
-              <a class="navbar-item" href="https://github.com/ndro/vue-webpack-buefy" target="_blank">
-                <b-icon pack="fa" icon="github" type="is-black"></b-icon>
-              </a>
-            <!--</div>-->
-            <div class="navbar-item">
-              <div class="field is-grouped">
-                <p class="control">
-                  <a class="button is-primary is-outlined" href="#">
-                    <span>Settings</span>
-                  </a>
-                </p>
-                <p class="control">
-                  <a class="button is-primary" href="#">
-                    <b-icon pack="fa" icon="user"></b-icon>
-                    <span>With Icon</span>
-                  </a>
-                </p>
+          <div id="navbarDropdown" class="navbar-menu" style="heigth: 100px">
+            <div class="navbar-start">
+              <div class="navbar-brand">
+                <a class="navbar-item">
+                  <img src="../../assets/logo-brand2.png" alt=""/>
+                </a>
               </div>
+            </div>
+
+            <div class="navbar-middle">
+              <h1 class="navbar-item title is-4" style="color: #074ab7">{{$route.name}}{{ $route.name == 'Query' ? ` ~ ${$store.query.db_name}  [${$store.query.session_name}]`: ''}}</h1>
+            </div>
+
+            <div class="navbar-end">
             </div>
           </div>
         </div>
-        </div>
+        <b-tooltip :label="$store.app.socket_connected?  'Connected': 'Disconnected'" position="is-bottom" type="is-dark">
+          <a class="navbar-item">
+            <b-icon pack="fa" icon="circle" :style="{'color': $store.app.socket_connected? '#83FF33': 'red'}"></b-icon>
+          </a>
+        </b-tooltip>
+        <a class="navbar-item" @click="reset">
+          <b-icon pack="fa" icon="trash-o" ></b-icon>
+        </a>
       </header>
-    <!--</div>
-  </section>-->
+
+      <!-- TODO: have for loop to display multiple messages as they arrive -->
+      <div>
+        <section class="modal-card animated fadeInRightBig" style="z-index: 1000; position: absolute;bottom: 10px; right: 10px;" :style="{'width': $store.settings.message.width}" v-if="$store.settings.message.show">
+          <b-message
+            :title="$store.settings.message.title"
+            :type="$store.settings.message.type"
+            :size="$store.settings.message.size"
+            :close="handle_messages"
+            :active.sync="$store.settings.message.show">
+              {{ $store.settings.message.text }}
+          </b-message>
+        </section>
+      </div>
+    </div>
 </template>
 
 <script>
@@ -104,6 +100,15 @@ document.addEventListener("DOMContentLoaded", function() {
 <style lang="scss" scoped>
 .navbar {
   border-bottom: 1px solid #e0e0e0;
+  min-height: 1rem;
+}
+.navbar-item,
+.navbar-menu,
+.navbar-end,
+.navbar-brand,
+.navbar-link {
+  padding-bottom: 0px;
+  padding-top: 0px;
 }
 </style>
 

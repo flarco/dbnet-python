@@ -36,6 +36,8 @@ hostname = socket.gethostname()
 workers = OrderedDict()
 db_workers_map = OrderedDict()
 conf_queue = Queue()
+profile = get_profile()
+databases = get_databases(profile)
 
 
 def start_worker_webapp():
@@ -194,6 +196,16 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
     rec = store.sqlx('databases').select_one(fwa(db_name=data.db_name))
     response_data = dict(completed=True, data=rec._asdict())
 
+  elif data.req_type == 'get-databases':
+    databases = get_databases()
+    get_rec = lambda d: dict(type=d['type'])
+    response_data = dict(
+      completed=True,
+      data={
+        k: get_rec(databases[k])
+        for k in sorted(databases) if k != 'TESTS'
+      })
+
   elif data.req_type == 'set-tab':
     store.sqlx('tabs').replace_rec(**data.tab_state)
     response_data = dict(completed=True)
@@ -207,12 +219,6 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
     rows = store.sqlx('tasks').select(
       where='1=1 order by end_date desc, start_date desc, queue_date desc',
       limit=100)
-    recs = [row._asdict() for row in rows]
-    response_data = dict(data=recs, completed=True)
-
-  elif data.req_type == 'get-queries':
-    rows = store.sqlx('queries').select(
-      where='1=1 order by exec_date desc', limit=100)
     recs = [row._asdict() for row in rows]
     response_data = dict(data=recs, completed=True)
 
@@ -259,8 +265,6 @@ def main():
   log('Main Loop PID is {}'.format(os.getpid()))
   register_pid(get_pid_path('dbnet', DBNET_FOLDER))
   exiting = False
-  profile = get_profile()
-  databases = get_databases(profile)
 
   # start web worker
   start_worker_webapp()
@@ -295,6 +299,9 @@ def main():
 
       for worker in workers.values():
         worker.stop()
+
+    except Exception as E:
+      log(E)
 
 
 if __name__ == '__main__':

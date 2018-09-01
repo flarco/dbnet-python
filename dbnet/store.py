@@ -1,7 +1,7 @@
 import os, sys, hashlib, time
-from xutil.database.base import make_sqlx, fwa, fwo
+from xutil.database.base import make_sqlx, fwa, fwo, rows_to_dicts
 from xutil.database.sqlite import SQLiteConn
-from xutil.helpers import get_home_path, log, now
+from xutil.helpers import get_home_path, log, now, jdumps, jloads
 from sqlalchemy import MetaData, Table, Column, String, Numeric, DateTime
 from sqlalchemy.sql import func, text
 from collections import namedtuple
@@ -59,8 +59,6 @@ tables['databases'] = Table(
   'databases',
   metadata,
   Column('db_name', String, primary_key=True),
-  Column('editor_text', String),
-  Column('active_tab_name', String),
   Column('state_json', String),
   Column('last_updated', DateTime, server_default=epoch_def),
 )
@@ -95,11 +93,24 @@ tables['meta_columns'] = Table(
   Column('last_updated', DateTime, server_default=epoch_def),
 )
 
-# state of tabs per database
+# state of sessions per database
+tables['sessions'] = Table(
+  'sessions',
+  metadata,
+  Column('db_name', String, primary_key=True),  #FK of databases.db_name
+  Column('session_name', String, primary_key=True),
+  Column('editor_text', String),
+  Column('active_tab_name', String),
+  Column('last_updated', DateTime, server_default=epoch_def),
+)
+
+# state of tabs per session
 tables['tabs'] = Table(
   'tabs',
   metadata,
   Column('db_name', String, primary_key=True),  #FK of databases.db_name
+  Column('session_name', String,
+         primary_key=True),  #FK of sessions.session_name
   Column('tab_name', String, primary_key=True),
   Column('sql_text', String),
   Column('data_json', String),  # tab headers & rows
@@ -184,6 +195,62 @@ worker_get = lambda hostname, worker_name: sqlx('workers').select_one(
   fwa(hostname=hostname, worker_name=worker_name),)
 worker_getall = lambda: sqlx('workers').select()
 add_task = lambda **kws: sqlx('tasks').replace_rec(**kws)
+
+
+def load_session(db_name, session_name):
+  sess_rec = sqlx('sessions').select_one(
+    fwa(db_name=db_name, session_name=session_name),
+    as_dict=True,
+  )
+  tabs_recs = sqlx('tabs').select(
+    fwa(db_name=db_name, session_name=session_name),
+    as_dict=True,
+  )
+
+  if sess_rec:
+    sess_rec['tabs'] = tabs_recs
+
+  return sess_rec
+
+
+def save_session(**kws):
+  tabs_rec = kws['tabs']
+  del kws['tabs']
+  sqlx('databases').replace_rec(
+    db_name=kws['db_name'], session_name=kws['session_name'])
+  sqlx('sessions').replace_rec(**kws)
+  sqlx('tabs').replace(tabs_rec)
+
+
+def set_dbquery_state(**kws):
+  dbquery_data = kws['data']
+  dn_name = dbquery_data['db_name']
+  sqlx('databases').replace_rec(
+    db_name=dn_name,
+    state_json=jdumps(dbquery_data),
+  )
+
+
+def get_dbquery_state(**kws):
+  db_name = kws['db_name']
+  rec = sqlx('databases').select_one(fwa(db_name=db_name), as_dict=True)
+  return jloads(rec['state_json']) if rec else {'db_name': db_name}
+
+
+# Stack wide functions to sync data from/to backend database
+store_func = dict(
+  create_session=save_session,
+  save_session=save_session,
+  load_session=load_session,
+  set_dbquery_state=set_dbquery_state,
+  get_dbquery_state=get_dbquery_state,
+  load_database=
+  lambda db_name: sqlx('databases').select_one(fwa(db_name=db_name), as_dict=True),
+  get_sessions=lambda db_name: sqlx('sessions').select_one(
+    fwa(db_name=db_name),
+    as_dict=True,
+  ),
+)
 
 
 def create_tables(drop_first=False):
