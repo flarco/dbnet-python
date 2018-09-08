@@ -18,6 +18,18 @@ sync_queue = lambda: store.worker_set(
   hostname=worker_hostname, worker_name=worker_name,
   queue_length=len(worker_queue))
 
+set_worker_idle = lambda: store.sqlx('workers').update_rec(
+    hostname=worker_hostname,
+    worker_name=worker_name,
+    status='IDLE',
+    task_id=None,
+    task_function=None,
+    task_start_date=None,
+    task_args=None,
+    task_kwargs=None,
+    last_updated=epoch()
+)
+
 
 def execute_sql(worker: Worker, data_dict):
   "Execute SQL operation"
@@ -205,6 +217,7 @@ def execute_sql(worker: Worker, data_dict):
         completed=True,
         options=options,
         pid=worker_pid,
+        orig_req=data_dict,
         sid=sid,
       )
 
@@ -225,6 +238,7 @@ def execute_sql(worker: Worker, data_dict):
         error='ERROR:\n' + err_msg,
         options=options,
         pid=worker_pid,
+        orig_req=data_dict,
         sid=sid)
 
     finally:
@@ -248,10 +262,11 @@ func_map = {'submit-sql': execute_sql}
 
 
 def run(db_prof, conf_queue: Queue, worker: Worker):
+  global worker_name, worker_status
   log = worker.log
   worker_name = worker.name
-  worker_status = store.sqlx('workers').select_one(
-    fwa(hostname=worker_hostname, worker_name=worker_name), field='status')
+  worker_status = 'IDLE'
+  set_worker_idle()
   worker_db_prof = db_prof
 
   while True:
@@ -283,9 +298,9 @@ def run(db_prof, conf_queue: Queue, worker: Worker):
           last_updated=epoch(),
         )
 
-        log('+Queued task: {}'.format(data_dict))
+        log('+({}) Queued task: {}'.format(len(worker_queue), data_dict))
 
-      # Send receipt confirmation
+      # Send receipt confirmation?
       # with worker.lock:
       #   worker.pipe.send_to_parent(conf_data)
 
@@ -329,20 +344,10 @@ def run(db_prof, conf_queue: Queue, worker: Worker):
         # worker.pipe.send_to_parent(error_data)
         worker.put_parent_q(error_data)
       finally:
-        worker_status = 'IDLE'
 
         # Sync worker
-        store.sqlx('workers').update_rec(
-          hostname=worker.hostname,
-          worker_name=worker.name,
-          status=worker_status,
-          task_id=None,
-          task_function=None,
-          task_start_date=None,
-          task_args=None,
-          task_kwargs=None,
-          last_updated=epoch(),
-        )
+        worker_status = 'IDLE'
+        set_worker_idle()
 
         # Sync task
         store.sqlx('tasks').update_rec(

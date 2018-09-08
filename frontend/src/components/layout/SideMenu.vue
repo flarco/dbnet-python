@@ -12,7 +12,7 @@
           v-for="(obj, name) in $store.app.databases"
           v-bind:key="name"
           @click="activate_query_db(name)"
-        ><a href="/#/query">{{ name }}</a></li>
+        ><a href="/#/query" :class="{'is-active': name == curr_database}">{{ name }}</a></li>
       </ul>
       <p class="menu-label">
         Activities

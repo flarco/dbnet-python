@@ -10,8 +10,8 @@
         </b-tooltip>
 
         <span style="padding-left:10px"></span>
-        <b-tooltip :label="$store.query.favorite?'Un-Favorite':'Favorite'" position="is-bottom" type="is-dark">
-          <a @click="$store.query.favorite=!$store.query.favorite">
+        <b-tooltip :label="$store.query.favorite?'Un-Favorite Database':'Favorite Database'" position="is-bottom" type="is-dark">
+          <a @click="toggle_db_favorite">
             <b-icon pack="fa" :icon="$store.query.favorite?'star':'star-o'" size="is-small"></b-icon>
           </a>
         </b-tooltip>
@@ -28,7 +28,10 @@
 
       </span>
     </h3>
-    <b-tabs expanded type="is-toggle" style="margin-bottom: -20px" v-model="$store.query.pane_tab_index">
+    <b-tabs expanded type="is-toggle" style="margin-bottom: -20px"
+            v-model="$store.query.pane_tab_index"
+            @input="change_pane"
+    >
         <b-tab-item label="Editor"></b-tab-item>
         <b-tab-item label="Schema"></b-tab-item>
         <b-tab-item label="History"></b-tab-item>
@@ -36,8 +39,16 @@
 
     <!-- <div id="editor_div" v-if="isLeftPaneActive('editor')" class="editor_div" style="font-size: 0.9em" @keyup.120="submit_sql" @keyup.115="get_object_data(get_editor_selection())" :style="{'height': settings.heights.editor_div}"> -->
     <div class="editor_div" style="font-size: 0.9em" :style="{'height': $store.style.editor_height}" v-if="$store.query.pane_tab_index == 0">
-      <codemirror ref="main_editor" v-model="$store.query.editor_text" :options="$store.main_editor.options"
-        @ready="onEditorReady" @focus="onEditorFocus" @change="onEditorCodeChange" :style="{'height': $store.style.editor_height}"></codemirror>
+      <codemirror ref="main_editor" v-model="$store.query.editor_text"
+        :options="$store.main_editor.options"
+        @ready="onEditorReady"
+        @focus="onEditorFocus"
+        @change="onEditorCodeChange"
+        @keyup.native.f9="execute_sql(get_cursor_query($refs.main_editor.codemirror))"
+        @keyup.native.f4="create_object_tab(get_editor_selection($refs.main_editor.codemirror))"
+        :style="{'height': $store.style.editor_height, 'font-size': $store.settings.editor_font_size}">
+
+      </codemirror>
     </div>
     <div v-if="$store.query.pane_tab_index == 1">
       <query-schema ref="query_schema"></query-schema>
@@ -45,7 +56,7 @@
     <div v-if="$store.query.pane_tab_index == 2">
       <query-history></query-history>
     </div>
-    
+
 
   </div>
 </template>
@@ -71,23 +82,49 @@ export default {
   },
   computed: {
     main_editor() {
-      return this.$refs.main_editor.editor;
+      return this.$refs.main_editor.codemirror;
     },
     main_editor_cursor() {
-      return this.$refs.main_editor.editor.getDoc().getCursor();
+      return this.$refs.main_editor.codemirror.getDoc().getCursor();
     }
   },
   methods: {
     onEditorReady() {
-      // this.main_editor_text = this.database.editor_sql;
+      let selection = this.$store.vars.query_editor_selection;
+      if (selection == null) return;
+      this.$refs.main_editor.codemirror
+        .getDoc()
+        .setSelection(selection, selection);
     },
     onEditorFocus() {
       // localStorage.setItem('sql_text', this.main_editor_text);
     },
     onEditorCodeChange() {
       // localStorage.setItem('sql_text', this.main_editor_text);
+      this.$store.vars.query_editor_selection = this.$refs.main_editor.codemirror
+        .getDoc()
+        .getCursor();
+      this.log(JSON.stringify(this.$store.vars.query_editor_selection));
+    },
+
+    change_pane(index = null) {
+      if (this.$refs.main_editor != null) {
+        this.$store.vars.query_editor_selection = this.$refs.main_editor.codemirror
+          .getDoc()
+          .getCursor();
+      }
+    },
+    toggle_db_favorite() {
+      this.$store.query.favorite = !this.$store.query.favorite;
+      this.$store.app.databases[
+        this.$store.query.db_name
+      ].favorite = this.$store.query.favorite;
+      setTimeout(() => {
+        self.resize_panes();
+      }, 60);
     },
     toggle_editor_size() {
+      self = this;
       if (this.$store.settings.pane_width == "5") {
         this.$store.settings.pane_width = "3";
       } else if (this.$store.settings.pane_width == "4") {
@@ -97,6 +134,9 @@ export default {
       } else {
         this.$store.settings.pane_width = "3";
       }
+      setTimeout(() => {
+        self.resize_panes();
+      }, 100);
       // this.$forceUpdate();
     }
   },

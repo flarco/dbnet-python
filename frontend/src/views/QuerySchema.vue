@@ -2,8 +2,8 @@
   <div style="font-size:0.9rem">
       <b-field horizontal label="Schema">
         <b-autocomplete
-          @keyup.native.esc="$store.query.sessions[$store.query.session_name].schema=null"
-          v-model="$store.query.sessions[$store.query.session_name].schema"
+          @keyup.native.esc="$store.query._session.schema=null"
+          v-model="$store.query._session.schema"
           :data="get_schema_list()"
           :open-on-focus="true"
           :keep-first="true"
@@ -11,27 +11,36 @@
           placeholder="Schema"
           @select="option => change_schema(option)">
         </b-autocomplete>
+        <p class="control">
+          <b-tooltip label="Add Schema to Favorites" position="is-bottom" type="is-dark">
+            <a class="button is-outlined is-info">
+              <b-icon pack="fa" icon="heart-o" size="is-small"></b-icon>
+            </a>
+        </b-tooltip>
+        </p>
     </b-field>
       <b-field horizontal label="Type">
-        <b-select expanded v-model="$store.query.sessions[$store.query.session_name].schema_obj_type" placeholder="Object type" @input="change_schema()">
+        <b-select expanded v-model="$store.query._session.schema_obj_type" placeholder="Object type" @input="change_schema()">
           <option value="tables">Table</option>
           <option value="views">View</option>
         </b-select>
     </b-field>
     <b-field>
-        <b-input expanded 
+        <b-input expanded
         v-model="object_filter"
         @keyup.native.esc="object_filter=null"
         placeholder="Filter..." type="search">
         </b-input>
         <p class="control">
-          <button title="Refresh Schemas / Objects"  class="button is-warning" @click="() => {get_schemas(); change_schema()}"><b-icon pack="fa" icon="refresh" ></b-icon></button>
+          <button title="Refresh Schemas / Objects"  class="button is-warning" @click="() => {get_schemas(); change_schema()}">
+            <b-icon pack="fa" icon="refresh" ></b-icon></button>
         </p>
     </b-field>
     <div id="schema_div">
-      <select multiple v-model="object_selected" class="schema_select" style="font-size: 1.1em; width:100%" :style="{'height': $store.style.schema_object_height}">
-        <option v-for="object in filertered_objects()" 
-          @dblclick="log(object_selected)"
+      <select multiple v-model="$store.query._session.schema_objects_selected"
+              class="schema_select" style="font-size: 1.1em; width:100%" :style="{'height': $store.style.schema_object_height}">
+        <option v-for="object in filertered_objects()"
+          @dblclick="create_object_tab(sess_schema + '.' + sess_schema_objects_selected[0])"
           v-bind:key="object"
           :value="object"
         >{{object}}</option>
@@ -69,7 +78,6 @@ export default {
     return {
       loading: false,
       object_filter: null,
-      object_selected: [],
       schema_list: []
     };
   },

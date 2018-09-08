@@ -111,6 +111,20 @@ def start_worker_db(db_name, start=False):
   return worker
 
 
+def stop_worker(worker_name):
+  if worker_name in workers:
+    worker_ = workers[worker_name]
+    worker_.stop()
+    for db in list(db_workers_map):
+      for w in list(db_workers_map[db]):
+        if w == worker_:
+          db_workers_map[db].remove(worker_)
+      if len(db_workers_map[db]) == 0:
+        del db_workers_map[db]
+    del workers[worker_name]
+  return True
+
+
 def send_to_webapp(data, host='localhost', port=WEBAPP_PORT):
   "Send data to Web App"
   payload_type = data['payload_type']
@@ -168,17 +182,8 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
     response_data['queued'] = True
 
   elif data.req_type == 'stop-worker':
-    if data.worker_name in workers:
-      worker_ = workers[data.worker_name]
-      worker_.stop()
-      for db in list(db_workers_map):
-        for w in list(db_workers_map[db]):
-          if w == worker_:
-            db_workers_map[db].remove(worker_)
-        if len(db_workers_map[db]) == 0:
-          del db_workers_map[db]
-      del workers[data.worker_name]
-      response_data = dict(completed=True)
+    completed = stop_worker(data.worker_name)
+    response_data = dict(completed=completed)
 
   elif data.req_type == 'add-worker':
     start_worker_db(data.database, start=True)
@@ -244,6 +249,12 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
     )
     workers_data = [make_rec(wkr) for wkr in workers.values()]
     response_data = dict(data=workers_data, completed=True)
+  elif data.req_type == 'reset-db':
+    for wkr_nm in list(workers):
+      if wkr_nm == 'webapp': continue
+      stop_worker(wkr_nm)
+    store.create_tables(drop_first=True)
+    response_data = dict(completed=True)
 
   # In case handle is missing. Also checked for completed
   if response_data:

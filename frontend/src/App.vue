@@ -37,6 +37,8 @@ export default {
     "client-response": function(data) {
       self = this;
 
+      data.ts_end = new Date().getTime();
+
       if (!data.completed && !data.queued) {
         this.notify(data);
       } else {
@@ -54,10 +56,7 @@ export default {
     },
     "query-data": function(data) {
       self = this;
-
-      if (!data.completed) {
-        this.notify(data);
-      } else if (!this._.isEmpty(data.options.meta)) {
+      if (!this._.isEmpty(data.options.meta)) {
         switch (data.options.meta) {
           case "get_schemas":
             self.rcv_schemas(data);
@@ -68,9 +67,14 @@ export default {
           case "get_views":
             self.rcv_views(data);
             break;
+          case "get_columns":
+            self.rcv_query_data(data);
+            break;
           default:
-            self.notify(data);
+            self.log(data);
         }
+      } else if (data.orig_req.req_type == "submit-sql") {
+        self.rcv_query_data(data);
       }
     },
     "task-error": function(data2) {
@@ -151,7 +155,7 @@ $fa-font-path: "~font-awesome/fonts/";
 .CodeMirror {
   border: 1px solid #eee;
   height: 100%;
-  font-size: 0.8rem;
+  // font-size: 0.8rem;
 }
 
 .separator {
@@ -167,7 +171,52 @@ nav.tabs > ul > li > a {
   padding-right: 11px;
 }
 
+div.tabs > ul > li > a {
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 11px;
+  padding-right: 11px;
+}
+
+div.tabs > ul > li > span > a {
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 11px;
+  padding-right: 11px;
+}
+
+.hot_div {
+  box-sizing: border-box;
+  padding-top: 0px;
+  width: 100%;
+  overflow: hidden;
+  font-size: 0.7rem;
+}
+
 .schema_select {
   height: 300px;
+}
+
+nav.tab-top {
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
+  margin-bottom: 10px;
+}
+
+div.tab-top > ul > li > a {
+  padding-left: 0.3em;
+  padding-right: 0.3em;
+}
+
+div.tab-top > span {
+  padding-right: 20px;
+}
+
+div.tab-top > span > a > i {
+  vertical-align: baseline;
+}
+
+.codelike {
+  font-family: monospace;
 }
 </style>

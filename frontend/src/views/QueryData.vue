@@ -1,48 +1,59 @@
 <template>
   <div>
-    <b-tabs type="is-boxed" style="margin-bottom: -20px; margin-top: 0px" v-model="$store.query.data_tab_index">
-        <b-tab-item label="T01"></b-tab-item>
-        <b-tab-item label="T02"></b-tab-item>
-        <b-tab-item label="T03"></b-tab-item>
-    </b-tabs>
-    <HotTable :settings="settings" ></HotTable>
+    <!--<span><b-icon pack="fa" icon="times"></b-icon></span>-->
+      <!--<b-tabs animated type="is-boxed" style="margin-bottom: -20px; margin-top: 0px"-->
+              <!--v-model="$store.query._session.active_tab_index"  @input="delete_tab">-->
+          <!--<span><b-icon pack="fa" icon="times"></b-icon></span>-->
+          <!--<b-tab-item label="T02"></b-tab-item>-->
+          <!--<b-tab-item label="T03"></b-tab-item>-->
+          <!--<b-tab-item label="T04"></b-tab-item>-->
+          <!--<b-tab-item label="T05"></b-tab-item>-->
+      <!--</b-tabs>-->
+    <div class="tabs is-boxed" style="overflow: scroll; margin-bottom: 0px;">
+      <ul>
+        <li @click="delete_tab">
+            <!--<span class="icon is-small"><i class="fas fa-image" aria-hidden="true"></i></span>-->
+          <a style="padding-left: 5px; padding-right: 1px"><span><b-icon pack="fa" icon="times" size="is-small"></b-icon></span></a>
+        </li>
+
+        <li v-for="(tab, tab_id) in $store.query._session.tabs"
+            v-if="tab != null && tab.parent_id == null"
+            :class="{'is-active': $store.query._session._tab.id == tab_id}">
+            <a @click="activate_tab(tab_id)" @auxclick="delete_tab(tab.id)">
+              <span v-if="tab.long_name != 'META' && tab.type=='data'">
+                <b-tooltip :label="trim_text(tab._child_tab.sql)" position="is-right" type="is-white" size="is-small">
+                  <i class="fa fa-spinner fa-spin fa-fw" v-if="$store.query._session.tabs[tab_id].loading"></i>
+                  <span style="font-size: 0.8rem">{{tab.long_name}}</span>
+                </b-tooltip>
+              </span>
+              <span v-else-if="tab.long_name != 'META' && tab.type=='object'">
+                <i class="fa fa-spinner fa-spin fa-fw" v-if="$store.query._session.tabs[tab_id].loading"></i>
+                <span style="font-size: 0.8rem">{{tab.long_name}}</span>
+              </span>
+              <span v-else>
+                <i class="fa fa-spinner fa-spin fa-fw" v-if="$store.query._session.tabs[tab_id].loading"></i>
+                <b-icon pack="fa" icon="database" size="is-small"></b-icon>
+              </span>
+            </a>
+        </li>
+      </ul>
+    </div>
+    <query-tab v-if="sess_active_tab_id != null" ></query-tab>
   </div>
 </template>
 
 <script>
-import { codemirror, CodeMirror } from "vue-codemirror";
-import "codemirror/lib/codemirror.css";
-import "handsontable/dist/handsontable.full.css";
-require("codemirror/addon/scroll/annotatescrollbar");
-require("codemirror/addon/search/matchesonscrollbar");
-require("codemirror/addon/search/searchcursor");
-require("codemirror/addon/search/match-highlighter");
-
-import HotTable from "@handsontable/vue";
+import QueryTab from "./QueryTab.vue";
 
 export default {
   name: "Home",
   components: {
-    codemirror: codemirror,
-    HotTable: HotTable
+    "query-tab": QueryTab
   },
-  computed: {
-    main_editor() {
-      return this.$refs.main_editor.editor;
-    },
-    main_editor_cursor() {
-      return this.$refs.main_editor.editor.getDoc().getCursor();
-    }
-  },
+  computed: {},
   methods: {
-    onEditorReady() {
-      // this.main_editor_text = this.database.editor_sql;
-    },
-    onEditorFocus() {
-      // localStorage.setItem('sql_text', this.main_editor_text);
-    },
-    onEditorCodeChange() {
-      // localStorage.setItem('sql_text', this.main_editor_text);
+    trim_text(text, n = 30) {
+      return text.substring(0, n) + (text.length > n ? "..." : "");
     }
   },
   data() {
@@ -58,6 +69,9 @@ export default {
         rowHeaders: true
       }
     };
+  },
+  mounted() {
+    this.activate_tab(null);
   }
 };
 </script>

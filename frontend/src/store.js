@@ -19,7 +19,10 @@ export default {
   settings: {
     perfMonitoringEnabled: true,
     sidebar_shown: true,
+    show_hot_table: true,
     pane_width: '3',
+    default_query_limit: 200,
+    editor_font_size: '0.8rem',
     message: {
       show: false,
       width: '370px',
@@ -32,15 +35,21 @@ export default {
   },
   queue: {
     messages: [],
+    rcv_query_data: [],
   },
   hotSettings: {
-    data: [],
-    // colHeaders: headers,
+    data: [
+      ["2016", 10, 11, 12, 13],
+      ["2017", 20, 11, 14, 13],
+      ["2018", 30, 15, 12, 13]
+    ],
+    colHeaders: ["Year", "Ford", "Volvo", "Toyota", "Honda"],
     // columns: columnDefs,
     rowHeaders: true,
     // stretchH: 'all',
     // width: 806,
     // autoWrapRow: false,
+    preventOverflow: 'horizontal',
     wordWrap: false,
     // height: 441,
     // maxRows: 50,,
@@ -104,6 +113,16 @@ export default {
     },
   },
   vars: {
-    objects_ready: false
+    // Temp Variables that are needed for front end session (non-saved)
+    objects_ready: false,
+    show_tab_sql: false,
+    show_tab_modal_email: false,
+    tabs_active: false,
+    query_time_interval: null,
+    query_time: null,
+    loading: false,
+    query_editor_selection: null,
+    tabs_loading: {},
+    app_loading: false,
   },
 }

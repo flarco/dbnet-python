@@ -15,6 +15,33 @@
                   {{ $store.settings.sidebar_shown? 'Shown':'Hidden' }}
               </b-switch>
           </div>
+          <div class="field">
+            <b-field label="Default Query Limit"/>
+
+              <select title="Limit" class="select is-small"
+                      v-model="$store.settings.default_query_limit"
+              >
+                <option selected>200</option>
+                <option>500</option>
+                <option>1000</option>
+                <option>2500</option>
+                <option>5000</option>
+                <option>10000</option>
+              </select>
+          </div>
+          <div class="field">
+            <b-field label="Query Editor Font Size"/>
+
+              <select title="Font Size" class="select is-small"
+                      v-model="$store.settings.editor_font_size"
+              >
+                <option>0.6rem</option>
+                <option>0.7rem</option>
+                <option>0.8rem</option>
+                <option>0.9rem</option>
+                <option>1.0rem</option>
+              </select>
+          </div>
       </section>
       <br/>
       <section>

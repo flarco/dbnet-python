@@ -1,7 +1,7 @@
 <template>
     <div>
       <header class="navbar is-bold" >
-        <a class="navbar-item" @click="$store.settings.sidebar_shown=!$store.settings.sidebar_shown">
+        <a class="navbar-item" @click="toggle_side_menu">
           <b-icon pack="fa" icon="bars" ></b-icon>
         </a>
         <div class="navbar-item has-dropdown is-hoverable">
@@ -10,19 +10,20 @@
           </a>
           <!-- Favorite connections on top -->
           <div class="navbar-dropdown is-boxed">
-            <a class="navbar-item is-active" href="#">
-              SPARK
-            </a>
-            <a class="navbar-item" href="#">
-              HIVE
-            </a>
+            <a 
+              v-for="(obj, name2) in $store.app.databases"
+              v-bind:key="name2"
+              @click="activate_query_db(name2)"
+              v-if="obj.favorite"
+              href="/#/query" class="navbar-item" :class="{'is-active': name2 == curr_database}">{{ name2 }}</a>
             <hr class="navbar-divider">
-            <a class="navbar-item" href="#">
-              DW1
-            </a>
-            <a class="navbar-item" href="#">
-              EDW2
-            </a>
+            <a 
+              v-for="(obj, name) in $store.app.databases"
+              v-bind:key="name"
+              v-if="!obj.favorite"
+              @click="activate_query_db(name)"
+              href="/#/query" class="navbar-item" :class="{'is-active': name == curr_database}">{{ name }}</a>
+              
           </div>
         </div>
         <div class="container">
@@ -44,14 +45,17 @@
             </div>
           </div>
         </div>
-        <b-tooltip :label="$store.app.socket_connected?  'Connected': 'Disconnected'" position="is-bottom" type="is-dark">
-          <a class="navbar-item">
-            <b-icon pack="fa" icon="circle" :style="{'color': $store.app.socket_connected? '#83FF33': 'red'}"></b-icon>
+          <a class="navbar-item" style="min-width: 55px; color: teal">
+            <i class="fa fa-cog fa-spin fa-fw fa-1x" v-if="$store.vars.app_loading"></i>
           </a>
-        </b-tooltip>
-        <a class="navbar-item" @click="reset">
-          <b-icon pack="fa" icon="trash-o" ></b-icon>
-        </a>
+          <b-tooltip :label="$store.app.socket_connected?  'Connected': 'Disconnected'" position="is-bottom" type="is-dark">
+            <a class="navbar-item">
+              <b-icon pack="fa" icon="circle" :style="{'color': $store.app.socket_connected? '#83FF33': 'red'}"></b-icon>
+            </a>
+          </b-tooltip>
+          <a class="navbar-item" @click="reset">
+            <b-icon pack="fa" icon="trash-o" ></b-icon>
+          </a>
       </header>
 
       <!-- TODO: have for loop to display multiple messages as they arrive -->
@@ -71,7 +75,17 @@
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {
+    toggle_side_menu() {
+      self = this;
+      this.$store.settings.sidebar_shown = !this.$store.settings.sidebar_shown;
+      setTimeout(() => {
+        self.resize_panes();
+      }, 60);
+    }
+  }
+};
 
 /* burger navigation */
 document.addEventListener("DOMContentLoaded", function() {
