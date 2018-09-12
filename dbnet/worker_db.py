@@ -5,7 +5,8 @@ from xutil import get_conn
 from xutil.database.base import fwa, fwo
 from collections import deque
 import time, socket
-import os, store, hashlib
+import os, hashlib
+import dbnet.store as store
 
 worker_db_prof = {}
 worker_hostname = socket.gethostname()
@@ -226,7 +227,7 @@ def execute_sql(worker: Worker, data_dict):
       err_msg_long = get_exception_message()
       err_msg = get_error_str(E)
 
-      log(err_msg_long, color='red')
+      worker.log(E)
       data = dict(
         id=id,
         payload_type='query-data',
@@ -258,7 +259,99 @@ def execute_sql(worker: Worker, data_dict):
   )
 
 
-func_map = {'submit-sql': execute_sql}
+def get_analysis_sql(worker: Worker, data_dict):
+  database = data_dict['database']
+
+  try:
+    conn = get_conn(database)
+    sql = conn.analyze_fields(
+      analysis=data_dict['analysis'],
+      table_name=data_dict['table_name'],
+      fields=data_dict['fields'],
+      as_sql=True,
+    )
+
+    data = dict(
+      id=data_dict['id'],
+      payload_type='template-sql',
+      sql=sql,
+      completed=True,
+      orig_req=data_dict,
+      sid=data_dict['sid'],
+    )
+
+  except Exception as E:
+    worker.log(E)
+    err_msg = get_error_str(E)
+
+    data = dict(
+      id=data_dict['id'],
+      payload_type='template-sql',
+      sql=None,
+      completed=False,
+      error=err_msg,
+      orig_req=data_dict,
+      sid=data_dict['sid'],
+    )
+
+  finally:
+    worker.put_parent_q(data)
+
+
+def update_meta(worker: Worker, data_dict):
+  database = data_dict['database']
+
+  try:
+    conn = get_conn(database)
+    make_rec = lambda name, rec: store.sqlx(name).ntRec(**dict(
+      db_name=database,
+      last_updated=int(time.time()),
+      **rec
+    ))
+
+    # meta_tables
+    table_data = [
+      make_rec('meta_tables', row._asdict()) for row in conn.get_all_tables()
+    ]
+    store.sqlx('meta_tables').replace(table_data)
+
+    # meta_columns
+    column_data = [
+      make_rec('meta_columns', row._asdict())
+      for row in conn.get_all_columns()
+    ]
+    store.sqlx('meta_columns').replace(column_data)
+
+    data = dict(
+      id=data_dict['id'],
+      payload_type='meta-updated',
+      completed=True,
+      orig_req=data_dict,
+      sid=data_dict['sid'],
+    )
+
+  except Exception as E:
+    worker.log(E)
+    err_msg = get_error_str(E)
+
+    data = dict(
+      id=data_dict['id'],
+      payload_type='meta-updated',
+      completed=False,
+      error=err_msg,
+      orig_req=data_dict,
+      sid=data_dict['sid'],
+    )
+  finally:
+    worker.put_parent_q(data)
+
+
+func_map = {
+  'submit-sql': execute_sql,
+  'get-meta-tables': update_meta,
+  'get-meta-columns': update_meta,
+  'get-analysis-sql': get_analysis_sql
+}
 
 
 def run(db_prof, conf_queue: Queue, worker: Worker):

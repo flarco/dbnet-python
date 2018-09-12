@@ -2,12 +2,15 @@ import os, sys, hashlib, time
 from xutil.database.base import make_sqlx, fwa, fwo, rows_to_dicts
 from xutil.database.sqlite import SQLiteConn
 from xutil.helpers import get_home_path, log, now, jdumps, jloads
+from xutil.diskio import write_file
 from sqlalchemy import MetaData, Table, Column, String, Numeric, DateTime
 from sqlalchemy.sql import func, text
 from collections import namedtuple
 import typing, jmespath
 
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
+SESS_FOLDER = DBNET_FOLDER + '/sessions'
+os.makedirs(SESS_FOLDER, exist_ok=True)
 
 # Models
 '''
@@ -60,6 +63,7 @@ tables['databases'] = Table(
   metadata,
   Column('db_name', String, primary_key=True),
   Column('state_json', String),
+  Column('meta_last_updated', DateTime),
   Column('last_updated', DateTime, server_default=epoch_def),
 )
 
@@ -67,11 +71,12 @@ tables['databases'] = Table(
 tables['meta_tables'] = Table(
   'meta_tables',
   metadata,
-  Column('db_name', String),  #FK of databases.db_name
-  Column('schema_name', String),
-  Column('table_name', String),
+  Column('db_name', String, primary_key=True),  #FK of databases.db_name
+  Column('schema_name', String, primary_key=True),
+  Column('table_name', String, primary_key=True),
   Column('table_type', String),
-  Column('row_count', Numeric),
+  Column('num_columns', Numeric),
+  Column('num_rows', Numeric),
   Column('last_analyzed', DateTime),
   Column('last_updated', DateTime, server_default=epoch_def),
 )
@@ -80,15 +85,18 @@ tables['meta_tables'] = Table(
 tables['meta_columns'] = Table(
   'meta_columns',
   metadata,
-  Column('db_name', String),  #FK of databases.db_name
-  Column('schema_name', String),
-  Column('table_name', String),
-  Column('column_name', String),
+  Column('db_name', String, primary_key=True),  #FK of databases.db_name
+  Column('schema_name', String, primary_key=True),
+  Column('table_name', String, primary_key=True),
+  Column('table_type', String),
+  Column('column_name', String, primary_key=True),
   Column('column_type', String),
-  Column('row_count', Numeric),
-  Column('value_count', Numeric),
-  Column('distinct_count', Numeric),
-  Column('null_count', Numeric),
+  Column('column_id', Numeric),
+  Column('num_distinct', Numeric),
+  Column('num_nulls', Numeric),
+  Column('num_rows', Numeric),
+  Column('prct_distinct', Numeric),
+  Column('prct_nulls', Numeric),
   Column('last_analyzed', DateTime),
   Column('last_updated', DateTime, server_default=epoch_def),
 )
@@ -224,11 +232,35 @@ def save_session(**kws):
 
 def set_dbquery_state(**kws):
   dbquery_data = kws['data']
-  dn_name = dbquery_data['db_name']
+  db_name = dbquery_data['db_name']
+  meta_last_updated = sqlx('databases').select_one(
+    fwa(db_name=db_name), field='meta_last_updated')
   sqlx('databases').replace_rec(
-    db_name=dn_name,
+    db_name=db_name,
     state_json=jdumps(dbquery_data),
+    meta_last_updated=meta_last_updated,
   )
+
+  # Save all sessions
+  for sess_name in dbquery_data['sessions']:
+    json_fpath = '{}/{}.{}.json'.format(SESS_FOLDER, db_name, sess_name)
+    sql_fpath = '{}/{}.{}.sql'.format(SESS_FOLDER, db_name, sess_name)
+
+    write_file(
+      json_fpath,
+      jdumps(dbquery_data['sessions'][sess_name]),
+      echo=True,
+    )
+    write_file(
+      sql_fpath,
+      dbquery_data['sessions'][sess_name]['editor_text'],
+      echo=True,
+    )
+
+  sess_name = dbquery_data['_session']['name']
+  json_fpath = '{}/{}.{}.json'.format(SESS_FOLDER, db_name, sess_name)
+  sql_fpath = '{}/{}.{}.sql'.format(SESS_FOLDER, db_name, sess_name)
+  return dict(sql_fpath=sql_fpath, json_fpath=json_fpath)
 
 
 def get_dbquery_state(**kws):
@@ -255,8 +287,8 @@ store_func = dict(
 
 def create_tables(drop_first=False):
   if drop_first:
-    # ans = input('Authorize Tables Drop. Please confirm with "Y": ')
-    ans = 'y'
+    ans = input('Authorize Tables Drop. Please confirm with "Y": ')
+    # ans = 'y'
     if ans.lower() == 'y':
       log('-Dropped tables!')
       metadata.drop_all(engine)

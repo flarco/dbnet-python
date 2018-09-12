@@ -1,0 +1,35 @@
+import os, sys, argparse
+from xutil import log
+
+
+def dbnet_cli():
+  parser = argparse.ArgumentParser(description='DbNet Application')
+  parser.add_argument(
+    '--serve', help='Start the DbNet server', action='store_true')
+  parser.add_argument(
+    '--init_db',
+    help='Initiatlize the backend SQLite database',
+    action='store_true')
+  parser.add_argument(
+    '--reset_db',
+    help='Reset the backend SQLite database',
+    action='store_true')
+  parser.add_argument('--port', help='The web application port')
+
+  args = parser.parse_args()
+
+  if args.port:
+    os.environ['DBNET_WEBAPP_PORT'] = args.port
+
+  # import after setting port
+  from dbnet import server, store
+
+  if args.init_db:
+    store.create_tables()
+  elif args.reset_db:
+    store.create_tables(drop_first=True)
+  elif args.serve:
+    store.create_tables()
+    server.main()
+  else:
+    parser.print_help()

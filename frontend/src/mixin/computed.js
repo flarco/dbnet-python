@@ -6,7 +6,9 @@ export default {
     return this.$store.query._session.name
   },
   sess_schema() {
-    return this.$store.query._session.schema;
+    if (this.$store.query._session.schema.length == 0) return null
+    else if (this.$store.query._session.schema.length == 1) return this.$store.query._session.schema[0]
+    else return this.$store.query._session.schema;
   },
   sess_schema_obj_type() {
     return this.$store.query._session.schema_obj_type;
@@ -18,13 +20,13 @@ export default {
     return this.$store.query._session.active_tab_index
   },
   sess_active_tab_id() {
-    return this.sess_active_tab != null? this.$store.query._session._tab.id : null
+    return this.sess_active_tab != null ? this.$store.query._session._tab.id : null
   },
   sess_active_tab() {
     return this.$store.query._session._tab
   },
   sess_active_child_tab_id() {
-    return this.sess_active_child_tab != null? this.sess_active_child_tab.id : null
+    return this.sess_active_child_tab != null ? this.sess_active_child_tab.id : null
   },
   sess_active_child_tab() {
     return this.$store.query._session._tab._child_tab
@@ -50,7 +52,7 @@ export default {
   get_schema_select_heigth() {
     return parseInt(window.innerHeight / 56, 10);
   },
-  main_editor(){
+  main_editor() {
     return this.$refs.main_editor.codemirror
   }
 }

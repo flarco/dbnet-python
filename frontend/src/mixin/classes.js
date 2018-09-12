@@ -18,7 +18,7 @@ let Tab = class {
     this.show_tab_functions = data.show_tab_functions || false
     this.type = data.type || 'data'
     this.limit = data.limit || 200
-    this._child_tab = data._child_tab ||  {} // Active child tab
+    this._child_tab = data._child_tab || {} // Active child tab
     this.child_tab_ids = data.child_tab_ids || {}
     this.child_active_tab = data.child_active_tab || 0
     this.parent_id = data.parent_id || null
@@ -31,20 +31,29 @@ let StoreQuerySession = class {
       id: 'META',
       name: 'META',
       long_name: 'META',
-      pinned: true
+      pinned: true,
+      limit: 1000,
+      query: {}
     })
+    meta_tab.filter_schema = null
+    meta_tab.filter_table = null
+    meta_tab.filter_column = null
+
     this.db_name = data.db_name || null
     this.name = data.name || null
     this.editor_text = data.editor_text || null
     this.active_tab_index = data.active_tab_index || 0
     this.active_tab_id = data.active_tab_id || null
-    this.schema = data.schema || null
+    this.schema = data.schema || []
+    this.schema_loading = data.schema_loading || false
     this.schema_object = data.schema_object || []
     this.schema_obj_type = data.schema_obj_type || 'tables'
     this.schema_objects_selected = data.schema_objects_selected || []
     // this.tabs = data.tabs || {'META': new Tab({id: 'META', name:'META', type:'meta'}), 22:{name:'S04'}, 33:{name:'T04'}}
     this._tab = data._tab || meta_tab
-    this.tabs = data.tabs || { 'META': meta_tab} // All Tables
+    this.tabs = data.tabs || {
+      'META': meta_tab
+    } // All Tables
   }
 }
 
@@ -86,7 +95,7 @@ export default {
       }, this);
     }
   },
-  SqlQuery:SqlQuery,
+  SqlQuery: SqlQuery,
   StoreQuerySession: StoreQuerySession,
   StoreQuery: class {
     constructor(data = {}) {

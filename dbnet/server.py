@@ -21,10 +21,10 @@ from xutil.helpers import (
 )
 from xutil.database.base import fwa
 from xutil.parallelism import Queue
-import worker_web as webapp_worker
-import worker_db as db_worker
+import dbnet.worker_web as webapp_worker
+import dbnet.worker_db as db_worker
 from collections import OrderedDict
-import store
+import dbnet.store as store
 
 WORKER_PREFIX = os.getenv('DBNET_WORKER_PREFIX', default='dbnet')
 WEBAPP_PORT = int(os.getenv('DBNET_WEBAPP_PORT', default=5566))
@@ -105,10 +105,35 @@ def start_worker_db(db_name, start=False):
     status='IDLE',
     last_updated=epoch(),
   )
+
   workers[worker_name] = worker
   db_workers_map[db_name].append(worker)
 
   return worker
+
+
+def get_avail_worker(data):
+
+  if data.database not in db_workers_map:
+    db_worker = start_worker_db(data.database, start=True)
+
+  # matched & available workers
+  db_workers_matched = []
+  db_workers_avail = []
+
+  for wkr in db_workers_map[data.database]:
+    wkr_rec = store.worker_get(hostname, wkr.name)
+    db_workers_matched.append(wkr.name)
+    if wkr_rec.status == 'IDLE':
+      db_workers_avail.append(wkr.name)
+
+  # just pick the first? need to add ability to specify in front-end
+  if not db_workers_avail:
+    db_workers_avail = [sorted(db_workers_matched)[0]]
+
+  db_worker = workers[db_workers_avail[0]]
+
+  return db_worker
 
 
 def stop_worker(worker_name):
@@ -143,6 +168,10 @@ def handle_db_worker_req(worker: Worker, data_dict):
     send_to_webapp(data_dict)
   elif data.payload_type in ('query-data'):
     send_to_webapp(data_dict)
+  elif data.payload_type in ('meta-updated'):
+    send_to_webapp(data_dict)
+  else:
+    send_to_webapp(data_dict)
 
 
 def handle_web_worker_req(web_worker: Worker, data_dict):
@@ -158,24 +187,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
   }
 
   if data.req_type in ('submit-sql'):
-    if data.database not in db_workers_map:
-      db_worker = start_worker_db(data.database, start=True)
-
-    # matched & available workers
-    db_workers_matched = []
-    db_workers_avail = []
-
-    for wkr in db_workers_map[data.database]:
-      wkr_rec = store.worker_get(hostname, wkr.name)
-      db_workers_matched.append(wkr.name)
-      if wkr_rec.status == 'IDLE':
-        db_workers_avail.append(wkr.name)
-
-    # just pick the first? need to add ability to specify in front-end
-    if not db_workers_avail:
-      db_workers_avail = [sorted(db_workers_matched)[0]]
-
-    db_worker = workers[db_workers_avail[0]]
+    db_worker = get_avail_worker(data)
 
     # send to worker queue
     db_worker.put_child_q(data_dict)
@@ -210,6 +222,51 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
         k: get_rec(databases[k])
         for k in sorted(databases) if k != 'TESTS'
       })
+
+  elif data.req_type == 'get-analysis-sql':
+    db_worker = get_avail_worker(data)
+    db_worker.put_child_q(data_dict)
+    response_data['queued'] = True
+
+  elif data.req_type == 'get-meta-tables':
+    where = "lower(db_name)=lower('{}')".format(data.database)
+    if data.filter_schema:
+      where = where + ''' and lower(schema_name) like lower('%{}%')'''.format(
+        data.filter_schema)
+    if data.filter_table:
+      where = where + ''' and lower(table_name) like lower('%{}%')'''.format(
+        data.filter_table)
+    rows = store.sqlx('meta_tables').select(where, limit=data.limit)
+    if rows:
+      headers = store.sqlx('meta_tables').ntRec._fields
+      rows = [list(r) for r in rows]
+      response_data = dict(completed=True, headers=headers, rows=rows)
+    else:
+      db_worker = get_avail_worker(data)
+      db_worker.put_child_q(data_dict)
+      response_data['queued'] = True
+
+  elif data.req_type == 'get-meta-columns':
+    log(str(data))
+    where = "lower(db_name)=lower('{}')".format(data.database)
+    if data.filter_schema:
+      where = where + ''' and lower(schema_name) like lower('%{}%')'''.format(
+        data.filter_schema)
+    if data.filter_table:
+      where = where + ''' and lower(table_name) like lower('%{}%')'''.format(
+        data.filter_table)
+    if data.filter_column:
+      where = where + ''' and lower(column_name) like lower('%{}%')'''.format(
+        data.filter_column)
+    rows = store.sqlx('meta_columns').select(where, limit=data.limit)
+    if rows:
+      headers = store.sqlx('meta_columns').ntRec._fields
+      rows = [list(r) for r in rows]
+      response_data = dict(completed=True, headers=headers, rows=rows)
+    else:
+      db_worker = get_avail_worker(data)
+      db_worker.put_child_q(data_dict)
+      response_data['queued'] = True
 
   elif data.req_type == 'set-tab':
     store.sqlx('tabs').replace_rec(**data.tab_state)

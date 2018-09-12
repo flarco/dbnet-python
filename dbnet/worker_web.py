@@ -2,22 +2,24 @@ import sys
 sys.path.insert(1, '/Users/larco/__/Git/xutil')
 
 from xutil.web import WebApp, process_request
-from xutil.helpers import jdumps, jtrans, log, get_error_str
-from store import store_func
+from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, get_dir_path
+from dbnet.store import store_func
+from flask import render_template
 
-app = WebApp('dbnet')
+app = WebApp('dbnet', root_path=get_dir_path(__file__))
 
 
 @app.route('/')
 def index():
   """Serve the client-side application."""
   (val_dict, form_dict, data_dict) = app.proc_request()
-  app.log('Requested "/"')
-  app.log('val_dict = {}'.format(val_dict))
-  app.log('form_dict = {}'.format(form_dict))
-  app.log('data_dict = {}'.format(data_dict))
-  # resp_data = app.pipe.emit_to_parent(val_dict)
-  return 'Hi!'
+  session_id = app.get_cookie_session_id()
+
+  resp = app.make_response(render_template('index.html'))
+  resp.set_cookie(app.cookie_session_key, session_id)
+  resp.headers['Cache-Control'] = 'no-cache'
+
+  return resp
 
 
 @app.route('/api/<payload_type>', methods=['POST'])

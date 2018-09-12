@@ -2,8 +2,48 @@
   <div>
     <div id="query_tab_div">
       <div id="query_tab_headers">
-        <h4 class="title is-5" style="margin-bottom: 6px; margin-top: 4px" v-if="sess_active_tab.type == 'object'">{{$store.query._session._tab._child_tab.long_name}}</h4>
-        <!--Schema Object Pane-->
+        <h4 class="title is-5" style="margin-bottom: 6px; margin-top: 4px" v-if="sess_active_tab.type == 'object'"
+        >{{$store.query._session._tab._child_tab.long_name}}<span>
+            <b-tooltip label="Copy object name to Clipboard" position="is-bottom" type="is-light" style="margin-left:7px">
+              <a v-clipboard="() => $store.query._session._tab._child_tab.long_name">
+                <i class="fa fa-clipboard" style="font-size: 12px; color:green" aria-hidden="true"></i>
+              </a>
+            </b-tooltip>
+            <span id="analysis-buttons" v-if="$store.query._session._tab.child_active_tab == 0">
+              <b-tooltip label="Analyze selected fields" position="is-bottom" type="is-light" style="margin-left:7px">
+                <a @click="analyze_fields('field_stat', $store.query._session._tab._child_tab.long_name, $store.hot_selection_values, true)">
+                  <i class="fa fa-life-ring" style="font-size: 12px; color:black"></i>
+                </a>
+              </b-tooltip>
+
+              <b-tooltip label="Analyze selected fields (deep)" position="is-bottom" type="is-light" style="margin-left:7px">
+                <a @click="analyze_fields('field_stat_deep', $store.query._session._tab._child_tab.long_name, $store.hot_selection_values, true)">
+                  <i class="fa fa-life-ring" style="font-size: 12px;color:blue"></i>
+                </a>
+              </b-tooltip>
+
+              <b-tooltip label="Analyze selected char fields" position="is-bottom" type="is-light" style="margin-left:7px">
+                <a @click="analyze_fields('field_chars', $store.query._session._tab._child_tab.long_name, $store.hot_selection_values, true)">
+                  <i class="fa fa-life-ring" style="font-size: 12px;color:orange"></i>
+                </a>
+              </b-tooltip>
+
+              <b-tooltip label="Analyze Field Distro" position="is-bottom" type="is-light" style="margin-left:7px">
+                <a @click="analyze_fields('distro_field', $store.query._session._tab._child_tab.long_name, $store.hot_selection_values, true)">
+                  <i class="fa fa-life-ring" style="font-size: 12px;color:pink"></i>
+                </a>
+              </b-tooltip>
+
+              <b-tooltip label="Analyze Date Distro" position="is-bottom" type="is-light" style="margin-left:7px">
+                <a @click="analyze_fields('distro_field_date', $store.query._session._tab._child_tab.long_name, $store.hot_selection_values, true)">
+                  <i class="fa fa-life-ring" style="font-size: 12px;color:red"></i>
+                </a>
+              </b-tooltip>
+            </span>
+          </span>
+        </h4>
+
+        <!-- Schema Object Pane -->
         <b-tabs expanded type="is-toggle" style="margin-bottom: -25px"
                 v-model="$store.query._session._tab.child_active_tab"
                 v-if="sess_active_tab != null && sess_active_tab.type == 'object'"
@@ -13,9 +53,7 @@
           <b-tab-item label="Definition"></b-tab-item>
         </b-tabs>
 
-        <!--Button Tab-->
-
-
+        <!-- Button Tab -->
         <nav id="tab-nav" class="level tab-top" v-if="sess_active_tab != null" style="margin-bottom: 5px;">
           <!-- Left side -->
           <div class="level-left">
@@ -130,14 +168,19 @@
         </nav>
         <div id="tab-sql">
           <textarea id="tab-sql-textarea" class="textarea codelike" v-if="$store.vars.show_tab_sql"
-            v-model="$store.query._session._tab._child_tab.sql" rows="8"
+            v-model="$store.query._session._tab._child_tab.sql" rows="5"
             @keyup.120="execute_sql($store.query._session._tab._child_tab.sql, $store.query._session._tab.id)"
             :style="{'font-size': $store.settings.editor_font_size}"
             title="F9 to Submit"></textarea>
         </div>
       </div>
       <div class="hot_div" :style="{'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}">
-        <HotTable :settings="$store.hotSettings" ></HotTable>
+        <HotTable v-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.query.error==null"></HotTable>
+        <textarea readonly class="textarea codelike" v-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.query.error!=null"
+            v-model="$store.query._session._tab._child_tab.query.error"
+            style="color:red"
+            :style="{'font-size': $store.settings.editor_font_size, 'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}"
+            title="Query Error"></textarea>
       </div>
     </div>
   </div>
@@ -151,8 +194,7 @@ require("codemirror/addon/search/matchesonscrollbar");
 require("codemirror/addon/search/searchcursor");
 require("codemirror/addon/search/match-highlighter");
 
-import "handsontable/dist/handsontable.full.css";
-import HotTable from "@handsontable/vue";
+import HotTable from "./HotTable.vue";
 export default {
   components: {
     codemirror: codemirror,
@@ -162,6 +204,8 @@ export default {
     toggle_tab_sql() {
       self = this;
       this.$store.vars.show_tab_sql = !this.$store.vars.show_tab_sql;
+      this.log(this.$refs);
+      this.log(this.$store.vars.hot.table.getSelected());
 
       setTimeout(() => {
         self.resize_panes();
@@ -241,7 +285,13 @@ export default {
           };
         }
       }, 20);
+    },
+    update_hot_ref() {
+      this.$store.vars.hot = this.$refs.hot;
     }
+  },
+  mounted() {
+    // this.update_hot_ref();
   }
 };
 </script>

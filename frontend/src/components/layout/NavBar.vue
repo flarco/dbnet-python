@@ -48,6 +48,11 @@
           <a class="navbar-item" style="min-width: 55px; color: teal">
             <i class="fa fa-cog fa-spin fa-fw fa-1x" v-if="$store.vars.app_loading"></i>
           </a>
+          <b-tooltip label="Save DB Session" position="is-bottom" type="is-dark">
+            <a class="navbar-item" @click="save_dbquery_state()">
+              <b-icon pack="fa" icon="hdd-o"></b-icon>
+            </a>
+          </b-tooltip>
           <b-tooltip :label="$store.app.socket_connected?  'Connected': 'Disconnected'" position="is-bottom" type="is-dark">
             <a class="navbar-item">
               <b-icon pack="fa" icon="circle" :style="{'color': $store.app.socket_connected? '#83FF33': 'red'}"></b-icon>

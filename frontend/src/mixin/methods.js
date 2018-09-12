@@ -1,4 +1,5 @@
 import classes from './classes'
+import Vue from 'vue'
 
 var LZString = require('lz-string')
 var debounce = require('debounce');
@@ -74,12 +75,14 @@ var methods = {
     let side_menu_width = document.getElementById('side-menu') == null ? 0 : document.getElementById('side-menu').offsetWidth
     let query_pane_width = document.getElementById('query-pane') == null ? 0 : document.getElementById('query-pane').offsetWidth
     let query_tab_headers_heigth = document.getElementById('query_tab_headers') == null ? 0 : document.getElementById('query_tab_headers').scrollHeight
+    let query_meta_tab_headers_heigth = document.getElementById('query_meta_tab_headers_heigth') == null ? 0 : document.getElementById('query_meta_tab_headers_heigth').scrollHeight
     this.$store.style.app_height = `${window.innerHeight}px`;
     this.$store.style.menu_height = `${window.innerHeight - 97}px`;
     this.$store.style.pane_height = `${window.innerHeight - 30}px`;
     this.$store.style.editor_height = `${window.innerHeight - 165}px`;
-    this.$store.style.schema_object_height = `${window.innerHeight - 310}px`;
+    this.$store.style.schema_object_height = `${window.innerHeight - 430}px`;
     this.$store.style.query_hot_height = `${window.innerHeight - 110 - query_tab_headers_heigth}px`;
+    this.$store.style.query_meta_hot_height = `${window.innerHeight - 120 - query_meta_tab_headers_heigth}px`;
     // this.$store.style.query_hot_width = `${window.innerWidth - 620}px`;
     this.$store.style.query_hot_width = `${window.innerWidth - query_pane_width - side_menu_width  - 20}px`;
     this.$store.style.schema_object_lines = parseInt(
@@ -99,7 +102,7 @@ var methods = {
     console.log(text);
   },
 
-  handle_messages() {
+  handle_messages(timeout = null) {
     // TODO: not working when multiple messages arrive.
     self = this
     let handle = function () {
@@ -109,13 +112,14 @@ var methods = {
         self.$store.settings.message.type = message.type
         self.$store.settings.message.text = message.text
         self.$store.settings.message.show = true
+        if (timeout != null) setTimeout(() => self.$store.settings.message.show = false, timeout)
       }
     }
 
     setTimeout(handle, 400);
   },
 
-  notify(data) {
+  notify(data, timeout = null) {
     this.log(data);
     let msg = null
     if ("error" in data) {
@@ -135,11 +139,13 @@ var methods = {
       msg.width = '370px'
       msg.size = 'is-medium'
       this.$store.queue.messages.push(msg)
-      this.handle_messages()
+      this.handle_messages(timeout)
     }
   },
 
   save_dbquery_state(on_save = (data, self) => {}) {
+
+    this.sync_session_copy()
 
     let data1a = new classes.ReqData({
       store_func: 'set_dbquery_state',
@@ -150,6 +156,7 @@ var methods = {
 
     self = this
     this.$socket.emit("store", data1a, function (data2) {
+      self.log(`Session saved @ '${data2.payload.sql_fpath}'`)
       on_save(data2, self)
     });
   },
@@ -163,12 +170,15 @@ var methods = {
     })
 
     self = self == null ? this : self
+    self.$store.vars.db_query_loaded = false
     this.$socket.emit("store", data1b, function (data3) {
       self.log(data3)
       self.$store.app.active_section = 'Query'
       self.$store.query = new classes.StoreQuery(data3.payload)
       if (!self._.isEmpty(self.sess_tabs)) self.activate_tab(null)
       self.$store.vars.app_loading = false
+      self.$store.vars.db_query_loaded = true
+      self.resize_panes()
 
       // Process queue
       for (let data4 in self.$store.queue.rcv_query_data) {
@@ -197,6 +207,7 @@ var methods = {
         }
       }, this);
     }
+    this.$store.query._session.editor_text = this.$store.query.editor_text
     this.$store.query.sessions[this.sess_name] = this._.cloneDeep(this.$store.query._session)
   },
 
@@ -254,6 +265,9 @@ var methods = {
     this.sync_session_copy()
     this.$store.hotSettings.data = tab == null ? [] : this.filter_rows(tab.rows, tab.filter_text)
     this.$store.hotSettings.colHeaders = tab == null ? [] : tab.headers
+    Vue.set(this.$store.hotSettings, 'afterSelection', self.store_last_hot_selection);
+    this.$store.hot_selection_values = []
+    this.$store.hot_selection_rows = []
 
     // live query time
     if (tab.loading) {
@@ -274,6 +288,44 @@ var methods = {
       if (new_row.length > 0) return row
     });
 
+  },
+
+  store_last_hot_selection(r_start, c_start, r_end, c_end) {
+    let self = this;
+    let hot_selection = {
+      r_start: r_start,
+      c_start: c_start,
+      r_end: r_end,
+      c_end: c_end,
+    };
+    let selection_array = null
+    try {
+      selection_array = this.$store.vars.hot.table.getSelected() // array of [[startRow, startCol, endRow, endCol],[],..]
+    } catch (error) {
+      this.log(error)
+      return
+    }
+
+    self.$store.hot_selection_values = [];
+    self.$store.hot_selection_rows = [];
+
+    for (let selection_item of selection_array) {
+      let selection = {
+        r_start: selection_item[0],
+        c_start: selection_item[1],
+        r_end: selection_item[2],
+        c_end: selection_item[3],
+      };
+      for (var r = selection.r_start; r <= selection.r_end; r++) {
+        let row = [];
+        for (var c = selection.c_start; c <= selection.c_end; c++) {
+          row.push(this.$store.hotSettings.data[r][c]);
+          self.$store.hot_selection_values.push(this.$store.hotSettings.data[r][c]);
+        }
+        self.$store.hot_selection_rows.push(this.$store.hotSettings.data[r]);
+      }
+    }
+    // this.log(self.$store.hot_selection_values)
   },
 
   filter_tab_data() {
@@ -328,10 +380,10 @@ var methods = {
 
 
 
-  get_editor_selection(cm_editor) {
+  get_editor_selection(cm_editor, word = false) {
     let selection = cm_editor.getSelection()
 
-    if (selection == '') {
+    if (selection == '' && word) {
       // need to select cursor word
       let cur_pos = cm_editor.getDoc().getCursor();
       this.log('cur_pos=' + JSON.stringify(cur_pos))
@@ -474,8 +526,15 @@ var methods = {
 
   },
 
-  create_data_tab() {
+  create_data_tab(sql = '') {
     let tab_name = `Q${Object.keys(this.get_sess_tabs()).length.toString().padStart(2, '0')}`
+
+    let query = new classes.SqlQuery({
+      database: this.$store.query.db_name,
+      sql: sql,
+      limit: this.$store.settings.default_query_limit
+    })
+
     let tab = new classes.Tab({
       name: tab_name,
       long_name: tab_name,
@@ -483,18 +542,27 @@ var methods = {
       child_active_tab: 0,
       type: 'data'
     })
+
     let child_tab = new classes.Tab({
       name: tab_name,
       long_name: tab_name,
       parent_id: tab.id,
+      query: query,
       limit: this.$store.settings.default_query_limit,
       type: 'data'
     })
+
+
+
     tab.child_tab_ids[0] = child_tab.id
     this.$store.query._session.tabs[tab.id] = tab
     this.$store.query._session.tabs[child_tab.id] = child_tab
     this.$store.query._session._tab = tab
     this.sync_session_copy()
+
+    this.set_tab_prop(child_tab.id, 'sql', sql)
+    this.set_tab_prop(child_tab.id, 'query', query)
+
     this.activate_tab(tab.id)
     return tab.id
   },
@@ -570,6 +638,63 @@ var methods = {
 
   },
 
+  analyze_fields(analysis_name, table_name = null, fields = [], mandatory_fields = false, tab_id = null) {
+    if (mandatory_fields && this._.isEmpty(fields)) {
+      this.$snackbar.open({
+        duration: 5000,
+        message: `Must select fields to run analysis '${analysis_name}'.`
+      })
+      return
+    }
+    if (tab_id == null) {
+      // need to create new tab
+      let parent_tab_id = this.create_data_tab(`-- Waiting for Template SQL for ${analysis_name}.`)
+      tab_id = this.$store.query._session.tabs[parent_tab_id]._child_tab.id
+      this.set_tab_prop(tab_id, 'loading', true)
+    }
+    if (table_name == null) table_name = this.$store.query._session._tab._child_tab.long_name
+
+    let data1 = new classes.ReqData({
+      tab_id: tab_id,
+      req_type: 'get-analysis-sql',
+      database: this.$store.query.db_name,
+      analysis: analysis_name,
+      table_name: table_name,
+      fields: fields,
+      as_sql: true
+    })
+    this.submit_req(data1)
+
+  },
+
+  analyze_tables(analysis_name, tables = [], tab_id = null) {
+    if (this._.isEmpty(tables)) {
+      this.$snackbar.open({
+        duration: 5000,
+        message: `Must select tables to run analysis '${analysis_name}'.`
+      })
+      return
+    }
+
+    if (tab_id == null) {
+      // need to create new tab
+      let parent_tab_id = this.create_data_tab(`-- Waiting for Template SQL for ${analysis_name}.`)
+      tab_id = this.$store.query._session.tabs[parent_tab_id]._child_tab.id
+      this.set_tab_prop(tab_id, 'loading', true)
+    }
+
+    let data1 = new classes.ReqData({
+      tab_id: tab_id,
+      req_type: 'get-analysis-sql',
+      database: this.$store.query.db_name,
+      analysis: analysis_name,
+      tables: tables,
+      as_sql: true
+    })
+    this.submit_req(data1)
+
+  },
+
   submit_meta(options) {
     options.kwargs = options.kwargs || {} // default empty
 
@@ -621,7 +746,17 @@ var methods = {
     if (this.$store.query._session.tabs[tab_id].parent_id != null)
       this.set_tab_prop(this.$store.query._session.tabs[tab_id].parent_id, 'loading', true)
     this.submit_req(sql_req)
+
+    if (this.sess_active_child_tab_id == tab_id) {
+      this.$store.hotSettings.data = []
+      this.$store.hotSettings.colHeaders = []
+    }
   },
+
+  change_meta_level() {
+    this.log(this.$store.app.meta_level)
+  },
+
 
 
   //////////////// META
@@ -652,6 +787,7 @@ var methods = {
   },
 
   get_schemas() {
+    this.$store.query._session.schema_loading = true
     this.submit_meta({
       meta: "get_schemas"
     })
@@ -665,7 +801,7 @@ var methods = {
       options: {
         meta: "get_columns",
         kwargs: {
-          obj: object_full_name,
+          table_name: object_full_name,
           include_schema_table: false
         }
       }
@@ -793,9 +929,10 @@ var methods = {
         }
       }
       if (this._.isEmpty(this.sess_schema)) {
-        this.$store.query._session.schema = this.schemas[0]
+        this.$store.query._session.schema = [this.schemas[0]]
         this.schema_objects
       }
+      this.$store.query._session.schema_loading = false
       this.$forceUpdate()
     }
   },
@@ -834,6 +971,7 @@ var methods = {
 
   get_tables(schema) {
     if (this._.isEmpty(schema)) return
+    this.$store.query._session.schema_loading = true
     this.submit_meta({
       meta: "get_tables",
       kwargs: {
@@ -842,8 +980,39 @@ var methods = {
     })
   },
 
+  get_meta_tables() {
+    let req = new classes.ReqData({
+      req_type: 'get-meta-tables',
+      database: this.curr_database,
+      session_name: this.sess_name,
+      limit: 1000,
+      tab_id: 'META',
+      filter_schema: this.sess_active_tab.filter_schema,
+      filter_table: this.sess_active_tab.filter_table,
+    })
+    this.set_tab_prop('META', 'loading', true)
+    this.submit_req(req)
+  },
+
+  get_meta_columns() {
+    let req = new classes.ReqData({
+      req_type: 'get-meta-columns',
+      database: this.curr_database,
+      session_name: this.sess_name,
+      limit: 1000,
+      tab_id: 'META',
+      filter_schema: this.sess_active_tab.filter_schema,
+      filter_table: this.sess_active_tab.filter_table,
+      filter_column: this.sess_active_tab.filter_column,
+    })
+    this.set_tab_prop('META', 'loading', true)
+    this.submit_req(req)
+  },
+
+
   rcv_tables(data) {
     this.log('receive_tables')
+    this.$store.query._session.schema_loading = false
     if (data.database == this.curr_database && !this._.isEmpty(data.rows)) {
       let schema = data.rows.map((row) => row[0])[0]
       let tables = data.rows.map((row) => row[1])
@@ -856,6 +1025,7 @@ var methods = {
 
   get_views(schema) {
     if (this._.isEmpty(schema)) return
+    this.$store.query._session.schema_loading = true
     this.submit_meta({
       meta: "get_views",
       kwargs: {
@@ -867,6 +1037,7 @@ var methods = {
   rcv_views(data) {
     this.log('receive_views')
     this.log(data)
+    this.$store.query._session.schema_loading = false
     if (data.database == this.curr_database && !this._.isEmpty(data.rows)) {
       let schema = data.rows.map((row) => row[0])[0]
       let views = data.rows.map((row) => row[1])
@@ -897,6 +1068,7 @@ var methods = {
       this.set_tab_prop(tab_id, 'loading', false, sess_name)
       this.set_tab_prop(tab_id, 'headers', data.headers, sess_name)
       this.set_tab_query_prop(tab_id, 'ts_end', new Date().getTime(), sess_name)
+      this.set_tab_query_prop(tab_id, 'error', data.error, sess_name)
       if (this.$store.query._session.tabs[tab_id].parent_id != null)
         this.set_tab_prop(this.$store.query._session.tabs[tab_id].parent_id, 'loading', false)
 
@@ -906,7 +1078,8 @@ var methods = {
         clearInterval(this.$store.vars.query_time_interval)
       }
 
-      if (!data.completed) this.notify(data)
+      if (!data.completed && this.sess_active_child_tab_id != data.orig_req.tab_id)
+        this.notify(data, 3000)
 
       this.$forceUpdate()
     } else if (data.orig_req.tab_id != null) {

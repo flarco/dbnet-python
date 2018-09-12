@@ -6,7 +6,8 @@ export default {
     active_section: null,
     databases: {},
     resetting: false,
-    socket_connected: false
+    socket_connected: false,
+    meta_level: 'Tables',
   },
   query: new classes.StoreQuery(),
   style: {
@@ -109,7 +110,7 @@ export default {
       highlightSelectionMatches: {
         showToken: /\w/,
         annotateScrollbar: true
-      },
+      }
     },
   },
   vars: {
@@ -124,5 +125,10 @@ export default {
     query_editor_selection: null,
     tabs_loading: {},
     app_loading: false,
+    db_query_loaded: true,
+    show_meta_hot: true,
+    hot: null,
+    hot_selection_values: [],
+    hot_selection_rows: [],
   },
 }

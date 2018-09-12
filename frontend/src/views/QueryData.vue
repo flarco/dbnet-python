@@ -20,39 +20,46 @@
             v-if="tab != null && tab.parent_id == null"
             :class="{'is-active': $store.query._session._tab.id == tab_id}">
             <a @click="activate_tab(tab_id)" @auxclick="delete_tab(tab.id)">
+
               <span v-if="tab.long_name != 'META' && tab.type=='data'">
                 <b-tooltip :label="trim_text(tab._child_tab.sql)" position="is-right" type="is-white" size="is-small">
-                  <i class="fa fa-spinner fa-spin fa-fw" v-if="$store.query._session.tabs[tab_id].loading"></i>
+                  <i class="fa fa-spinner fa-fw" v-if="$store.query._session.tabs[tab_id].loading" style="color:blue"></i>
                   <span style="font-size: 0.8rem">{{tab.long_name}}</span>
                 </b-tooltip>
               </span>
+
               <span v-else-if="tab.long_name != 'META' && tab.type=='object'">
-                <i class="fa fa-spinner fa-spin fa-fw" v-if="$store.query._session.tabs[tab_id].loading"></i>
+                <i class="fa fa-spinner fa-fw" v-if="$store.query._session.tabs[tab_id].loading" style="color:blue"></i>
                 <span style="font-size: 0.8rem">{{tab.long_name}}</span>
               </span>
+
               <span v-else>
-                <i class="fa fa-spinner fa-spin fa-fw" v-if="$store.query._session.tabs[tab_id].loading"></i>
+                <i class="fa fa-spinner fa-fw" v-if="$store.query._session.tabs[tab_id].loading"></i>
                 <b-icon pack="fa" icon="database" size="is-small"></b-icon>
               </span>
             </a>
         </li>
       </ul>
     </div>
-    <query-tab v-if="sess_active_tab_id != null" ></query-tab>
+    <query-tab v-if="sess_active_tab_id != null && sess_active_tab.long_name != 'META'" ></query-tab>
+    <query-meta v-if="sess_active_tab.long_name == 'META' && $store.vars.db_query_loaded"></query-meta>
   </div>
 </template>
 
 <script>
 import QueryTab from "./QueryTab.vue";
+import QueryMeta from "./QueryMeta.vue";
 
 export default {
   name: "Home",
   components: {
-    "query-tab": QueryTab
+    "query-tab": QueryTab,
+    "query-meta": QueryMeta
   },
   computed: {},
   methods: {
     trim_text(text, n = 30) {
+      if (text == null) return "";
       return text.substring(0, n) + (text.length > n ? "..." : "");
     }
   },

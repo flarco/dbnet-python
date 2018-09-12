@@ -45,7 +45,7 @@
         @focus="onEditorFocus"
         @change="onEditorCodeChange"
         @keyup.native.f9="execute_sql(get_cursor_query($refs.main_editor.codemirror))"
-        @keyup.native.f4="create_object_tab(get_editor_selection($refs.main_editor.codemirror))"
+        @keyup.native.f4="create_object_tab(get_editor_selection($refs.main_editor.codemirror, true))"
         :style="{'height': $store.style.editor_height, 'font-size': $store.settings.editor_font_size}">
 
       </codemirror>

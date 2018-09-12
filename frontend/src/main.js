@@ -11,6 +11,8 @@ import methods from './mixin/methods';
 import computed from './mixin/computed';
 import VueLodash from 'vue-lodash'
 import VueSocketio from 'vue-socket.io';
+import Clipboard from 'v-clipboard'
+import VueContextMenu from 'vue-context-menu'
 
 Vue.use(Buefy, {
   defaultIconPack: 'fa'
@@ -23,12 +25,18 @@ Vue.use(VueStash)
 // https://github.com/Ewocker/vue-lodash
 Vue.use(VueLodash)
 
+// https://github.com/euvl/v-clipboard
+Vue.use(Clipboard)
+
 // https://github.com/MetinSeylan/Vue-Socket.io
 Vue.config.productionTip = false
 
-// if (Vue.config.productionTip || process.env.NOVE_ENV != 'development') {
-//   sio_url = `http://${document.domain}:${location.port}`
-// }
+// https://github.com/vmaimone/vue-context-menu
+Vue.use(VueContextMenu)
+
+if (Vue.config.productionTip || process.env.NODE_ENV != 'development') {
+  sio_url = `http://${document.domain}:${location.port}`
+}
 Vue.use(VueSocketio, sio_url);
 
 Vue.mixin({

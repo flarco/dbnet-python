@@ -1,22 +1,31 @@
-import setuptools
+from distutils.core import setup
+from setuptools import find_packages
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
-
-setuptools.setup(
-    name="example_pkg",
-    version="0.0.1",
-    author="Example Author",
-    author_email="author@example.com",
-    description="A small example package",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/pypa/sampleproject",
-    packages=setuptools.find_packages(),
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-    ],
-)
-
+setup(
+  name='dbnet',
+  # packages=['xutil'],
+  version='0.0.1',
+  description='DbNet.',
+  author='Fritz Larco',
+  author_email='flarco@live.com',
+  url='https://github.com/flarco/dbnet',
+  download_url='https://github.com/flarco/dbnet.git',
+  keywords=['dbnet'],
+  packages=find_packages(exclude=['tests']),
+  include_package_data=True,
+  install_requires=[
+    "verboselogs",
+    "coloredlogs",
+    "psutil",
+    "jmespath",
+  ],
+  entry_points={
+    'console_scripts': ['dbnet=dbnet.cli:dbnet_cli'],
+  },
+  classifiers=[
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 3', 'Intended Audience :: Developers',
+    'Intended Audience :: Education', 'Intended Audience :: Science/Research',
+    'Operating System :: Windows', 'Operating System :: MacOS',
+    'Operating System :: Unix', 'Topic :: Utilities'
+  ])

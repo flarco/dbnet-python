@@ -29,8 +29,10 @@
     "lz-string": "^1.4.4",
     "mdi": "^2.0.46",
     "nanoid": "^1.2.2",
+    "v-clipboard": "^2.0.1",
     "vue": "^2.5.2",
     "vue-codemirror": "^4.0.5",
+    "vue-context-menu": "^2.0.6",
     "vue-lodash": "^2.0.0",
     "vue-router": "^3.0.1",
     "vue-socket.io": "^2.1.1-b"

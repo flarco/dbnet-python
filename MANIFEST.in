@@ -1,0 +1,4 @@
+recursive-include dbnet/static *
+recursive-include dbnet/templates *
+recursive-exclude dbnet/tests *
+prune dbnet/tests

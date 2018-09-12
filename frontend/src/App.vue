@@ -49,9 +49,30 @@ export default {
           case "get-query-state":
             self.activate_query_db(data);
             break;
+          case "get-meta-columns":
+            self.rcv_query_data(data);
+            break;
+          case "get-meta-tables":
+            if (data.rows != null) self.rcv_query_data(data);
+            break;
           default:
             data;
         }
+      }
+    },
+    "meta-updated": function(data) {
+      if (!data.completed) {
+        this.notify(data);
+      } else {
+        // Meta has been updated, re-submit orig-req
+        this.submit_req(data.orig_req);
+      }
+    },
+    "template-sql": function(data) {
+      if (!data.completed) {
+        this.notify(data);
+      } else {
+        this.submit_sql(data.sql, data.orig_req.tab_id);
       }
     },
     "query-data": function(data) {
@@ -68,6 +89,12 @@ export default {
             self.rcv_views(data);
             break;
           case "get_columns":
+            self.rcv_query_data(data);
+            break;
+          case "analyze_fields":
+            self.rcv_query_data(data);
+            break;
+          case "analyze_tables":
             self.rcv_query_data(data);
             break;
           default:
@@ -218,5 +245,10 @@ div.tab-top > span > a > i {
 
 .codelike {
   font-family: monospace;
+}
+
+.item_select {
+  border-radius: 4px;
+  border: 1px solid #aaaaaa;
 }
 </style>
