@@ -1,5 +1,4 @@
-import sys
-sys.path.insert(1, '/Users/larco/__/Git/xutil')
+import sys, copy
 
 from xutil.web import WebApp, process_request
 from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, get_dir_path
@@ -26,7 +25,12 @@ def index():
 def transmit_payload(payload_type):
   (val_dict, form_dict, data_dict) = app.proc_request()
   if data_dict['payload_type'] != 'client-response':
-    app.log('-Response -> {}'.format(data_dict))
+    _data_dict = copy.deepcopy(data_dict)
+    if 'rows' in data_dict:
+      nrows = len(data_dict['rows'])
+      ncols = len(data_dict['rows'][0]) if nrows else 0
+      _data_dict['rows'] = '{} cols X {} rows'.format(ncols, nrows)
+    app.log('-Response -> {}'.format(_data_dict))
   else:
     app.log('Confirmation -> {}'.format(data_dict))
   app.emit(payload_type, data_dict, namespace='/', room=data_dict['sid'])

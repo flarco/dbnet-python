@@ -2,7 +2,6 @@
 This will be the backend instance.
 '''
 import sys
-sys.path.insert(1, '/Users/larco/__/Git/xutil')
 import os, time, requests, socket
 from xutil.parallelism import Pipe, Queue, Process, Worker
 from xutil.helpers import (
