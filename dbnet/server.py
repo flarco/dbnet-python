@@ -220,7 +220,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
       completed=True,
       data={
         k: get_rec(databases[k])
-        for k in sorted(databases) if k != 'TESTS'
+        for k in sorted(databases) if k.lower() not in ('tests', 'drivers')
       })
 
   elif data.req_type == 'get-analysis-sql':
