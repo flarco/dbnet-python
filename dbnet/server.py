@@ -336,7 +336,6 @@ def main():
 
   # start web worker
   start_worker_webapp()
-  start_worker_db('PG_XENIAL', start=True)
 
   while not exiting:
     try:
