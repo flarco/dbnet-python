@@ -69,7 +69,9 @@ def client_request(sid, data, *args, **kwargs):
       error=get_error_str(err),
       orig_req=data,
     )
-  app.log('-Resp Data => {}'.format(data2))
+  _data2 = copy.deepcopy(data2)
+  _data2['payload'] = '{} bytes'.format(len(jdumps(_data2['payload'])))
+  app.log('-Resp Data => {}'.format(_data2))
   return data2
 
 

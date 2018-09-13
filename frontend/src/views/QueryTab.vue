@@ -80,8 +80,7 @@
                     <b-icon pack="fa" icon="refresh" size="is-small"></b-icon>
                 </span>
 
-                <span class="button is-small"
-                      @click="">
+                <span class="button is-small">
                   <b-tooltip label="View Row" position="is-top" type="is-light">
                     <b-icon pack="fa" icon="search-plus" size="is-small"></b-icon>
                   </b-tooltip>
@@ -130,10 +129,17 @@
                 <strong>{{ $store.vars.query_time }}</strong> sec
               </span>
 
-                <span style="font-family: monospace" v-else>
+              <span style="font-family: monospace; min-width:160px" v-else>
                 <strong>{{ sess_active_child_tab.query_records }}</strong> rows / <strong>{{ calc_query_time(sess_active_child_tab) }}</strong> sec
               </span>
+
+              <progress class="progress is-primary" v-if="$store.vars.query_progress_prct != null"
+              style="min-width:50px" :value="$store.vars.query_progress_prct" max="100"
+              >{{$store.vars.query_progress_prct}}%</progress>
+
+              
             </div>
+
 
 
             <div class="level-item">

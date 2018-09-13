@@ -292,8 +292,6 @@ def create_tables(drop_first=False):
     if ans.lower() == 'y':
       log('-Dropped tables!')
       metadata.drop_all(engine)
-    else:
-      sys.exit()
 
   metadata.create_all(engine)
   log('+DB Tables OK.')

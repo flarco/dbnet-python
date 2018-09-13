@@ -14,6 +14,11 @@ import VueSocketio from 'vue-socket.io';
 import Clipboard from 'v-clipboard'
 import VueContextMenu from 'vue-context-menu'
 
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+
+Vue.use(VueAxios, axios)
+
 Vue.use(Buefy, {
   defaultIconPack: 'fa'
 })

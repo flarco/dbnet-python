@@ -41,6 +41,14 @@ def execute_sql(worker: Worker, data_dict):
   pid = worker_pid
 
   conn = get_conn(database)
+  if conn.type.lower() == 'spark':
+    worker.put_parent_q(
+      dict(
+        payload_type='spark-url',
+        database=database,
+        url=conn.sparko.uiWebUrl,
+        sid=data_dict['sid'],
+      ))
 
   def start_sql(sql, id, limit, options, sid):
     rows = fields = []

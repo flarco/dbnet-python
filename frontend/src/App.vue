@@ -68,6 +68,9 @@ export default {
         this.submit_req(data.orig_req);
       }
     },
+    "spark-url": function(data) {
+      this.$store.app.databases[data.database].url = data.url;
+    },
     "template-sql": function(data) {
       if (!data.completed) {
         this.notify(data);

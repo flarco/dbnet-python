@@ -268,10 +268,11 @@ var methods = {
     Vue.set(this.$store.hotSettings, 'afterSelection', self.store_last_hot_selection);
     this.$store.hot_selection_values = []
     this.$store.hot_selection_rows = []
+    this.$store.vars.query_progress_prct = null
 
     // live query time
     if (tab.loading) {
-      this.$store.vars.query_time_interval = setInterval(this.set_tab_live_duration, 200)
+      this.$store.vars.query_time_interval = setInterval(this.set_tab_live_progress, 200)
     }
 
     setTimeout(self.resize_panes, 50);
@@ -573,7 +574,7 @@ var methods = {
     // Create the Tab
     let parent_tab = new classes.Tab({
       name: `S${Object.keys(this.sess_tabs).length.toString().padStart(2, '0')}`,
-      long_name: object_full_name,
+      long_name: object_full_name.split('.')[1],
       child_active_tab: 0,
       type: 'object'
     })
@@ -745,6 +746,11 @@ var methods = {
     this.$store.vars.query_time = 0
     if (this.$store.query._session.tabs[tab_id].parent_id != null)
       this.set_tab_prop(this.$store.query._session.tabs[tab_id].parent_id, 'loading', true)
+
+    if (tab_id == this.sess_active_child_tab_id) {
+      this.activate_tab(this.sess_active_child_tab.parent_id) // to enable loading timer
+    }
+
     this.submit_req(sql_req)
 
     if (this.sess_active_child_tab_id == tab_id) {
@@ -869,14 +875,47 @@ var methods = {
     return lapsed
   },
 
-  set_tab_live_duration() {
-
+  set_tab_live_progress() {
+    self = this
     let tab = this.sess_active_tab
     if (tab != null && !this._.isEmpty(tab.child_tab_ids)) {
       tab = this.sess_active_child_tab
     }
 
     this.$store.vars.query_time = this.calc_query_time(tab)
+
+    // if database is spark, get progress percent
+    if (self.$store.app.databases[this.curr_database].type.toLowerCase() == 'spark') {
+      let last_got = self.$store.app.databases[this.curr_database].last_got
+      if (last_got != null && (new Date().getTime()) - last_got < 2000) return
+      if (!self.$store.query._session._tab._child_tab.loading) return
+
+      let url = self.$store.app.databases[this.curr_database].url
+      let api_applications = `${url}/api/v1/applications`
+      let api_jobs = null
+
+      // Steps: get application ID, get-job-id
+      self.axios.get(api_applications).then((resp1) => {
+        console.log(resp1.data)
+        try {
+          let app_id = resp1[0].id
+          api_jobs = `${url}/api/v1/applications/${app_id}/jobs`
+
+        } catch (error) {
+          this.log('spark api error -> ' + error)
+        }
+        if (api_jobs == null) return
+        self.axios.get(api_jobs).then((resp2) => {
+          if (resp2.length == 0) return
+          let job = resp2[0]
+          self.$store.vars.query_progress_prct = parseInt(100.0 * job.numCompletedTasks / job.numTasks)
+        })
+      })
+
+
+
+      self.$store.app.databases[this.curr_database].last_got = new Date().getTime()
+    }
   },
 
 
@@ -1076,6 +1115,7 @@ var methods = {
       if (this.sess_active_child_tab_id == data.orig_req.tab_id) this.activate_tab(this.sess_active_tab_id)
       if (this.sess_active_child_tab_id == data.orig_req.tab_id && this.$store.vars.query_time_interval != null) {
         clearInterval(this.$store.vars.query_time_interval)
+        this.$store.vars.query_progress_prct = null
       }
 
       if (!data.completed && this.sess_active_child_tab_id != data.orig_req.tab_id)

@@ -119,6 +119,7 @@ export default {
     show_tab_sql: false,
     show_tab_modal_email: false,
     tabs_active: false,
+    query_progress_prct: null,
     query_time_interval: null,
     query_time: null,
     loading: false,
