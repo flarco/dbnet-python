@@ -23,7 +23,8 @@ export default {
     show_hot_table: true,
     pane_width: '3',
     default_query_limit: 200,
-    editor_font_size: '0.8rem',
+    editor_font_size: '0.7rem',
+    progress_interval: 1000,
     message: {
       show: false,
       width: '370px',

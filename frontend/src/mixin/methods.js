@@ -888,7 +888,7 @@ var methods = {
     // if database is spark, get progress percent
     if (self.$store.app.databases[this.curr_database].type.toLowerCase() == 'spark') {
       let last_got = self.$store.app.databases[this.curr_database].last_got
-      if (last_got != null && (new Date().getTime()) - last_got < 2000) return
+      if (last_got != null && (new Date().getTime()) - last_got < parseInt(self.$store.settings.progress_interval)) return
       if (!self.$store.query._session._tab._child_tab.loading) return
       let url = self.$store.app.databases[this.curr_database].url
       if (url == null) return

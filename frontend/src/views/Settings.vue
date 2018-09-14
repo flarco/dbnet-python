@@ -16,6 +16,22 @@
               </b-switch>
           </div>
           <div class="field">
+            <b-field label="Progress Interval"/>
+
+              <select title="Limit" class="select is-small"
+                      v-model="$store.settings.progress_interval"
+              >
+                <option selected>250</option>
+                <option>500</option>
+                <option>750</option>
+                <option>1000</option>
+                <option>1250</option>
+                <option>1500</option>
+                <option>2000</option>
+                <option>5000</option>
+              </select>
+          </div>
+          <div class="field">
             <b-field label="Default Query Limit"/>
 
               <select title="Limit" class="select is-small"
