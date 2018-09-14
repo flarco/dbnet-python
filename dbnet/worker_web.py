@@ -1,4 +1,4 @@
-import sys, copy, requests, json
+import os, sys, copy, requests, json
 
 from xutil.web import WebApp, process_request
 from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, get_dir_path
@@ -6,6 +6,14 @@ from dbnet.store import store_func
 from flask import render_template
 
 app = WebApp('dbnet', root_path=get_dir_path(__file__))
+
+
+@app.route('/logo.ico')
+def favicon():
+  return app.send_from_directory(
+    os.path.join(app.flask_app.root_path, 'templates'),
+    'logo.ico',
+    mimetype='image/vnd.microsoft.icon')
 
 
 @app.route('/')
