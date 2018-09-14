@@ -129,15 +129,9 @@
                 <strong>{{ $store.vars.query_time }}</strong> sec
               </span>
 
-              <span style="font-family: monospace; min-width:160px" v-else>
+              <span style="font-family: monospace; min-width:100px" v-else>
                 <strong>{{ sess_active_child_tab.query_records }}</strong> rows / <strong>{{ calc_query_time(sess_active_child_tab) }}</strong> sec
-              </span>
-
-              <progress class="progress is-primary" v-if="$store.vars.query_progress_prct != null"
-              style="min-width:50px" :value="$store.vars.query_progress_prct" max="100"
-              >{{$store.vars.query_progress_prct}}%</progress>
-
-              
+              </span>              
             </div>
 
 
@@ -168,6 +162,11 @@
                 </a>
 
               </div>
+            </div>
+            <div class="level-item" style="font-size: 0.8rem">
+              <progress class="progress is-primary" v-if="$store.vars.query_progress_prct != null"
+              style="min-width:100px" :value="$store.vars.query_progress_prct" max="100"
+              >{{$store.vars.query_progress_prct}}%</progress>
             </div>
 
           </div>

@@ -3,6 +3,7 @@ import Vue from 'vue'
 
 var LZString = require('lz-string')
 var debounce = require('debounce');
+var jsonp = require('jsonp');
 
 function toObject(arr, key = null) {
   var rv = {};
@@ -889,30 +890,15 @@ var methods = {
       let last_got = self.$store.app.databases[this.curr_database].last_got
       if (last_got != null && (new Date().getTime()) - last_got < 2000) return
       if (!self.$store.query._session._tab._child_tab.loading) return
-
       let url = self.$store.app.databases[this.curr_database].url
-      let api_applications = `${url}/api/v1/applications`
-      let api_jobs = null
+      if (url == null) return
 
-      // Steps: get application ID, get-job-id
-      self.axios.get(api_applications).then((resp1) => {
-        console.log(resp1.data)
-        try {
-          let app_id = resp1[0].id
-          api_jobs = `${url}/api/v1/applications/${app_id}/jobs`
-
-        } catch (error) {
-          this.log('spark api error -> ' + error)
-        }
-        if (api_jobs == null) return
-        self.axios.get(api_jobs).then((resp2) => {
-          if (resp2.length == 0) return
-          let job = resp2[0]
-          self.$store.vars.query_progress_prct = parseInt(100.0 * job.numCompletedTasks / job.numTasks)
-        })
-      })
-
-
+      let data1 = {
+        url: url
+      }
+      self.$socket.emit("spark-progress", data1, function (data2) {
+        self.$store.vars.query_progress_prct = data2['query_progress_prct']
+      });
 
       self.$store.app.databases[this.curr_database].last_got = new Date().getTime()
     }

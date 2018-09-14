@@ -1,4 +1,4 @@
-import sys, copy
+import sys, copy, requests, json
 
 from xutil.web import WebApp, process_request
 from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, get_dir_path
@@ -37,6 +37,37 @@ def transmit_payload(payload_type):
   return 'OK'
 
 
+@app.on('spark-progress')
+def spark_progess(sid, data):
+  """
+  Get Spark-Progress
+  """
+
+  data2 = dict(query_progress_prct=None)
+
+  try:
+    data['sid'] = sid
+    url = data['url']
+    api_applications = '{}/api/v1/applications'.format(url)
+    headers = {'Content-type': 'application/json'}
+    resp = requests.get(api_applications, headers=headers)
+    resp1 = json.loads(resp.text)
+
+    app_id = resp1[0]['id']
+    api_jobs = '{}/api/v1/applications/{}/jobs'.format(url, app_id)
+    resp = requests.get(api_jobs, headers=headers)
+    resp2 = json.loads(resp.text)
+    if resp2:
+      job = resp2[0]
+      data2['query_progress_prct'] = int(
+        100.0 * job['numCompletedTasks'] / job['numTasks'])
+  except Exception as E:
+    app.log(data)
+    app.log(E)
+
+  return data2
+
+
 @app.on('connect')
 def connect(sid, environ):
   app.log('connect ' + sid)
@@ -55,7 +86,10 @@ def client_request(sid, data, *args, **kwargs):
   Operation on Store. Returns Data as needed
   """
   data['sid'] = sid
-  app.log('+Got Store Req => {}'.format(data))
+  _data = copy.deepcopy(data)
+  if _data['store_func'] == 'set_dbquery_state':
+    _data['kwargs'] = '{} bytes'.format(len(jdumps(_data['kwargs'])))
+  app.log('+Got Store Req => {}'.format(_data))
   try:
     data2 = dict(
       payload=store_func[data['store_func']](**data['kwargs']),

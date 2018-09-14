@@ -122,3 +122,5 @@ selenium-debug.log
 *.ntvs*
 *.njsproj
 *.sln
+
+spark-warehouse
