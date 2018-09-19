@@ -309,7 +309,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
     for wkr_nm in list(workers):
       if wkr_nm == 'webapp': continue
       stop_worker(wkr_nm)
-    store.create_tables(drop_first=True)
+    store.create_tables(drop_first=True, ask=False)
     response_data = dict(completed=True)
 
   # In case handle is missing. Also checked for completed

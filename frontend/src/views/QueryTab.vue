@@ -11,31 +11,43 @@
             </b-tooltip>
             <span id="analysis-buttons" v-if="$store.query._session._tab.child_active_tab == 0">
               <b-tooltip label="Analyze selected fields" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('field_stat', $store.query._session._tab._child_tab.long_name, $store.hot_selection_values, true)">
+                <a @click="analyze_fields('field_stat', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true)">
                   <i class="fa fa-life-ring" style="font-size: 12px; color:black"></i>
                 </a>
               </b-tooltip>
 
               <b-tooltip label="Analyze selected fields (deep)" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('field_stat_deep', $store.query._session._tab._child_tab.long_name, $store.hot_selection_values, true)">
+                <a @click="analyze_fields('field_stat_deep', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true)">
+                  <i class="fa fa-life-ring" style="font-size: 12px;color:blue"></i>
+                </a>
+              </b-tooltip>
+
+              <b-tooltip label="Group selected field (fill count)" position="is-bottom" type="is-light" style="margin-left:7px">
+                <a @click="analyze_fields('fill_cnt_group_field', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true, {union:false, expr_func_map: {fill_cnt_fields_sql: 'fill_cnt_field'}})">
+                  <i class="fa fa-life-ring" style="font-size: 12px;color:blue"></i>
+                </a>
+              </b-tooltip>
+
+              <b-tooltip label="Group selected field (fill rate)" position="is-bottom" type="is-light" style="margin-left:7px">
+                <a @click="analyze_fields('fill_rate_group_field', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true, {union:false, expr_func_map: {fill_rate_fields_sql: 'fill_rate_field'}})">
                   <i class="fa fa-life-ring" style="font-size: 12px;color:blue"></i>
                 </a>
               </b-tooltip>
 
               <b-tooltip label="Analyze selected char fields" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('field_chars', $store.query._session._tab._child_tab.long_name, $store.hot_selection_values, true)">
+                <a @click="analyze_fields('field_chars', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true)">
                   <i class="fa fa-life-ring" style="font-size: 12px;color:orange"></i>
                 </a>
               </b-tooltip>
 
               <b-tooltip label="Analyze Field Distro" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('distro_field', $store.query._session._tab._child_tab.long_name, $store.hot_selection_values, true)">
+                <a @click="analyze_fields('distro_field', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true, {union:false})">
                   <i class="fa fa-life-ring" style="font-size: 12px;color:pink"></i>
                 </a>
               </b-tooltip>
 
               <b-tooltip label="Analyze Date Distro" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('distro_field_date', $store.query._session._tab._child_tab.long_name, $store.hot_selection_values, true)">
+                <a @click="analyze_fields('distro_field_date', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true, {union:false})">
                   <i class="fa fa-life-ring" style="font-size: 12px;color:red"></i>
                 </a>
               </b-tooltip>
@@ -140,12 +152,12 @@
               <div class="buttons has-addons">
 
                 <a title="Copy Selected Headers to Clipboard" class="button is-small" style="color: black;"
-                  @click="set_clipboard('header_data')">
+                  @click="copy_hot_headers">
                   <b-icon pack="fa" icon="header" size="is-small"></b-icon>
                 </a>
 
                 <a title="Copy Tab Data to Clipboard (TSV)"
-                  class="button is-small" style="color: black;" @click="set_clipboard('tsv_data')">
+                  class="button is-small" style="color: black;" @click="copy_hot_data">
                   <b-icon pack="fa" icon="files-o" size="is-small"></b-icon>
                 </a>
 

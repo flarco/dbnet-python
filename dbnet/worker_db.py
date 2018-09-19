@@ -277,7 +277,7 @@ def get_analysis_sql(worker: Worker, data_dict):
       table_name=data_dict['table_name'],
       fields=data_dict['fields'],
       as_sql=True,
-    )
+      **data_dict['kwargs'])
 
     data = dict(
       id=data_dict['id'],

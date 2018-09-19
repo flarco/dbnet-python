@@ -11,6 +11,7 @@ export default {
   components: {
     HotTable: HotTable
   },
+  methods: {},
   mounted() {
     this.$store.vars.hot = this.$refs.hot;
   }

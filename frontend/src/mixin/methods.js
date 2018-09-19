@@ -13,6 +13,16 @@ function toObject(arr, key = null) {
 }
 
 var methods = {
+  test() {
+    this.log("test");
+  },
+
+  handleKey(e) {
+    this.log("keyCode -> " + e.keyCode);
+    if ((e.metaKey || e.ctrlKey) && e.keyCode == 72) {
+      this.log("bingo");
+    }
+  },
 
   set(key, value) {
     localStorage.setItem(
@@ -266,9 +276,13 @@ var methods = {
     this.sync_session_copy()
     this.$store.hotSettings.data = tab == null ? [] : this.filter_rows(tab.rows, tab.filter_text)
     this.$store.hotSettings.colHeaders = tab == null ? [] : tab.headers
+    this.$store.hotSettings.columns = tab == null ? [] : tab.headers.map((val) => {
+      readOnly: true
+    })
     Vue.set(this.$store.hotSettings, 'afterSelection', self.store_last_hot_selection);
-    this.$store.hot_selection_values = []
-    this.$store.hot_selection_rows = []
+    Vue.set(this.$store.hotSettings, 'afterDocumentKeyDown', self.hot_keydown);
+    this.$store.vars.hot_selection_values = []
+    this.$store.vars.hot_selection_rows = []
     this.$store.vars.query_progress_prct = null
 
     // live query time
@@ -292,6 +306,65 @@ var methods = {
 
   },
 
+  set_clipboard(data) {
+    let self = this;
+    self.$clipboard(data)
+  },
+
+  copy_hot_headers() {
+    // Ctrl + h: copy headers
+    let headers = [];
+    if (self.$store.vars.hot_selection) {
+      for (var c = self.$store.vars.hot_selection.c_start; c <= self.$store.vars.hot_selection.c_end; c++) {
+        headers.push(self.$store.hotSettings.colHeaders[c])
+      }
+    } else {
+      headers = self.$store.hotSettings.colHeaders;
+    }
+    self.$clipboard(headers.join('\n'))
+  },
+
+  copy_hot_data() {
+    let headers = [];
+    let tsv_rows = [];
+
+    // get headers
+    if (self.$store.vars.hot_selection) {
+      for (var c = self.$store.vars.hot_selection.c_start; c <= self.$store.vars.hot_selection.c_end; c++) {
+        headers.push(self.$store.hotSettings.colHeaders[c])
+      }
+    } else {
+      headers = self.$store.hotSettings.colHeaders;
+    }
+
+    tsv_rows.push('"' + headers.join('"\t"') + '"');
+
+    // get rows
+    if (self.$store.vars.hot_selection) {
+      for (var r = self.$store.vars.hot_selection.r_start; r <= self.$store.vars.hot_selection.r_end; r++) {
+        let row = []
+        for (var c = self.$store.vars.hot_selection.c_start; c <= self.$store.vars.hot_selection.c_end; c++) {
+          row.push(self.$store.hotSettings.data[r][c])
+        }
+        tsv_rows.push('"' + row.join('"\t"') + '"');
+      }
+    } else {
+      self.$store.hotSettings.data.forEach(function (row) {
+        tsv_rows.push('"' + row.join('"\t"') + '"');
+      }, this);
+    }
+
+    self.$clipboard(tsv_rows.join('\n'))
+  },
+
+  hot_keydown(e) {
+    self = this
+    if ((e.metaKey || e.ctrlKey) && e.keyCode == 72) {
+      // Ctrl + H: Copy headers + cells
+      self.copy_hot_data()
+    }
+  },
+
   store_last_hot_selection(r_start, c_start, r_end, c_end) {
     let self = this;
     let hot_selection = {
@@ -308,8 +381,8 @@ var methods = {
       return
     }
 
-    self.$store.hot_selection_values = [];
-    self.$store.hot_selection_rows = [];
+    self.$store.vars.hot_selection_values = [];
+    self.$store.vars.hot_selection_rows = [];
 
     for (let selection_item of selection_array) {
       let selection = {
@@ -318,16 +391,19 @@ var methods = {
         r_end: selection_item[2],
         c_end: selection_item[3],
       };
+
+      self.$store.vars.hot_selection = selection
       for (var r = selection.r_start; r <= selection.r_end; r++) {
         let row = [];
         for (var c = selection.c_start; c <= selection.c_end; c++) {
           row.push(this.$store.hotSettings.data[r][c]);
-          self.$store.hot_selection_values.push(this.$store.hotSettings.data[r][c]);
+          self.$store.vars.hot_selection_values.push(this.$store.hotSettings.data[r][c]);
         }
-        self.$store.hot_selection_rows.push(this.$store.hotSettings.data[r]);
+        self.$store.vars.hot_selection_rows.push(row);
+        // self.$store.vars.hot_selection_rows.push(this.$store.hotSettings.data[r]);
       }
     }
-    // this.log(self.$store.hot_selection_values)
+    // this.log(self.$store.vars.hot_selection_values)
   },
 
   filter_tab_data() {
@@ -640,7 +716,7 @@ var methods = {
 
   },
 
-  analyze_fields(analysis_name, table_name = null, fields = [], mandatory_fields = false, tab_id = null) {
+  analyze_fields(analysis_name, table_name = null, fields = [], mandatory_fields = false, kwargs = {}, tab_id = null) {
     if (mandatory_fields && this._.isEmpty(fields)) {
       this.$snackbar.open({
         duration: 5000,
@@ -663,7 +739,8 @@ var methods = {
       analysis: analysis_name,
       table_name: table_name,
       fields: fields,
-      as_sql: true
+      as_sql: true,
+      kwargs: kwargs
     })
     this.submit_req(data1)
 

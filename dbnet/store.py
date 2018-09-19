@@ -285,10 +285,12 @@ store_func = dict(
 )
 
 
-def create_tables(drop_first=False):
+def create_tables(drop_first=False, ask=True):
   if drop_first:
-    ans = input('Authorize Tables Drop. Please confirm with "Y": ')
-    # ans = 'y'
+    if ask:
+      ans = input('Authorize Tables Drop. Please confirm with "Y": ')
+    else:
+      ans = 'y'
     if ans.lower() == 'y':
       log('-Dropped tables!')
       metadata.drop_all(engine)
