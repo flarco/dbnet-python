@@ -118,6 +118,7 @@ export default {
     // Temp Variables that are needed for front end session (non-saved)
     objects_ready: false,
     show_tab_sql: false,
+    show_tab_row_view: true,
     show_tab_modal_email: false,
     tabs_active: false,
     query_progress_prct: null,
@@ -132,5 +133,38 @@ export default {
     hot: null,
     hot_selection_values: [],
     hot_selection_rows: [],
+    hot_selection_rows_full: [],
+    tab_row_data: [],
+    tab_row_hotSettings: {
+      data: [
+        ["2016", 10, 11, 12, 13],
+        ["2017", 20, 11, 14, 13],
+        ["2018", 30, 15, 12, 13]
+      ],
+      colHeaders: ["Year", "Ford", "Volvo", "Toyota", "Honda"],
+      // columns: columnDefs,
+      rowHeaders: true,
+      // stretchH: 'all',
+      // width: 806,
+      // autoWrapRow: false,
+      preventOverflow: 'horizontal',
+      wordWrap: true,
+      // height: 441,
+      // maxRows: 50,,
+      columnSorting: true,
+      sortIndicator: true,
+      autoColumnSize: {
+        samplingRatio: 23
+      },
+      search: true,
+      contextMenu: false,
+      // fixedColumnsLeft: 2,
+      manualColumnResize: true,
+      modifyColWidth: function (width, col) {
+        if (width > 150) {
+          return 150
+        }
+      }
+    },
   },
 }

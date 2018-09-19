@@ -92,7 +92,8 @@
                     <b-icon pack="fa" icon="refresh" size="is-small"></b-icon>
                 </span>
 
-                <span class="button is-small">
+                <span class="button is-small" @click="toggle_tab_row_view"
+                      :class="{'is-info':$store.vars.show_tab_row_view}">
                   <b-tooltip label="View Row" position="is-top" type="is-light">
                     <b-icon pack="fa" icon="search-plus" size="is-small"></b-icon>
                   </b-tooltip>
@@ -112,24 +113,6 @@
                   </select>
                 </p>
 
-              </div>
-            </div>
-
-            <div class="level-item">
-              <div class="field has-addons">
-                <p class="control">
-                  <input class="input is-small"
-                        placeholder="Filter..." type="text"
-                        @input="filter_tab_data()"
-                        v-model="$store.query._session._tab._child_tab.filter_text"
-                        @keyup.27="$store.query._session._tab._child_tab.filter_text = null; filter_tab_data()"
-                        size="12">
-                </p>
-                <p class="control">
-                  <span class="button is-small" @click="$store.query._session._tab._child_tab.filter_text = null">
-                    <b-icon pack="fa" icon="remove" size="is-small"></b-icon>
-                </span>
-                </p>
               </div>
             </div>
 
@@ -175,6 +158,25 @@
 
               </div>
             </div>
+
+            <div class="level-item">
+              <div class="field has-addons">
+                <p class="control">
+                  <input class="input is-small"
+                        placeholder="Filter..." type="text"
+                        @input="filter_tab_data()"
+                        v-model="$store.query._session._tab._child_tab.filter_text"
+                        @keyup.27="$store.query._session._tab._child_tab.filter_text = null; filter_tab_data()"
+                        size="12">
+                </p>
+                <p class="control">
+                  <span class="button is-small" @click="$store.query._session._tab._child_tab.filter_text = null">
+                    <b-icon pack="fa" icon="remove" size="is-small"></b-icon>
+                </span>
+                </p>
+              </div>
+            </div>
+
             <div class="level-item" style="font-size: 0.8rem">
               <progress class="progress is-primary" v-if="$store.vars.query_progress_prct != null"
               style="min-width:100px" :value="$store.vars.query_progress_prct" max="100"
@@ -191,13 +193,45 @@
             title="F9 to Submit"></textarea>
         </div>
       </div>
-      <div class="hot_div" :style="{'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}">
-        <HotTable v-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.query.error==null"></HotTable>
-        <textarea readonly class="textarea codelike" v-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.query.error!=null"
-            v-model="$store.query._session._tab._child_tab.query.error"
-            style="color:red"
-            :style="{'font-size': $store.settings.editor_font_size, 'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}"
-            title="Query Error"></textarea>
+      <div class="columns">
+        <div id="row-view-pane" class="column is-4" v-if="$store.vars.show_tab_row_view"
+          style="overflow:scroll; font-size: 0.7rem; width: 370px"
+          :style="{'height': $store.style.query_hot_height}"
+          >
+          <div class="level-item">
+            <div class="field has-addons">
+              <p class="control">
+                <input class="input is-small"
+                      placeholder="Filter Values..." type="text"
+                      @input="render_tab_row_view_data(tab_row_view_filter)"
+                      v-model="tab_row_view_filter"
+                      @keyup.27="tab_row_view_filter = ''; render_tab_row_view_data(tab_row_view_filter)"
+                      size="19">
+              </p>
+              <p class="control">
+                <span class="button is-small" @click="$store.query._session._tab._child_tab.filter_text = null">
+                  <b-icon pack="fa" icon="remove" size="is-small"></b-icon>
+              </span>
+              </p>
+
+              <a title="Copy Row Data to Clipboard" class="button is-small" style="color: black;"
+                @click="copy_tab_row_view_data">
+                <b-icon pack="fa" icon="files-o" size="is-small"></b-icon>
+              </a>
+            </div>
+          </div>
+          <b-table :data="$store.vars.tab_row_data" :columns="columns" hoverable narrowed :default-sort="null"></b-table>
+        </div>
+        <div class="column">
+          <div class="hot_div" :style="{'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}">
+            <HotTable v-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.query.error==null"></HotTable>
+            <textarea readonly class="textarea codelike" v-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.query.error!=null"
+                v-model="$store.query._session._tab._child_tab.query.error"
+                style="color:red"
+                :style="{'font-size': $store.settings.editor_font_size, 'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}"
+                title="Query Error"></textarea>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -213,11 +247,43 @@ require("codemirror/addon/search/match-highlighter");
 
 import HotTable from "./HotTable.vue";
 export default {
+  data() {
+    return {
+      tab_row_view_filter: "",
+      columns: [
+        {
+          field: "n",
+          label: "N",
+          width: "10"
+          // numeric: true
+        },
+        {
+          field: "field",
+          label: "Field"
+          // width: "40"
+        },
+        {
+          field: "value",
+          label: "Value"
+          // width: "40"
+        }
+      ]
+    };
+  },
   components: {
     codemirror: codemirror,
     HotTable: HotTable
   },
   methods: {
+    toggle_tab_row_view() {
+      self = this;
+      self.$store.vars.tab_row_data = [];
+      this.$store.vars.show_tab_row_view = !this.$store.vars.show_tab_row_view;
+
+      setTimeout(() => {
+        self.resize_panes();
+      }, 20);
+    },
     toggle_tab_sql() {
       self = this;
       this.$store.vars.show_tab_sql = !this.$store.vars.show_tab_sql;

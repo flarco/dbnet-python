@@ -1,10 +1,14 @@
 import os, sys, copy, requests, json
+from io import StringIO, BytesIO
 
 from xutil.web import WebApp, process_request
-from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, get_dir_path
+from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, get_dir_path, get_home_path
+from xutil.diskio import read_file, read_csv
 from dbnet.store import store_func
 from flask import render_template
 
+DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
+CSV_FOLDER = DBNET_FOLDER + '/csv'
 app = WebApp('dbnet', root_path=get_dir_path(__file__))
 
 
@@ -29,15 +33,19 @@ def index():
   return resp
 
 
-@app.route('/csv/<name>')
-def get_csv(name):
-  """Serve the client-side application."""
+@app.route('/csv/<file_name>')
+def get_csv_file(file_name):
+  """Create virtual CSV file"""
   (val_dict, form_dict, data_dict) = app.proc_request()
   session_id = app.get_cookie_session_id()
 
-  resp = app.make_response(render_template('index.html'))
-  resp.set_cookie(app.cookie_session_key, session_id)
-  resp.headers['Cache-Control'] = 'no-cache'
+  fpath = '{}/{}'.format(CSV_FOLDER, file_name)
+  byte_io = BytesIO(read_file(fpath, mode='rb'))
+  resp = app.make_response(byte_io.getvalue())
+  resp.headers["Content-Disposition"] = "attachment;filename={}".format(
+    file_name)
+  # resp.headers["Content-type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  resp.headers["Content-type"] = "text/csv"
 
   return resp
 

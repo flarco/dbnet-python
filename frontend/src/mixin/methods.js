@@ -87,6 +87,7 @@ var methods = {
     let query_pane_width = document.getElementById('query-pane') == null ? 0 : document.getElementById('query-pane').offsetWidth
     let query_tab_headers_heigth = document.getElementById('query_tab_headers') == null ? 0 : document.getElementById('query_tab_headers').scrollHeight
     let query_meta_tab_headers_heigth = document.getElementById('query_meta_tab_headers_heigth') == null ? 0 : document.getElementById('query_meta_tab_headers_heigth').scrollHeight
+    let query_row_view_pane = document.getElementById('row-view-pane') ? document.getElementById('row-view-pane').offsetWidth : 0
     this.$store.style.app_height = `${window.innerHeight}px`;
     this.$store.style.menu_height = `${window.innerHeight - 97}px`;
     this.$store.style.pane_height = `${window.innerHeight - 30}px`;
@@ -95,7 +96,7 @@ var methods = {
     this.$store.style.query_hot_height = `${window.innerHeight - 110 - query_tab_headers_heigth}px`;
     this.$store.style.query_meta_hot_height = `${window.innerHeight - 120 - query_meta_tab_headers_heigth}px`;
     // this.$store.style.query_hot_width = `${window.innerWidth - 620}px`;
-    this.$store.style.query_hot_width = `${window.innerWidth - query_pane_width - side_menu_width  - 20}px`;
+    this.$store.style.query_hot_width = `${window.innerWidth - query_pane_width - side_menu_width - query_row_view_pane - 20}px`;
     this.$store.style.schema_object_lines = parseInt(
       window.innerHeight / 33,
       10
@@ -241,7 +242,7 @@ var methods = {
     // use this.$store.query.data_tab_index as clicked tab
     // let tab = this.sess_tabs[Object.keys(this.sess_tabs)[this.sess_active_tab_index]]
     self = this
-
+    this.$store.vars.show_tab_row_view = false
     this.$store.vars.tabs_active = !this._.isEmpty(this.get_sess_tabs())
 
     if (tab_id == null && !this._.isEmpty(this.$store.query._session._tab))
@@ -324,6 +325,15 @@ var methods = {
     self.$clipboard(headers.join('\n'))
   },
 
+  copy_tab_row_view_data() {
+    let tsv_rows = [];
+    tsv_rows.push('"' + ['N', 'Field', 'Value'].join('"\t"') + '"');
+    for (let obj of self.$store.vars.tab_row_data) {
+      let row = [obj.n, obj.field, obj.value]
+      tsv_rows.push('"' + row.join('"\t"') + '"');
+    }
+    this.$clipboard(tsv_rows.join('\n'))
+  },
   copy_hot_data() {
     let headers = [];
     let tsv_rows = [];
@@ -365,6 +375,41 @@ var methods = {
     }
   },
 
+  render_tab_row_view_data(filter_text = '') {
+    self = this
+    let cols = [{
+        field: "n",
+        label: "N",
+        // width: "40"
+      },
+      {
+        field: "field",
+        label: "Field"
+        // width: "40"
+      },
+      {
+        field: "value",
+        label: "Value"
+        // width: "40"
+      }
+    ];
+    let i = 0;
+    self.$store.vars.tab_row_data = [];
+    if (self.$store.vars.hot_selection_rows_full.length == 0) return
+    for (let val of self.$store.vars.hot_selection_rows_full[0]) {
+      if (filter_text == '' ||
+        (val && val.toString().toLowerCase().indexOf(filter_text.toLowerCase()) >= 0) ||
+        self.$store.hotSettings.colHeaders[i].toString().toLowerCase().indexOf(filter_text.toLowerCase()) >= 0)
+        self.$store.vars.tab_row_data.push({
+          n: i + 1,
+          field: self.$store.hotSettings.colHeaders[i],
+          value: val
+        });
+      i++;
+    }
+    self.resize_panes();
+  },
+
   store_last_hot_selection(r_start, c_start, r_end, c_end) {
     let self = this;
     let hot_selection = {
@@ -383,6 +428,7 @@ var methods = {
 
     self.$store.vars.hot_selection_values = [];
     self.$store.vars.hot_selection_rows = [];
+    self.$store.vars.hot_selection_rows_full = [];
 
     for (let selection_item of selection_array) {
       let selection = {
@@ -400,13 +446,23 @@ var methods = {
           self.$store.vars.hot_selection_values.push(this.$store.hotSettings.data[r][c]);
         }
         self.$store.vars.hot_selection_rows.push(row);
-        // self.$store.vars.hot_selection_rows.push(this.$store.hotSettings.data[r]);
+        self.$store.vars.hot_selection_rows_full.push(this.$store.hotSettings.data[r]);
       }
     }
+
+    this.render_tab_row_view_data()
     // this.log(self.$store.vars.hot_selection_values)
   },
 
   filter_tab_data() {
+    let tab = this.sess_active_tab
+    if (tab != null && !this._.isEmpty(tab.child_tab_ids)) {
+      tab = this.sess_active_child_tab
+    }
+    this.$store.hotSettings.data = tab == null ? [] : this.filter_rows(tab.rows, tab.filter_text)
+  },
+
+  filter_tab_row_view_data() {
     let tab = this.sess_active_tab
     if (tab != null && !this._.isEmpty(tab.child_tab_ids)) {
       tab = this.sess_active_child_tab
@@ -561,10 +617,6 @@ var methods = {
 
   set_clipboard(keyw) {
     this.log('set_clipboard -> ' + keyw)
-  },
-
-  export_to_csv() {
-    this.log('export_to_csv')
   },
 
   kill_query() {
@@ -794,7 +846,7 @@ var methods = {
   },
 
 
-  submit_sql(sql, tab_id = null) {
+  submit_sql(sql, tab_id = null, options = {}) {
 
     if (tab_id == null) {
       // need to create new tab
@@ -815,6 +867,7 @@ var methods = {
       sql: query.sql,
       tab_id: tab_id,
       limit: query.limit,
+      options: options,
       session_name: this.$store.query.session_name
     })
 
@@ -839,6 +892,14 @@ var methods = {
 
   change_meta_level() {
     this.log(this.$store.app.meta_level)
+  },
+
+  export_to_csv() {
+    let options = {
+      csv: true,
+      name: 'export'
+    }
+    this.submit_sql(this.$store.query._session._tab._child_tab.sql, this.$store.query._session._tab.id, options)
   },
 
 
@@ -1183,6 +1244,10 @@ var methods = {
 
       if (!data.completed && this.sess_active_child_tab_id != data.orig_req.tab_id)
         this.notify(data, 3000)
+
+      if (data.options && data.options.csv && data.options.url) {
+        document.getElementById('file-iframe').src = data.options.url;
+      }
 
       this.$forceUpdate()
     } else if (data.orig_req.tab_id != null) {

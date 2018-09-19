@@ -111,7 +111,7 @@ def execute_sql(worker: Worker, data_dict):
 
       if rows == None: rows = []
 
-      if 'email' in options:
+      if 'email' in options or 'csv' in options:
         file_name = '{}-{}-{}.csv'.format(database, options['name'],
                                           data_dict['id'])
         file_path = '{}/{}'.format(CSV_FOLDER, file_name)
@@ -126,6 +126,9 @@ def execute_sql(worker: Worker, data_dict):
           port=WEBAPP_PORT,
           name=file_name,
         )
+        options['url'] = url
+
+      if 'email' in options:
         subj = 'dbNet -- Result for Query {}'.format(data_dict['id'])
         body_text = 'URL: {url}\n\nROWS: {rows}\n\nSQL:\n{sql}'.format(
           url=url, rows=len(rows), sql=sql)
