@@ -7,7 +7,7 @@
           <b-icon pack="fa" icon="plus" type="is-black"></b-icon>
         </span>
       </p>
-      <ul class="menu-list">
+      <ul class="menu-list" style="max-height: 500px; overflow: scroll">
         <li
           v-for="(obj, name) in $store.app.databases"
           v-bind:key="name"

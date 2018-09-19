@@ -9,7 +9,7 @@
             <b-icon pack="fa" icon="bolt" ></b-icon>
           </a>
           <!-- Favorite connections on top -->
-          <div class="navbar-dropdown is-boxed">
+          <div class="navbar-dropdown is-boxed" style="max-height: 700px; overflow: scroll">
             <a 
               v-for="(obj, name2) in $store.app.databases"
               v-bind:key="name2"
