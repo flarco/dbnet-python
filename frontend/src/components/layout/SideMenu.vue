@@ -7,7 +7,7 @@
           <b-icon pack="fa" icon="plus" type="is-black"></b-icon>
         </span>
       </p>
-      <ul class="menu-list" style="max-height: 500px; overflow: scroll">
+      <ul class="menu-list" style="overflow: scroll" :style="{'max-height': $store.style.menu_connections_height}">
         <li
           v-for="(obj, name) in $store.app.databases"
           v-bind:key="name"
@@ -17,7 +17,7 @@
       <p class="menu-label">
         Activities
       </p>
-      <ul class="menu-list">
+      <ul id="menu-sections" class="menu-list">
         <li><a href="/#/">Query</a></li>
         <li><a href="/#/meta">Meta Explorer</a></li>
         <li><a href="/#/transfer">Data Transfer</a></li>

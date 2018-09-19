@@ -16,6 +16,7 @@ export default {
     pane_height: '700px',
     editor_height: '500px',
     sidebar_width: '180px',
+    menu_connections_height: '280px',
   },
   settings: {
     perfMonitoringEnabled: true,

@@ -84,17 +84,20 @@ var methods = {
 
   resize_panes() {
     let side_menu_width = document.getElementById('side-menu') == null ? 0 : document.getElementById('side-menu').offsetWidth
+    let side_menu_sections_heigth = document.getElementById('menu-sections') == null ? 0 : document.getElementById('menu-sections').scrollHeight
     let query_pane_width = document.getElementById('query-pane') == null ? 0 : document.getElementById('query-pane').offsetWidth
-    let query_tab_headers_heigth = document.getElementById('query_tab_headers') == null ? 0 : document.getElementById('query_tab_headers').scrollHeight
+    let query_tab_headers_height = document.getElementById('query_tab_headers') == null ? 0 : document.getElementById('query_tab_headers').scrollHeight
+    let query_tab_names_height = document.getElementById('tab-names') == null ? 0 : document.getElementById('tab-names').scrollHeight
     let query_meta_tab_headers_heigth = document.getElementById('query_meta_tab_headers_heigth') == null ? 0 : document.getElementById('query_meta_tab_headers_heigth').scrollHeight
     let query_row_view_pane = document.getElementById('row-view-pane') ? document.getElementById('row-view-pane').offsetWidth : 0
     this.$store.style.app_height = `${window.innerHeight}px`;
     this.$store.style.menu_height = `${window.innerHeight - 97}px`;
+    this.$store.style.menu_connections_height = `${window.innerHeight - 130 - side_menu_sections_heigth}px`;
     this.$store.style.pane_height = `${window.innerHeight - 30}px`;
     this.$store.style.editor_height = `${window.innerHeight - 165}px`;
     this.$store.style.schema_object_height = `${window.innerHeight - 430}px`;
-    this.$store.style.query_hot_height = `${window.innerHeight - 110 - query_tab_headers_heigth}px`;
-    this.$store.style.query_meta_hot_height = `${window.innerHeight - 120 - query_meta_tab_headers_heigth}px`;
+    this.$store.style.query_hot_height = `${window.innerHeight - 80 - query_tab_names_height - query_tab_headers_height}px`;
+    this.$store.style.query_meta_hot_height = `${window.innerHeight - 90  - query_tab_names_height - query_meta_tab_headers_heigth}px`;
     // this.$store.style.query_hot_width = `${window.innerWidth - 620}px`;
     this.$store.style.query_hot_width = `${window.innerWidth - query_pane_width - side_menu_width - query_row_view_pane - 20}px`;
     this.$store.style.schema_object_lines = parseInt(

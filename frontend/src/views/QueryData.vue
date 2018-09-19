@@ -9,7 +9,7 @@
           <!--<b-tab-item label="T04"></b-tab-item>-->
           <!--<b-tab-item label="T05"></b-tab-item>-->
       <!--</b-tabs>-->
-    <div class="tabs is-boxed" style="overflow: scroll; margin-bottom: 0px;">
+    <div id="tab-names" class="tabs is-boxed" style="overflow: scroll; margin-bottom: 0px;">
       <ul>
         <li @click="delete_tab">
             <!--<span class="icon is-small"><i class="fas fa-image" aria-hidden="true"></i></span>-->
