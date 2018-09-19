@@ -181,6 +181,8 @@
               <progress class="progress is-primary" 
               style="min-width:100px" :value="$store.vars.query_progress_prct" max="100"
               >{{$store.vars.query_progress_prct}}%</progress>
+            </div>
+            <div class="level-item" style="font-size: 0.8rem" v-if="$store.vars.query_progress_prct != null">
               <a>{{$store.vars.query_progress_prct}}%</a>
             </div>
 
