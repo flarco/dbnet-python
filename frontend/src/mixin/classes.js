@@ -88,8 +88,9 @@ export default {
   ReqData: class {
     constructor(data = {}) {
       self = this
-      self.id = 'REQ-' + nanoid(11)
       self.ts_start = new Date().getTime()
+      // self.id = 'REQ-' + nanoid(11)
+      self.id = `${self.ts_start}.${nanoid(3)}`
       Object.keys(data).forEach(function (key) {
         self[key] = data[key];
       }, this);
