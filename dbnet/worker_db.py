@@ -1,8 +1,20 @@
 from xutil.parallelism import Worker, Queue
-from xutil.diskio import write_csv
-from xutil.helpers import log, struct, now, epoch, jdumps, get_db_profile, get_exception_message, get_error_str
+from xutil.diskio import write_csv, write_file
+from xutil.helpers import (
+  log,
+  struct,
+  now,
+  epoch,
+  jdumps,
+  get_db_profile,
+  get_exception_message,
+  get_error_str,
+  get_home_path,
+  now_str,
+)
 from xutil import get_conn
 from xutil.database.base import fwa, fwo
+from xutil.web import send_email_exchange
 from collections import deque
 import time, socket
 import os, hashlib
@@ -14,6 +26,13 @@ worker_name = None
 worker_status = 'IDLE'
 worker_queue = deque([])
 worker_pid = os.getpid()
+
+WEBAPP_PORT = int(os.getenv('DBNET_WEBAPP_PORT', default=5566))
+DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
+SQL_FOLDER = DBNET_FOLDER + '/sql'
+os.makedirs(SQL_FOLDER, exist_ok=True)
+CSV_FOLDER = DBNET_FOLDER + '/csv'
+os.makedirs(CSV_FOLDER, exist_ok=True)
 
 sync_queue = lambda: store.worker_set(
   hostname=worker_hostname, worker_name=worker_name,
@@ -76,88 +95,6 @@ def execute_sql(worker: Worker, data_dict):
 
       elif 'special' in options:
         pass
-      #   if options['special'] == 'join-analyze':
-      #     rows = conn.join_analyze(sql)
-      #     fields = get_fields(rows[0]) if rows else []
-
-      #   elif options['special'] == 'get_schemas':
-      #     db = options['special_values']['database']
-      #     rows = conn.get_schemas()
-      #     fields = get_fields(rows[0]) if rows else []
-
-      #   elif options['special'] == 'get_objects':
-      #     schema = options['special_values']['schema']
-      #     object_type = options['special_values']['object_type']
-      #     rows = conn.get_objects(schema, object_type)
-      #     fields = get_fields(rows[0]) if rows else []
-
-      #   elif options['special'] == 'get_columns':
-      #     obj = options['special_values']['object']
-      #     object_type = options['special_values']['object_type']
-      #     rows = conn.get_columns(obj, object_type)
-      #     fields = get_fields(rows[0]) if rows else []
-
-      #   elif options['special'] == 'get_ddl':
-      #     obj = options['special_values']['object']
-      #     object_type = options['special_values']['object_type']
-      #     rows = conn.get_ddl(obj, object_type)
-      #     fields = get_fields(rows[0]) if rows else []
-
-      #   elif options['special'] == 'analyze-chars':
-      #     obj = options['special_values']['object']
-      #     sp_fields = options['special_values']['fields']
-      #     sql = conn.analyze_chars(obj, sp_fields, as_sql=True)
-      #     send_to_web_server('sql-text', dict(id=id, sql=sql, sid=sid))
-      #     fields, rows = exec_sql(sql)
-
-      #   elif options['special'] == 'analyze-fields':
-      #     obj = options['special_values']['object']
-      #     sp_fields = options['special_values']['fields']
-      #     sql = conn.analyze_fields(obj, sp_fields, as_sql=True)
-      #     send_to_web_server('sql-text', dict(id=id, sql=sql, sid=sid))
-      #     fields, rows = exec_sql(sql)
-
-      #   elif options['special'] == 'analyze-fields-group':
-      #     obj = options['special_values']['object']
-      #     sp_fields = options['special_values']['fields']
-      #     group_exp = options['special_values']['group_exp']
-      #     rows = conn.analyze_fields_group(obj, sp_fields, group_exp)
-      #     fields = get_fields(rows[0]) if rows else []
-
-      #   elif options['special'] == 'analyze-fields-distro':
-      #     obj = options['special_values']['object']
-      #     sp_fields = options['special_values']['fields']
-      #     limit = options['special_values']['limit']
-      #     sql = conn.analyze_fields_distro(obj, sp_fields, limit, as_sql=True)
-      #     send_to_web_server('sql-text', dict(id=id, sql=sql, sid=sid))
-      #     fields, rows = exec_sql(sql)
-
-      #   elif options['special'] == 'analyze-fields-distro-group':
-      #     obj = options['special_values']['object']
-      #     sp_fields = options['special_values']['fields']
-      #     limit = options['special_values']['limit']
-      #     group_exp = options['special_values']['group_exp']
-      #     rows = conn.analyze_fields_distro_group(obj, sp_fields, group_exp,
-      #                                             limit)
-      #     fields = get_fields(rows[0]) if rows else []
-
-      #   elif options['special'] == 'analyze-fields-date-distro':
-      #     obj = options['special_values']['object']
-      #     sp_fields = options['special_values']['fields']
-      #     # where_clause = options['special_values']['where_clause']
-      #     sql = conn.analyze_fields_date_distro(obj, sp_fields, as_sql=True)
-      #     send_to_web_server('sql-text', dict(id=id, sql=sql, sid=sid))
-      #     fields, rows = exec_sql(sql)
-
-      #   elif options['special'] == 'analyze-fields-date-distro-wide':
-      #     obj = options['special_values']['object']
-      #     sp_date_field = options['special_values']['date_field']
-      #     sp_fields = options['special_values']['fields']
-      #     # where_clause = options['special_values']['where_clause']
-      #     sql = conn.analyze_fields_date_distro_wide(
-      #       obj, sp_date_field, sp_fields, as_sql=True)
-      #     send_to_web_server('sql-text', dict(id=id, sql=sql, sid=sid))
-      #     fields, rows = exec_sql(sql)
 
       #   elif options['special'] == 'analyze-match-rate':
       #     src_table = options['special_values']['src_table']
@@ -174,28 +111,32 @@ def execute_sql(worker: Worker, data_dict):
 
       if rows == None: rows = []
 
-      # if 'email' in options:
-      #   file_name = '{}-{}-{}.csv'.format(
-      #     os.getenv('USER'), options['name'], id)
-      #   file_path = '{}/{}'.format(public_folder, file_name)
-      #   write_csv(file_path, fields, rows)
-      #   if os.path.getsize(file_path) > 20 * (1024**2):
-      #     rc = os.system('gzip -f ' + file_path)
-      #     file_name = file_name + '.gz' if rc == 0 else file_name
-      #     file_path = '{}/{}'.format(public_folder, file_name)
+      if 'email' in options:
+        file_name = '{}-{}-{}.csv'.format(database, options['name'],
+                                          data_dict['id'])
+        file_path = '{}/{}'.format(CSV_FOLDER, file_name)
+        write_csv(file_path, fields, rows)
+        if os.path.getsize(file_path) > 20 * (1024**2):
+          rc = os.system('gzip -f ' + file_path)
+          file_name = file_name + '.gz' if rc == 0 else file_name
+          file_path = '{}/{}'.format(CSV_FOLDER, file_name)
 
-      #   os.system('chmod 770 ' + file_path)
+        url = 'http://{base_url}:{port}/csv/{name}'.format(
+          base_url=socket.gethostname(),
+          port=WEBAPP_PORT,
+          name=file_name,
+        )
+        subj = 'dbNet -- Result for Query {}'.format(data_dict['id'])
+        body_text = 'URL: {url}\n\nROWS: {rows}\n\nSQL:\n{sql}'.format(
+          url=url, rows=len(rows), sql=sql)
+        if 'exchange_server' in options:
+          os.environ['SMTP_SERVER'] = options['exchange_server']
+          send_email_exchange(options['email'], subj, body_text)
+        else:
+          raise Exception('Email method not implemented!')
 
-      #   url = 'http://' + socket.gethostname(
-      #   ) + ':29999/spark_results/' + file_name
-
-      #   subj = 'Db-Server Result for Query {}'.format(id)
-      #   body_text = 'URL: {url}\n\nROWS: {rows}\n\nSQL:\n{sql}'.format(
-      #     url=url, rows=len(rows), sql=sql)
-      #   send_email_exchange(options['email'], subj, body_text)
-
-      #   if len(rows) > 100:
-      #     rows = rows[:100]
+        if len(rows) > 100:
+          rows = rows[:100]
 
       e_t = epoch()
       secs = e_t - s_t
@@ -212,6 +153,11 @@ def execute_sql(worker: Worker, data_dict):
         sql_md5=hashlib.md5(sql.encode('utf-8')).hexdigest(),
         last_updated=epoch(),
       )
+
+      sql_fpath = '{}/{}.{}.sql'.format(SQL_FOLDER, database, data_dict['id'])
+      sql_text = '-- Completed @ {} in {} seconds.\n\n{}'.format(
+        now_str(), secs, sql)
+      write_file(sql_fpath, sql_text)
 
       # time.sleep(0.5)
       data = dict(
