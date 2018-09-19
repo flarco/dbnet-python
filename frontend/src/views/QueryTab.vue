@@ -170,17 +170,18 @@
                         size="12">
                 </p>
                 <p class="control">
-                  <span class="button is-small" @click="$store.query._session._tab._child_tab.filter_text = null">
+                  <span class="button is-small" @click="$store.query._session._tab._child_tab.filter_text = null; filter_tab_data()">
                     <b-icon pack="fa" icon="remove" size="is-small"></b-icon>
                 </span>
                 </p>
               </div>
             </div>
 
-            <div class="level-item" style="font-size: 0.8rem">
-              <progress class="progress is-primary" v-if="$store.vars.query_progress_prct != null"
+            <div class="level-item" style="font-size: 0.8rem" v-if="$store.vars.query_progress_prct != null">
+              <progress class="progress is-primary" 
               style="min-width:100px" :value="$store.vars.query_progress_prct" max="100"
               >{{$store.vars.query_progress_prct}}%</progress>
+              <a>{{$store.vars.query_progress_prct}}%</a>
             </div>
 
           </div>
@@ -203,13 +204,13 @@
               <p class="control">
                 <input class="input is-small"
                       placeholder="Filter Values..." type="text"
-                      @input="render_tab_row_view_data(tab_row_view_filter)"
-                      v-model="tab_row_view_filter"
-                      @keyup.27="tab_row_view_filter = ''; render_tab_row_view_data(tab_row_view_filter)"
+                      @input="render_tab_row_view_data()"
+                      v-model="$store.vars.tab_row_view_filter"
+                      @keyup.27="$store.vars.tab_row_view_filter = ''; render_tab_row_view_data()"
                       size="19">
               </p>
               <p class="control">
-                <span class="button is-small" @click="$store.query._session._tab._child_tab.filter_text = null">
+                <span class="button is-small" @click="$store.vars.tab_row_view_filter = ''; render_tab_row_view_data()">
                   <b-icon pack="fa" icon="remove" size="is-small"></b-icon>
               </span>
               </p>
@@ -249,7 +250,6 @@ import HotTable from "./HotTable.vue";
 export default {
   data() {
     return {
-      tab_row_view_filter: "",
       columns: [
         {
           field: "n",

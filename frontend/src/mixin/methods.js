@@ -92,12 +92,12 @@ var methods = {
     let query_row_view_pane = document.getElementById('row-view-pane') ? document.getElementById('row-view-pane').offsetWidth : 0
     this.$store.style.app_height = `${window.innerHeight}px`;
     this.$store.style.menu_height = `${window.innerHeight - 97}px`;
-    this.$store.style.menu_connections_height = `${window.innerHeight - 130 - side_menu_sections_heigth}px`;
+    this.$store.style.menu_connections_height = `${window.innerHeight - 190 - side_menu_sections_heigth}px`;
     this.$store.style.pane_height = `${window.innerHeight - 30}px`;
     this.$store.style.editor_height = `${window.innerHeight - 165}px`;
     this.$store.style.schema_object_height = `${window.innerHeight - 430}px`;
-    this.$store.style.query_hot_height = `${window.innerHeight - 80 - query_tab_names_height - query_tab_headers_height}px`;
-    this.$store.style.query_meta_hot_height = `${window.innerHeight - 90  - query_tab_names_height - query_meta_tab_headers_heigth}px`;
+    this.$store.style.query_hot_height = `${window.innerHeight - 100 - query_tab_names_height - query_tab_headers_height}px`;
+    this.$store.style.query_meta_hot_height = `${window.innerHeight - 110  - query_tab_names_height - query_meta_tab_headers_heigth}px`;
     // this.$store.style.query_hot_width = `${window.innerWidth - 620}px`;
     this.$store.style.query_hot_width = `${window.innerWidth - query_pane_width - side_menu_width - query_row_view_pane - 20}px`;
     this.$store.style.schema_object_lines = parseInt(
@@ -246,6 +246,7 @@ var methods = {
     // let tab = this.sess_tabs[Object.keys(this.sess_tabs)[this.sess_active_tab_index]]
     self = this
     this.$store.vars.show_tab_row_view = false
+    this.$store.vars.tab_row_view_filter = false
     this.$store.vars.tabs_active = !this._.isEmpty(this.get_sess_tabs())
 
     if (tab_id == null && !this._.isEmpty(this.$store.query._session._tab))
@@ -378,7 +379,7 @@ var methods = {
     }
   },
 
-  render_tab_row_view_data(filter_text = '') {
+  render_tab_row_view_data() {
     self = this
     let cols = [{
         field: "n",
@@ -398,6 +399,7 @@ var methods = {
     ];
     let i = 0;
     self.$store.vars.tab_row_data = [];
+    let filter_text = this.$store.vars.tab_row_view_filter
     if (self.$store.vars.hot_selection_rows_full.length == 0) return
     for (let val of self.$store.vars.hot_selection_rows_full[0]) {
       if (filter_text == '' ||
@@ -1015,6 +1017,19 @@ var methods = {
     }
 
     return lapsed
+  },
+
+  get_mon_perf() {
+    self = this
+    self.$socket.emit("get-perf", {}, function (data2) {
+      if (data2.tot_cpu_prct > 100) {
+        data2.tot_cpu_prct = `${(data2.tot_cpu_prct / 100.0).toFixed(1)}X`
+      } else {
+        data2.tot_cpu_prct = `${data2.tot_cpu_prct}%`
+      }
+      self.$store.vars.perf_summary.cpu = data2.tot_cpu_prct;
+      self.$store.vars.perf_summary.ram = data2.tot_ram_prct;
+    });
   },
 
   set_tab_live_progress() {

@@ -61,6 +61,10 @@
           <a class="navbar-item" @click="reset">
             <b-icon pack="fa" icon="trash-o" ></b-icon>
           </a>
+          <a class="navbar-item" style="width: 80px;font-size: 0.8rem" title="CPU / RAM Utilization">
+            C={{$store.vars.perf_summary.cpu}}
+            R={{$store.vars.perf_summary.ram}}%
+          </a>
       </header>
 
       <!-- TODO: have for loop to display multiple messages as they arrive -->

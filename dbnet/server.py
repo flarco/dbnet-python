@@ -22,6 +22,7 @@ from xutil.database.base import fwa
 from xutil.parallelism import Queue
 import dbnet.worker_web as webapp_worker
 import dbnet.worker_db as db_worker
+import dbnet.worker_mon as mon_worker
 from collections import OrderedDict
 import dbnet.store as store
 
@@ -41,15 +42,53 @@ databases = get_databases(profile)
 
 def start_worker_webapp():
   worker_name = '{}-webapp'.format(WORKER_PREFIX)
+
   worker = Worker(
     worker_name,
     'web-app',
     fn=webapp_worker.run,
     log=log,
     args=(WEBAPP_PORT, ),
+    kwargs={'mon_worker': workers['mon']},
     pid_folder=DBNET_FOLDER)
   worker.start()
+  workers['mon'].put_child_q(dict(name=worker_name,
+                                  pid=worker.pid))  # add to monitor
   workers['webapp'] = worker
+  store.sqlx('workers').replace_rec(
+    hostname=worker.hostname,
+    worker_name=worker.name,
+    worker_type=worker.type,
+    worker_pid=worker.pid,
+    status='RUNNING',
+    task_id=-1,
+    task_function=worker.fn.__name__,
+    task_start_date=now(),
+    task_args=jdumps(worker.args),
+    task_kwargs=jdumps(worker.kwargs),
+    progress=None,
+    queue_length=0,
+    last_updated=epoch(),
+  )
+  return worker
+
+
+def start_worker_mon():
+  worker_name = '{}-mon'.format(WORKER_PREFIX)
+  worker = Worker(
+    worker_name,
+    'monitor',
+    fn=mon_worker.run,
+    kwargs={},
+    log=log,
+    pid_folder=DBNET_FOLDER)
+
+  worker.start()
+  log('Monitor Loop PID is {}'.format(worker.pid))
+
+  workers['mon'] = worker
+  workers['mon'].put_child_q(dict(name=worker_name,
+                                  pid=worker.pid))  # add to monitor
   store.sqlx('workers').replace_rec(
     hostname=worker.hostname,
     worker_name=worker.name,
@@ -95,6 +134,8 @@ def start_worker_db(db_name, start=False):
     worker.start()
     log('*Started worker {} with PID {}'.format(worker.name, worker.pid))
 
+  workers['mon'].put_child_q(dict(name=worker_name,
+                                  pid=worker.pid))  # add to monitor
   store.sqlx('workers').replace_rec(
     hostname=worker.hostname,
     worker_name=worker.name,
@@ -163,7 +204,9 @@ def handle_worker_req(worker: Worker, data_dict):
 
 def handle_db_worker_req(worker: Worker, data_dict):
   data = struct(data_dict)
-  if data.payload_type in ('task-error'):
+  if worker.type == 'monitor':
+    send_to_webapp(data_dict)
+  elif data.payload_type in ('task-error'):
     send_to_webapp(data_dict)
   elif data.payload_type in ('query-data'):
     send_to_webapp(data_dict)
@@ -332,6 +375,8 @@ def main():
   log('Main Loop PID is {}'.format(os.getpid()))
   register_pid(get_pid_path('dbnet', DBNET_FOLDER))
   exiting = False
+  start_worker_mon()
+  workers['mon'].put_child_q(dict(name='main', pid=os.getpid()))
 
   # start web worker
   start_worker_webapp()
@@ -344,14 +389,15 @@ def main():
       for wkr_key in list(workers):
         worker = workers.get(wkr_key, None)
         if not worker: continue
-
-        # recv_data = worker.pipe.recv_from_child(timeout=0)
+        if wkr_key == 'mon': continue
 
         recv_data = worker.get_parent_q()
 
         if recv_data:
           if wkr_key == 'webapp':
             handle_web_worker_req(worker, recv_data)
+          elif wkr_key == 'mon':
+            handle_db_worker_req(worker, recv_data)
           elif worker.type == 'database-client':
             handle_db_worker_req(worker, recv_data)
           else:

@@ -24,10 +24,13 @@ export default {
 
       // get profile databases from backend
       this.get_databases();
+
+      this.$store.vars.mon_interval = setInterval(this.get_mon_perf, 1000);
     },
     disconnect: function() {
       console.log("socket disconnected");
       this.$store.app.socket_connected = false;
+      clearInterval(this.$store.vars.mon_interval);
     },
     customEmit: function(val) {
       console.log(
@@ -67,6 +70,10 @@ export default {
         // Meta has been updated, re-submit orig-req
         this.submit_req(data.orig_req);
       }
+    },
+    monitor: function(data) {
+      this.$store.vars.perf_summary.cpu = data.tot_cpu_prct;
+      this.$store.vars.perf_summary.ram = data.tot_ram_prct;
     },
     "spark-url": function(data) {
       this.$store.app.databases[data.database].url = data.url;

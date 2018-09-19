@@ -124,6 +124,7 @@ export default {
     tabs_active: false,
     query_progress_prct: null,
     query_time_interval: null,
+    mon_interval: null,
     query_time: null,
     loading: false,
     query_editor_selection: null,
@@ -136,6 +137,12 @@ export default {
     hot_selection_rows: [],
     hot_selection_rows_full: [],
     tab_row_data: [],
+    perf_summary: {
+      cpu: 0,
+      ram: 0,
+      threads: 0,
+    },
+    tab_row_view_filter: '',
     tab_row_hotSettings: {
       data: [
         ["2016", 10, 11, 12, 13],

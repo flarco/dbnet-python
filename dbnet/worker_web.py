@@ -10,6 +10,8 @@ from flask import render_template
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
 CSV_FOLDER = DBNET_FOLDER + '/csv'
 app = WebApp('dbnet', root_path=get_dir_path(__file__))
+SID = None
+last_perf_data = {}
 
 
 @app.route('/logo.ico')
@@ -53,7 +55,9 @@ def get_csv_file(file_name):
 @app.route('/api/<payload_type>', methods=['POST'])
 def transmit_payload(payload_type):
   (val_dict, form_dict, data_dict) = app.proc_request()
-  if data_dict['payload_type'] != 'client-response':
+  if data_dict['payload_type'] == 'monitor':
+    data_dict['sid'] = data_dict.get('sid', SID)
+  elif data_dict['payload_type'] != 'client-response':
     _data_dict = copy.deepcopy(data_dict)
     if 'rows' in data_dict:
       nrows = len(data_dict['rows'])
@@ -64,6 +68,21 @@ def transmit_payload(payload_type):
     app.log('Confirmation -> {}'.format(data_dict))
   app.emit(payload_type, data_dict, namespace='/', room=data_dict['sid'])
   return 'OK'
+
+
+@app.on('get-perf')
+def get_perf_mon(sid, data):
+  """
+  Get Monitoring Performance
+  """
+  global last_perf_data
+  data2 = _mon_worker.get_parent_q()
+  if not data2:
+    data2 = last_perf_data
+  else:
+    last_perf_data = data2
+
+  return data2
 
 
 @app.on('spark-progress')
@@ -100,6 +119,7 @@ def spark_progess(sid, data):
 @app.on('connect')
 def connect(sid, environ):
   app.log('connect ' + sid)
+  SID = sid
 
 
 @app.on('message')
@@ -148,6 +168,7 @@ def client_request(sid, data, *args, **kwargs):
    * get-workers
   """
   data['sid'] = sid
+  SID = sid
 
   # with app.worker.lock:
   #   resp_data = app.pipe.emit_to_parent(data)
@@ -162,7 +183,10 @@ def client_request(sid, data, *args, **kwargs):
 @app.on('disconnect')
 def disconnect(sid):
   app.log('disconnect ' + sid)
+  SID = sid
 
 
-def run(port, worker):
+def run(port, worker, mon_worker):
+  global _mon_worker
+  _mon_worker = mon_worker
   app.run(port, log=worker.log, worker=worker)
