@@ -29,6 +29,19 @@ def index():
   return resp
 
 
+@app.route('/csv/<name>')
+def get_csv(name):
+  """Serve the client-side application."""
+  (val_dict, form_dict, data_dict) = app.proc_request()
+  session_id = app.get_cookie_session_id()
+
+  resp = app.make_response(render_template('index.html'))
+  resp.set_cookie(app.cookie_session_key, session_id)
+  resp.headers['Cache-Control'] = 'no-cache'
+
+  return resp
+
+
 @app.route('/api/<payload_type>', methods=['POST'])
 def transmit_payload(payload_type):
   (val_dict, form_dict, data_dict) = app.proc_request()
