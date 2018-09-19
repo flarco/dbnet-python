@@ -185,7 +185,7 @@
         </nav>
         <div id="tab-sql">
           <textarea id="tab-sql-textarea" class="textarea codelike" v-if="$store.vars.show_tab_sql"
-            v-model="$store.query._session._tab._child_tab.sql" rows="5"
+            v-model="$store.query._session._tab._child_tab.sql" rows="8"
             @keyup.120="execute_sql($store.query._session._tab._child_tab.sql, $store.query._session._tab.id)"
             :style="{'font-size': $store.settings.editor_font_size}"
             title="F9 to Submit"></textarea>
