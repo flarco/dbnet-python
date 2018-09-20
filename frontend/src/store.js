@@ -22,6 +22,7 @@ export default {
     perfMonitoringEnabled: true,
     sidebar_shown: true,
     show_hot_table: true,
+    query_progress_enabled: false,
     pane_width: '3',
     default_query_limit: 200,
     editor_font_size: '0.7rem',

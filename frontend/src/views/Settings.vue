@@ -16,6 +16,12 @@
               </b-switch>
           </div>
           <div class="field">
+            <b-field label="Spark Progress Bar"/>
+              <b-switch v-model="$store.settings.query_progress_enabled">
+                  {{ $store.settings.query_progress_enabled? 'Enabled':'Disabled' }}
+              </b-switch>
+          </div>
+          <div class="field">
             <b-field label="Progress Interval"/>
 
               <select title="Limit" class="select is-small"
