@@ -350,7 +350,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
     response_data = dict(data=workers_data, completed=True)
   elif data.req_type == 'reset-db':
     for wkr_nm in list(workers):
-      if wkr_nm == 'webapp': continue
+      if wkr_nm in ('webapp', 'mon'): continue
       stop_worker(wkr_nm)
     store.create_tables(drop_first=True, ask=False)
     response_data = dict(completed=True)

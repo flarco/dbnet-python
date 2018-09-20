@@ -246,7 +246,7 @@ var methods = {
     // let tab = this.sess_tabs[Object.keys(this.sess_tabs)[this.sess_active_tab_index]]
     self = this
     this.$store.vars.show_tab_row_view = false
-    this.$store.vars.tab_row_view_filter = false
+    this.$store.vars.tab_row_view_filter = ''
     this.$store.vars.tabs_active = !this._.isEmpty(this.get_sess_tabs())
 
     if (tab_id == null && !this._.isEmpty(this.$store.query._session._tab))
