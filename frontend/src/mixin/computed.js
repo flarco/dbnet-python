@@ -51,8 +51,5 @@ export default {
   },
   get_schema_select_heigth() {
     return parseInt(window.innerHeight / 56, 10);
-  },
-  main_editor() {
-    return this.$refs.main_editor.codemirror
   }
 }

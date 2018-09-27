@@ -44,8 +44,8 @@
         @ready="onEditorReady"
         @focus="onEditorFocus"
         @change="onEditorCodeChange"
-        @keyup.native.f9="execute_sql(get_cursor_query($refs.main_editor.codemirror))"
-        @keyup.native.f4="create_object_tab(get_editor_selection($refs.main_editor.codemirror, true))"
+        @keyup.native.f9="execute_sql(get_cursor_query(cm_editor))"
+        @keyup.native.f4="create_object_tab(get_editor_selection(cm_editor, true))"
         :style="{'height': $store.style.editor_height, 'font-size': $store.settings.editor_font_size}">
 
       </codemirror>
@@ -81,35 +81,34 @@ export default {
     "query-history": QueryHistory
   },
   computed: {
-    main_editor() {
+    cm_editor() {
       return this.$refs.main_editor.codemirror;
+      // return this.$refs.main_editor.editor;
     },
-    main_editor_cursor() {
-      return this.$refs.main_editor.codemirror.getDoc().getCursor();
+    cm_editor_cursor() {
+      return this.cm_editor.getDoc().getCursor();
     }
   },
   methods: {
     onEditorReady() {
       let selection = this.$store.vars.query_editor_selection;
       if (selection == null) return;
-      this.$refs.main_editor.codemirror
-        .getDoc()
-        .setSelection(selection, selection);
+      this.cm_editor.getDoc().setSelection(selection, selection);
     },
     onEditorFocus() {
       // localStorage.setItem('sql_text', this.main_editor_text);
     },
     onEditorCodeChange() {
       // localStorage.setItem('sql_text', this.main_editor_text);
-      this.$store.vars.query_editor_selection = this.$refs.main_editor.codemirror
+      this.$store.vars.query_editor_selection = this.cm_editor
         .getDoc()
         .getCursor();
       this.log(JSON.stringify(this.$store.vars.query_editor_selection));
     },
 
     change_pane(index = null) {
-      if (this.$refs.main_editor != null) {
-        this.$store.vars.query_editor_selection = this.$refs.main_editor.codemirror
+      if (this.cm_editor != null) {
+        this.$store.vars.query_editor_selection = this.cm_editor
           .getDoc()
           .getCursor();
       }
