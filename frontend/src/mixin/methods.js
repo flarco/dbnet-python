@@ -490,7 +490,6 @@ var methods = {
     if (Object.keys(sess_parent_tabs).length > 1) {
       let new_tab = sess_parent_tabs[Object.keys(sess_parent_tabs)[index == 0 ? 1 : index - 1]]
       this.$store.query._session._tab = new_tab
-      this.log('Activating tab ' + new_tab.id)
       this.activate_tab(new_tab.id)
     } else {
       this.$store.vars.tabs_active = false
@@ -499,11 +498,9 @@ var methods = {
     // Delete children
     Object.keys(this.sess_tabs[tab_id].child_tab_ids).forEach(function (key) {
       let child_tab_id = this.sess_tabs[tab_id].child_tab_ids[key];
-      this.log('Deleting ' + child_tab_id)
       delete this.$store.query._session.tabs[child_tab_id]
     }, this);
 
-    this.log('Deleting ' + tab_id)
     delete this.$store.query._session.tabs[tab_id]
     if (this.sess_active_tab_id == tab_id) delete this.$store.query._session._tab
 
@@ -1217,7 +1214,6 @@ var methods = {
 
   rcv_views(data) {
     this.log('receive_views')
-    this.log(data)
     this.$store.query._session.schema_loading = false
     if (data.database == this.curr_database && !this._.isEmpty(data.rows)) {
       let schema = data.rows.map((row) => row[0])[0]
