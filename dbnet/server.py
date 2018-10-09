@@ -36,6 +36,7 @@ hostname = socket.gethostname()
 workers = OrderedDict()
 db_workers_map = OrderedDict()
 conf_queue = Queue()
+exit_queue = Queue()
 profile = get_profile()
 databases = get_databases(profile)
 
@@ -48,6 +49,7 @@ def start_worker_webapp():
     'web-app',
     fn=webapp_worker.run,
     log=log,
+    kill_if_running=True,
     args=(WEBAPP_PORT, ),
     kwargs={'mon_worker': workers['mon']},
     pid_folder=DBNET_FOLDER)
@@ -81,6 +83,7 @@ def start_worker_mon():
     fn=mon_worker.run,
     kwargs={},
     log=log,
+    kill_if_running=True,
     pid_folder=DBNET_FOLDER)
 
   worker.start()
@@ -125,6 +128,7 @@ def start_worker_db(db_name, start=False):
     'database-client',
     fn=db_worker.run,
     log=log,
+    kill_if_running=True,
     args=(db_prof, conf_queue),
     kwargs={},
     pid_folder=DBNET_FOLDER)
@@ -373,7 +377,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
 
 def main():
   log('Main Loop PID is {}'.format(os.getpid()))
-  register_pid(get_pid_path('dbnet', DBNET_FOLDER))
+  register_pid(get_pid_path('dbnet', DBNET_FOLDER), exit_queue=exit_queue)
   exiting = False
   start_worker_mon()
   workers['mon'].put_child_q(dict(name='main', pid=os.getpid()))
@@ -403,17 +407,20 @@ def main():
           else:
             handle_worker_req(worker, recv_data)
 
+      if not exit_queue.empty():
+        log('-Received Exit SIG')
+        exiting = True
+
     except (KeyboardInterrupt, SystemExit):
       # Exit cleanly
-
       exiting = True
-      log('-Exiting')
-
-      for worker in workers.values():
-        worker.stop()
 
     except Exception as E:
       log(E)
+
+  log('-Exiting')
+  for worker in workers.values():
+    worker.stop()
 
 
 if __name__ == '__main__':
