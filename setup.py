@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 setup(
   name='dbnet',
-  # packages=['xutil'],
+  packages=['git+git://github.com/flarco/xutil.git'],
   version='0.0.1',
   description='DbNet.',
   author='Fritz Larco',
