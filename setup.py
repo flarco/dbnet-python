@@ -13,7 +13,7 @@ setup(
   packages=find_packages(exclude=['tests']),
   include_package_data=True,
   install_requires=[
-    "git+git://github.com/flarco/xutil.git",
+    "https://github.com/flarco/xutil/archive/master.zip",
     "verboselogs",
     "coloredlogs",
     "psutil",
