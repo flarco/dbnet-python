@@ -18,6 +18,7 @@
 
         <li v-for="(tab, tab_id) in $store.query._session.tabs"
             v-if="tab != null && tab.parent_id == null"
+            v-bind:key="tab_id"
             :class="{'is-active': $store.query._session._tab.id == tab_id}">
             <a @click="activate_tab(tab_id)" @auxclick="delete_tab(tab.id)">
 
