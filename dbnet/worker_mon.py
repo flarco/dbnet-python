@@ -1,6 +1,6 @@
-import os, psutil, time, socket
+import os, psutil, time, socket, platform
 from xutil.parallelism import Worker, Queue
-from xutil.helpers import get_process_data
+from xutil.helpers import get_process_data, log
 
 pids = {}
 
@@ -25,6 +25,12 @@ def collect_perf():
 
 
 def run(worker: Worker):
+  uname = platform.uname()
+  on_wsl = uname[0] == 'Linux' and "microsoft" in uname[3].lower()
+  if on_wsl:
+    log('-Cannot run Monitor on Linux WSL')
+    return
+  
   while True:
     try:
       time.sleep(1)
