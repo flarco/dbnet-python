@@ -77,3 +77,7 @@ dbnet
 - F4 is to open schema tab
 - F9 is execute SQL block
 - F10 is to queue SQL block
+
+## Features
+
+- Ability to favorite a SQL snippet with a name, searchable
