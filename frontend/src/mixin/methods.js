@@ -117,6 +117,10 @@ var methods = {
     console.log(text);
   },
 
+  logo(obj_name, obj) {    
+    this.log(obj_name + ' -> ' + JSON.stringify(obj))
+  },
+
   handle_messages(timeout = null) {
     // TODO: not working when multiple messages arrive.
     self = this
@@ -514,6 +518,187 @@ var methods = {
 
   },
 
+  get_ace_selection(ace_editor = null, word = false) {
+    if (!ace_editor) ace_editor = this.$store.vars.ace_editor
+    let selection = ace_editor.editor.getCopyText()
+    
+    if (selection == '' && word) {
+      // need to select cursor word
+
+      let done = false;
+      let ace_editor_ = _.cloneDeep(ace_edito)
+      
+      let cur_pos = {
+        col: ace_editor_.editor.selection.lead.column,
+        row: ace_editor_.editor.selection.lead.row
+      }
+      let value = ace_editor_.editor.selection.doc.$lines[cur_pos.row]
+      let textLength = value.length
+      let i = _.cloneDeep(cur_pos).col;
+
+      this.logo('value', value)
+
+      let start, end;
+
+      // from cursor to end of name
+      while (!done && i <= textLength) {
+        i++;
+        let c = value.substring(i - 1, i);
+        if (
+          c == " " ||
+          c == "\t" ||
+          c == "\n" ||
+          i == textLength
+        ) {
+          end =
+            i == textLength && c != " " && c != "\t" && c != "\n" ?
+            i :
+            i - 1;
+          done = true;
+        }
+      }
+
+      // from cursor to beginning of name
+      i = _.cloneDeep(cur_pos).col;
+      done = false;
+      while (!done && i > 0) {
+        i--;
+        let c = value.substring(i, i + 1);
+        if (c == " " || c == "\t" || c == "\n" || i == 0) {
+          start = i == 0 && c != " " && c != "\t" && c != "\n" ? i : i + 1;
+          done = true;
+        }
+      }
+
+      let new_cursor = {
+        from: {
+          row: cur_pos.row,
+          col: start
+        },
+        to: {
+          row: cur_pos.row,
+          col: end
+        }
+      };
+      
+      ace_editor.editor.selection.setSelectionAnchor(new_cursor.from.row, new_cursor.from.col)
+      ace_editor.editor.selection.selectTo(new_cursor.to.row, new_cursor.to.col)
+      // selection = ace_editor.editor.getCopyText()
+      this.logo('selection', selection)
+    }
+
+
+    return selection
+  },
+  
+  get_ace_selection2(ace_editor = null) {
+    if (!ace_editor) ace_editor = this.$store.vars.ace_editor
+    let start, end, c1, c2;
+    c1 = {
+      col: ace_editor.editor.selection.lead.column,
+      row: ace_editor.editor.selection.lead.row
+    }
+    c2 = {
+      col: ace_editor.editor.selection.anchor.column,
+      row: ace_editor.editor.selection.anchor.row
+    }
+    if (c1.row < c2.row) {
+      start = c1
+      end = c2
+    } else if (c1.row == c2.row && c1.col < c2.col) {
+      start = c1
+      end = c2
+    } else {
+      start = c2
+      end = c1
+    }
+
+    let lines = ace_editor.editor.selection.doc.$lines
+    let text = ''
+    let passed = false
+    for (let r = 0; r < lines.length; r++) {
+      const line = lines[r];
+      for (let c = 0; c < line.length; c++) {
+        const ch = line[c];
+        text = text + ch
+        if(r == end.row && c > end.col) passed = true
+        if(passed && ch == ';') break
+        else if (ch == ';') text = ''
+      }
+      if(r == start.row) {
+        for (let c = 0; c < line.length; c++) {
+          const ch = line[c];
+          if(c >= start.col) text = text + ch
+        }
+        if(end.row > start.row) text = text + '\n'
+      } else if (r > start.row && r < end.row) {
+        for (let c = 0; c < line.length; c++) {
+          const ch = line[c];
+          text = text + ch
+        }
+        text = text + '\n'
+      } else if (r == end.row) {
+        for (let c = 0; c < line.length; c++) {
+          const ch = line[c];
+          if(c < end.col) text = text + ch
+        }
+      }
+    }
+    console.log(text)
+  },
+
+  get_ace_cursor_query(ace_editor = null) {
+    if (!ace_editor) ace_editor = this.$store.vars.ace_editor
+    let selection = this.get_ace_selection(ace_editor)
+    if (selection != "") return selection
+
+    let start, end;
+
+    start = {
+      col: 0,
+      row: 0
+    }
+
+    end = {
+      col: ace_editor.editor.selection.lead.column,
+      row: ace_editor.editor.selection.lead.row
+    }
+
+
+    let lines = ace_editor.editor.selection.doc.$lines
+    let ch
+    let passed = false
+    
+    for (let r = 0; r < lines.length; r++) {
+      const line = lines[r];
+
+      for (let c = 0; c < line.length; c++) {
+        if (ch == ';') {
+          start.row = r
+          start.col = c
+          selection = ''
+        }
+        ch = line[c];
+        selection = selection + ch
+        if(r == end.row && c+1 >= end.col) passed = true
+
+        if((passed && ch == ';') || (r == lines.length-1 && c == line.length-1)) {
+          end.row = r
+          end.col = c
+          break
+        }
+      }
+      if((passed && ch == ';') || r == lines.length-1) break
+      selection = selection + '\n'
+    }
+
+    // this.log(start)
+    // this.log(end)
+
+    ace_editor.editor.selection.setSelectionAnchor(start.row, start.col)
+    ace_editor.editor.selection.selectTo(end.row, end.col)
+    console.log(selection)
+  },
 
 
   get_editor_selection(cm_editor, word = false) {

@@ -189,6 +189,12 @@
           </div>
         </nav>
         <div id="tab-sql">
+          <!-- <editor v-if="$store.vars.show_tab_sql"></editor> -->
+          <!-- <editor ref="ace_editor" v-model="$store.query._session._tab._child_tab.sql"
+              @init="editorInit" v-if="$store.vars.show_tab_sql"
+              @keyup.120="execute_sql($store.query._session._tab._child_tab.sql, $store.query._session._tab.id)"
+              lang="pgsql" theme="chrome" width="100%" height="100"
+              title="F9 to Submit"></editor> -->
           <textarea id="tab-sql-textarea" class="textarea codelike" v-if="$store.vars.show_tab_sql"
             v-model="$store.query._session._tab._child_tab.sql" rows="8"
             @keyup.120="execute_sql($store.query._session._tab._child_tab.sql, $store.query._session._tab.id)"
@@ -241,14 +247,9 @@
 </template>
 
 <script>
-import { codemirror, CodeMirror } from "vue-codemirror";
-import "codemirror/lib/codemirror.css";
-require("codemirror/addon/scroll/annotatescrollbar");
-require("codemirror/addon/search/matchesonscrollbar");
-require("codemirror/addon/search/searchcursor");
-require("codemirror/addon/search/match-highlighter");
 
 import HotTable from "./HotTable.vue";
+import AceEditor from "./AceEditor.vue";
 export default {
   data() {
     return {
@@ -273,10 +274,31 @@ export default {
     };
   },
   components: {
-    codemirror: codemirror,
+    // editor: require('vue2-ace-editor'),
+    editor: AceEditor,
     HotTable: HotTable
   },
   methods: {
+    editorInit() {
+      require('brace/ext/language_tools') //language extension prerequsite...
+      require('brace/mode/html')                
+      require('brace/mode/javascript')    //language
+      require('brace/mode/pgsql')    //language
+      require('brace/mode/less')
+      require('brace/theme/chrome')
+      require('brace/snippets/javascript') //snippet
+
+      self=this
+      // Add F9 command
+      this.$refs.ace_editor.editor.commands.addCommand({
+        name: "Execute SQL",
+        exec: function() {
+          // self.execute_sql(self.$store.query._session._tab._child_tab.sql, self.$store.query._session._tab.id)
+          self.get_ace_selection(self.$refs.ace_editor)
+        },
+        bindKey: {mac: "f9", win: "f9"}
+      })
+    },
     toggle_tab_row_view() {
       self = this;
       self.$store.vars.tab_row_data = [];
@@ -288,6 +310,7 @@ export default {
     },
     toggle_tab_sql() {
       self = this;
+
       this.$store.vars.show_tab_sql = !this.$store.vars.show_tab_sql;
       this.log(this.$refs);
       this.log(this.$store.vars.hot.table.getSelected());
