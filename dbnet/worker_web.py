@@ -22,6 +22,36 @@ def favicon():
     mimetype='image/vnd.microsoft.icon')
 
 
+@app.route('/css/<file_name>')
+def get_css_file(file_name):
+  return app.send_from_directory(
+    os.path.join(app.flask_app.root_path, 'static', 'css'), file_name)
+
+
+@app.route('/js/<file_name>')
+def get_js_file(file_name):
+  return app.send_from_directory(
+    os.path.join(app.flask_app.root_path, 'static', 'js'), file_name)
+
+
+@app.route('/img/<file_name>')
+def get_img_file(file_name):
+  return app.send_from_directory(
+    os.path.join(app.flask_app.root_path, 'static', 'img'), file_name)
+
+
+@app.route('/fonts/<file_name>')
+def get_fonts_file(file_name):
+  return app.send_from_directory(
+    os.path.join(app.flask_app.root_path, 'static', 'fonts'), file_name)
+
+
+@app.route('/favicon.ico')
+def get_favicon():
+  return app.send_from_directory(
+    os.path.join(app.flask_app.root_path, 'static'), 'favicon.ico')
+
+
 @app.route('/')
 def index():
   """Serve the client-side application."""

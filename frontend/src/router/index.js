@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import QueryData from 'views/QueryData'
-import Settings from 'views/Settings'
-import Transfer from 'views/Transfer'
-import Home from 'views/Home'
+import QueryData from '../views/QueryData'
+import Settings from '../views/Settings'
+import Transfer from '../views/Transfer'
+import Home from '../views/Home'
 
 Vue.use(Router)
 

@@ -1,10 +1,7 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
 import router from './router'
 import Buefy from 'buefy'
-import 'buefy/lib/buefy.css'
 import VueStash from 'vue-stash';
 import store from './store';
 import methods from './mixin/methods';
@@ -22,6 +19,7 @@ Vue.use(VueAxios, axios)
 Vue.use(Buefy, {
   defaultIconPack: 'fa'
 })
+
 let sio_url = `http://${document.domain}:5566`
 
 // https://github.com/cklmercer/vue-stash
@@ -49,7 +47,7 @@ Vue.mixin({
   methods: methods
 })
 
-/* eslint-disable no-new */
+/* eslint-disable */
 new Vue({
   el: '#app',
   router,
@@ -59,5 +57,6 @@ new Vue({
   },
   components: {
     App
-  }
-})
+  },
+  render: h => h(App)
+}).$mount('#app')

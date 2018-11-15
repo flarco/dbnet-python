@@ -4,9 +4,7 @@ cd $DIR/frontend
 npm run build
 mv dist ../dbnet
 cd ../dbnet
-rm -rf templates
+rm -f templates/index.html
 rm -rf static
-mv dist templates
-mv templates/static .
-mkdir -p static/css/static
-mv static/fonts static/css/static
+mv dist static
+mv static/index.html templates
