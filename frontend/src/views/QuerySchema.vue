@@ -67,9 +67,9 @@
 
           <b-dropdown-item @click="set_clipboard(sess_schema_objects_selected.map(tbl => `${sess_schema}.${tbl}`).join('\n'))">Copy Name</b-dropdown-item>
 
-          <b-dropdown-item @click="set_clipboard(sess_schema_objects_selected.map(tbl => `select * from ${sess_schema}.${tbl}`).join(';\n'))">Copy SELECT *</b-dropdown-item>
+          <b-dropdown-item @click="set_clipboard(sess_schema_objects_selected.map(tbl => `select * from ${sess_schema}.${tbl}`).join(';\n')+';')">Copy SELECT *</b-dropdown-item>
 
-          <b-dropdown-item @click="set_clipboard(sess_schema_objects_selected.map(tbl => `drop table ${sess_schema}.${tbl}`).join(';\n'))">Copy DROP TABLE</b-dropdown-item>
+          <b-dropdown-item @click="set_clipboard(sess_schema_objects_selected.map(tbl => `drop table ${sess_schema}.${tbl}`).join(';\n')+';')">Copy DROP TABLE</b-dropdown-item>
 
           <b-dropdown-item @click="execute_sql(sess_schema_objects_selected.map(tbl => `select '${sess_schema}.${tbl}' as table_nm, count(*) as cnt from ${sess_schema}.${tbl}`).join(' union all\n'))">Exec SELECT COUNT(*)</b-dropdown-item>
 

@@ -230,7 +230,7 @@ var methods = {
       self.resize_panes();
 
       // Process queue
-      for (let data4 in self.$store.queue.rcv_query_data) {
+      for (let data4 of self.$store.queue.rcv_query_data) {
         self.rcv_query_data(data4);
       }
     });
