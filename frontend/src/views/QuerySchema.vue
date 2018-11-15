@@ -59,7 +59,7 @@
 
 
         <b-dropdown style="z-index: 10000; font-size: 10px">
-          <button title="Functions"  class="button" slot="trigger" style="color: blue">
+          <button title="Functions"  class="button is-primary is-outlined" slot="trigger" style="color: blue">
             <b-icon pack="fa" icon="snowflake-o" ></b-icon>
           </button>
 
@@ -74,6 +74,8 @@
           <b-dropdown-item @click="execute_sql(sess_schema_objects_selected.map(tbl => `select '${sess_schema}.${tbl}' as table_nm, count(*) as cnt from ${sess_schema}.${tbl}`).join(' union all\n'))">Exec SELECT COUNT(*)</b-dropdown-item>
 
           <b-dropdown-item v-if="is_hive_type" @click="execute_sql(sess_schema_objects_selected.map(tbl => `refresh table ${sess_schema}.${tbl}`).join(';\n'))">Exec REFRESH TABLE</b-dropdown-item>
+
+          <b-dropdown-item v-if="is_hive_type" @click="sess_schema_objects_selected.map(tbl => execute_sql(`describe formatted ${sess_schema}.${tbl}`))">Exec DESCRIBE TABLE</b-dropdown-item>
 
           <b-dropdown-item @click="sess_schema_objects_selected.map(tbl => analyze_fields('field_stat', `${sess_schema}.${tbl}`, [], false))">Analyze Fields</b-dropdown-item>
 
