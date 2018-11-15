@@ -117,6 +117,7 @@ export default {
       }
     },
     toggle_db_favorite() {
+      let self = this;
       this.$store.query.favorite = !this.$store.query.favorite;
       this.$store.app.databases[
         this.$store.query.db_name
