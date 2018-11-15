@@ -3,7 +3,6 @@ import Vue from 'vue'
 
 var LZString = require('lz-string')
 var debounce = require('debounce');
-var jsonp = require('jsonp');
 
 function toObject(arr, key = null) {
   var rv = {};
@@ -117,7 +116,7 @@ var methods = {
     console.log(text);
   },
 
-  logo(obj_name, obj) {    
+  logo(obj_name, obj) {
     this.log(obj_name + ' -> ' + JSON.stringify(obj))
   },
 
@@ -521,13 +520,13 @@ var methods = {
   get_ace_selection(ace_editor = null, word = false) {
     if (!ace_editor) ace_editor = this.$store.vars.ace_editor
     let selection = ace_editor.editor.getCopyText()
-    
+
     if (selection == '' && word) {
       // need to select cursor word
 
       let done = false;
       let ace_editor_ = _.cloneDeep(ace_edito)
-      
+
       let cur_pos = {
         col: ace_editor_.editor.selection.lead.column,
         row: ace_editor_.editor.selection.lead.row
@@ -580,7 +579,7 @@ var methods = {
           col: end
         }
       };
-      
+
       ace_editor.editor.selection.setSelectionAnchor(new_cursor.from.row, new_cursor.from.col)
       ace_editor.editor.selection.selectTo(new_cursor.to.row, new_cursor.to.col)
       // selection = ace_editor.editor.getCopyText()
@@ -590,7 +589,7 @@ var methods = {
 
     return selection
   },
-  
+
   get_ace_selection2(ace_editor = null) {
     if (!ace_editor) ace_editor = this.$store.vars.ace_editor
     let start, end, c1, c2;
@@ -621,16 +620,16 @@ var methods = {
       for (let c = 0; c < line.length; c++) {
         const ch = line[c];
         text = text + ch
-        if(r == end.row && c > end.col) passed = true
-        if(passed && ch == ';') break
+        if (r == end.row && c > end.col) passed = true
+        if (passed && ch == ';') break
         else if (ch == ';') text = ''
       }
-      if(r == start.row) {
+      if (r == start.row) {
         for (let c = 0; c < line.length; c++) {
           const ch = line[c];
-          if(c >= start.col) text = text + ch
+          if (c >= start.col) text = text + ch
         }
-        if(end.row > start.row) text = text + '\n'
+        if (end.row > start.row) text = text + '\n'
       } else if (r > start.row && r < end.row) {
         for (let c = 0; c < line.length; c++) {
           const ch = line[c];
@@ -640,7 +639,7 @@ var methods = {
       } else if (r == end.row) {
         for (let c = 0; c < line.length; c++) {
           const ch = line[c];
-          if(c < end.col) text = text + ch
+          if (c < end.col) text = text + ch
         }
       }
     }
@@ -668,7 +667,7 @@ var methods = {
     let lines = ace_editor.editor.selection.doc.$lines
     let ch
     let passed = false
-    
+
     for (let r = 0; r < lines.length; r++) {
       const line = lines[r];
 
@@ -680,15 +679,15 @@ var methods = {
         }
         ch = line[c];
         selection = selection + ch
-        if(r == end.row && c+1 >= end.col) passed = true
+        if (r == end.row && c + 1 >= end.col) passed = true
 
-        if((passed && ch == ';') || (r == lines.length-1 && c == line.length-1)) {
+        if ((passed && ch == ';') || (r == lines.length - 1 && c == line.length - 1)) {
           end.row = r
           end.col = c
           break
         }
       }
-      if((passed && ch == ';') || r == lines.length-1) break
+      if ((passed && ch == ';') || r == lines.length - 1) break
       selection = selection + '\n'
     }
 

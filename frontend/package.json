@@ -26,7 +26,6 @@
     "debounce": "^1.2.0",
     "font-awesome": "^4.7.0",
     "handsontable": "^5.0.1",
-    "jsonp": "^0.2.1",
     "locallyjs": "^0.3.3",
     "lz-string": "^1.4.4",
     "mdi": "^2.0.46",
