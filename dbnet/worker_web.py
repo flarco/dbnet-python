@@ -34,6 +34,12 @@ def get_js_file(file_name):
     os.path.join(app.flask_app.root_path, 'static', 'js'), file_name)
 
 
+@app.route('/app.js')
+def get_app_js():
+  return app.send_from_directory(
+    os.path.join(app.flask_app.root_path, 'static'), 'app.js')
+
+
 @app.route('/img/<file_name>')
 def get_img_file(file_name):
   return app.send_from_directory(
