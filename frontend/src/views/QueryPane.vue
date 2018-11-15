@@ -38,15 +38,18 @@
     </b-tabs>
 
     <!-- <div id="editor_div" v-if="isLeftPaneActive('editor')" class="editor_div" style="font-size: 0.9em" @keyup.120="submit_sql" @keyup.115="get_object_data(get_editor_selection())" :style="{'height': settings.heights.editor_div}"> -->
-    <div class="editor_div" style="font-size: 0.9em" :style="{'height': $store.style.editor_height}" v-if="$store.query.pane_tab_index == 0">
+    <div class="editor_div"
+      style="font-size: 0.9em"
+      @keyup.120="execute_sql(get_cursor_query(cm_editor)) /* f9 */" 
+      @keyup.115="create_object_tab(get_editor_selection(cm_editor, true))  /* f4 */"
+      :style="{'height': $store.style.editor_height, 'font-size': $store.settings.editor_font_size}"
+      v-if="$store.query.pane_tab_index == 0">
       <codemirror ref="main_editor" v-model="$store.query.editor_text"
         :options="$store.main_editor.options"
         @ready="onEditorReady"
         @focus="onEditorFocus"
         @change="onEditorCodeChange"
-        @keyup.native.f9="execute_sql(get_cursor_query(cm_editor))"
-        @keyup.native.f4="create_object_tab(get_editor_selection(cm_editor, true))"
-        :style="{'height': $store.style.editor_height, 'font-size': $store.settings.editor_font_size}">
+        :style="{'height': $store.style.editor_height}">
 
       </codemirror>
     </div>
@@ -65,7 +68,7 @@
 import QuerySchema from "./QuerySchema.vue";
 import QuerySession from "./QuerySession.vue";
 import QueryHistory from "./QueryHistory.vue";
-import { codemirror, CodeMirror } from "vue-codemirror";
+import { codemirror } from "vue-codemirror";
 import "codemirror/lib/codemirror.css";
 require("codemirror/addon/scroll/annotatescrollbar");
 require("codemirror/addon/search/matchesonscrollbar");
@@ -82,8 +85,8 @@ export default {
   },
   computed: {
     cm_editor() {
-      return this.$refs.main_editor.codemirror;
-      // return this.$refs.main_editor.editor;
+      // return this.$refs.main_editor.codemirror; // v4+
+      return this.$refs.main_editor.editor;
     },
     cm_editor_cursor() {
       return this.cm_editor.getDoc().getCursor();
@@ -106,7 +109,7 @@ export default {
       this.log(JSON.stringify(this.$store.vars.query_editor_selection));
     },
 
-    change_pane(index = null) {
+    change_pane() {
       if (this.cm_editor != null) {
         this.$store.vars.query_editor_selection = this.cm_editor
           .getDoc()
@@ -123,7 +126,7 @@ export default {
       }, 60);
     },
     toggle_editor_size() {
-      self = this;
+      let self = this;
       if (this.$store.settings.pane_width == "5") {
         this.$store.settings.pane_width = "3";
       } else if (this.$store.settings.pane_width == "4") {

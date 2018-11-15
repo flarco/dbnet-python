@@ -102,7 +102,7 @@ export default {
     };
   },
   mounted() {
-    self = this;
+    let self = this;
     this.filter_schema = this.$store.query.sessions[this.sess_name].tabs[
       "META"
     ].filter_schema;

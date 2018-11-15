@@ -87,7 +87,7 @@
 export default {
   methods: {
     toggle_side_menu() {
-      self = this;
+      let self = this;
       this.$store.settings.sidebar_shown = !this.$store.settings.sidebar_shown;
       setTimeout(() => {
         self.resize_panes();

@@ -59,7 +59,7 @@ let StoreQuerySession = class {
 
 let SqlQuery = class {
   constructor(data = {}) {
-    self = this
+    let self = this
     self.id = 'QUERY-' + nanoid(11)
     self.ts_start = new Date().getTime()
     self.ts_end = null
@@ -87,7 +87,7 @@ export default {
 
   ReqData: class {
     constructor(data = {}) {
-      self = this
+      let self = this
       self.ts_start = new Date().getTime()
       // self.id = 'REQ-' + nanoid(11)
       self.id = `${self.ts_start}.${nanoid(3)}`
@@ -100,7 +100,7 @@ export default {
   StoreQuerySession: StoreQuerySession,
   StoreQuery: class {
     constructor(data = {}) {
-      self = this
+      let self = this
       this.db_name = data.db_name || null
       this.favorite = data.favorite || false
       this.pane_tab_index = data.pane_tab_index || 0

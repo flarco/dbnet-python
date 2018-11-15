@@ -1,5 +1,5 @@
 {
-  "name": "dbnet2",
+  "name": "DbNet",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -20,7 +20,7 @@
     "v-clipboard": "^2.0.1",
     "vue": "^2.5.17",
     "vue-axios": "^2.1.4",
-    "vue-codemirror": "^4.0.6",
+    "vue-codemirror": "^3.1.8",
     "vue-context-menu": "^2.0.6",
     "vue-lodash": "^2.0.0",
     "vue-router": "^3.0.1",

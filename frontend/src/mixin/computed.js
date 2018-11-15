@@ -2,6 +2,12 @@ export default {
   curr_database() {
     return this.$store.query.db_name;
   },
+  curr_database_type() {
+    return this.$store.app.databases[this.curr_database].type;
+  },
+  is_hive_type() {
+    return this.curr_database_type.toLowerCase() == 'spark' || this.curr_database_type.toLowerCase() == 'hive'
+  },
   sess_name() {
     return this.$store.query._session.name
   },
@@ -31,6 +37,9 @@ export default {
   sess_active_child_tab() {
     return this.$store.query._session._tab._child_tab
   },
+  sess_active_child_long_name() {
+    return this.$store.query._session._tab._child_tab.long_name
+  },
   sess_tabs() {
     return this.$store.query._session.tabs
   },
@@ -51,5 +60,8 @@ export default {
   },
   get_schema_select_heigth() {
     return parseInt(window.innerHeight / 56, 10);
+  },
+  hot_selection_values() {
+    return this.$store.vars.hot_selection_values;
   }
 }

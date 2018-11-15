@@ -56,6 +56,28 @@
           <button title="Refresh Schemas / Objects"  class="button is-warning" @click="() => {get_schemas(); change_schema()}">
             <b-icon pack="fa" :icon="$store.query._session.schema_loading? 'refresh fa-spin' : 'refresh'" ></b-icon></button>
         </p>
+
+
+        <b-dropdown style="z-index: 10000; font-size: 10px">
+          <button title="Functions"  class="button" slot="trigger" style="color: blue">
+            <b-icon pack="fa" icon="snowflake-o" ></b-icon>
+          </button>
+
+          <b-dropdown-item @click="sess_schema_objects_selected.map(tbl => create_object_tab(`${sess_schema}.${tbl}`))">Open</b-dropdown-item>
+
+          <b-dropdown-item @click="set_clipboard(sess_schema_objects_selected.map(tbl => `${sess_schema}.${tbl}`).join('\n'))">Copy Name</b-dropdown-item>
+
+          <b-dropdown-item @click="set_clipboard(sess_schema_objects_selected.map(tbl => `select * from ${sess_schema}.${tbl}`).join(';\n'))">Copy SELECT *</b-dropdown-item>
+
+          <b-dropdown-item @click="set_clipboard(sess_schema_objects_selected.map(tbl => `drop table ${sess_schema}.${tbl}`).join(';\n'))">Copy DROP TABLE</b-dropdown-item>
+
+          <b-dropdown-item @click="execute_sql(sess_schema_objects_selected.map(tbl => `select '${sess_schema}.${tbl}' as table_nm, count(*) as cnt from ${sess_schema}.${tbl}`).join(' union all\n'))">Exec SELECT COUNT(*)</b-dropdown-item>
+
+          <b-dropdown-item v-if="is_hive_type" @click="execute_sql(sess_schema_objects_selected.map(tbl => `refresh table ${sess_schema}.${tbl}`).join(';\n'))">Exec REFRESH TABLE</b-dropdown-item>
+
+          <b-dropdown-item @click="sess_schema_objects_selected.map(tbl => analyze_fields('field_stat', `${sess_schema}.${tbl}`, [], false))">Analyze Fields</b-dropdown-item>
+
+        </b-dropdown>
     </b-field>
     <div id="schema_div">
       <select multiple v-model="$store.query._session.schema_objects_selected"
@@ -140,5 +162,10 @@ export default {
 }
 #schema_div > div > div > span > select {
   height: 100%;
+}
+
+.dropdown-item {
+  font-size: 11px;
+  // font-weight: bold;
 }
 </style>

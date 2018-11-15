@@ -124,7 +124,7 @@ import { SideMenu } from "../components/layout/";
 export default {
   name: "Home",
   components: {
-    "side-menu": SideMenu
+    // "side-menu": SideMenu
   },
   data() {
     return {

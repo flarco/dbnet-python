@@ -123,7 +123,7 @@ export default {
       });
     },
     select_session(option) {
-      self = this;
+      let self = this;
       if (option == null) return;
       this.filter_word = "";
       self.new_session_name = option;
@@ -153,7 +153,7 @@ export default {
     },
 
     create_session() {
-      self = this;
+      let self = this;
       let session_data = {
         db_name: self.$store.query.db_name,
         session_name: self.new_session_name
@@ -188,7 +188,7 @@ export default {
     },
     load_session(toast = true) {
       /* Load session from backend */
-      self = this;
+      let self = this;
       this.save_session();
       if (self.new_session_name in self.$store.query.sessions) {
         this.$store.query.session_name = this.new_session_name;
@@ -211,7 +211,7 @@ export default {
     },
     delete_session() {
       /* TODO: Delete session from backend */
-      self = this;
+      let self = this;
       let old_name = this._.cloneDeep(this.$store.query.session_name);
       if (old_name == "default") {
         this.$toast.open({
@@ -256,7 +256,7 @@ export default {
       get session records from `sessions` with session_name
 
      */
-    self = this;
+    let self = this;
 
     self.session_name = this._.cloneDeep(this.$store.query.session_name);
   }

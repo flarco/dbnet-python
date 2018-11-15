@@ -3,51 +3,51 @@
     <div id="query_tab_div">
       <div id="query_tab_headers">
         <h4 class="title is-5" style="margin-bottom: 6px; margin-top: 4px" v-if="sess_active_tab.type == 'object'"
-        >{{$store.query._session._tab._child_tab.long_name}}<span>
+        >{{sess_active_child_long_name}}<span>
             <b-tooltip label="Copy object name to Clipboard" position="is-bottom" type="is-light" style="margin-left:7px">
-              <a v-clipboard="() => $store.query._session._tab._child_tab.long_name">
+              <a v-clipboard="() => sess_active_child_long_name">
                 <i class="fa fa-clipboard" style="font-size: 12px; color:green" aria-hidden="true"></i>
               </a>
             </b-tooltip>
             <span id="analysis-buttons" v-if="$store.query._session._tab.child_active_tab == 0">
               <b-tooltip label="Analyze selected fields" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('field_stat', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true)">
+                <a @click="analyze_fields('field_stat', sess_active_child_long_name, hot_selection_values, true)">
                   <i class="fa fa-life-ring" style="font-size: 12px; color:black"></i>
                 </a>
               </b-tooltip>
 
               <b-tooltip label="Analyze selected fields (deep)" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('field_stat_deep', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true)">
+                <a @click="analyze_fields('field_stat_deep', sess_active_child_long_name, hot_selection_values, true)">
                   <i class="fa fa-life-ring" style="font-size: 12px;color:blue"></i>
                 </a>
               </b-tooltip>
 
               <b-tooltip label="Group selected field (fill count)" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('fill_cnt_group_field', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true, {union:false, expr_func_map: {fill_cnt_fields_sql: 'fill_cnt_field'}})">
+                <a @click="analyze_fields('fill_cnt_group_field', sess_active_child_long_name, hot_selection_values, true, {union:false, expr_func_map: {fill_cnt_fields_sql: 'fill_cnt_field'}})">
                   <i class="fa fa-life-ring" style="font-size: 12px;color:blue"></i>
                 </a>
               </b-tooltip>
 
               <b-tooltip label="Group selected field (fill rate)" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('fill_rate_group_field', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true, {union:false, expr_func_map: {fill_rate_fields_sql: 'fill_rate_field'}})">
+                <a @click="analyze_fields('fill_rate_group_field', sess_active_child_long_name, hot_selection_values, true, {union:false, expr_func_map: {fill_rate_fields_sql: 'fill_rate_field'}})">
                   <i class="fa fa-life-ring" style="font-size: 12px;color:blue"></i>
                 </a>
               </b-tooltip>
 
               <b-tooltip label="Analyze selected char fields" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('field_chars', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true)">
+                <a @click="analyze_fields('field_chars', sess_active_child_long_name, hot_selection_values, true)">
                   <i class="fa fa-life-ring" style="font-size: 12px;color:orange"></i>
                 </a>
               </b-tooltip>
 
               <b-tooltip label="Analyze Field Distro" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('distro_field', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true, {union:false})">
+                <a @click="analyze_fields('distro_field', sess_active_child_long_name, hot_selection_values, true, {union:false})">
                   <i class="fa fa-life-ring" style="font-size: 12px;color:pink"></i>
                 </a>
               </b-tooltip>
 
               <b-tooltip label="Analyze Date Distro" position="is-bottom" type="is-light" style="margin-left:7px">
-                <a @click="analyze_fields('distro_field_date', $store.query._session._tab._child_tab.long_name, $store.vars.hot_selection_values, true, {union:false})">
+                <a @click="analyze_fields('distro_field_date', sess_active_child_long_name, hot_selection_values, true, {union:false})">
                   <i class="fa fa-life-ring" style="font-size: 12px;color:red"></i>
                 </a>
               </b-tooltip>
@@ -71,6 +71,30 @@
           <div class="level-left">
             <div class="level-item">
               <div class="buttons has-addons">
+                
+                <b-dropdown style="z-index: 10000; font-size: 10px" v-if="sess_active_tab.type == 'object'">
+                  <span class="button is-small" style="color: blue"
+                      slot="trigger">
+                      <b-tooltip label="Functions" position="is-top" type="is-light">
+                        <b-icon pack="fa" icon="snowflake-o" size="is-small"></b-icon>
+                      </b-tooltip>
+                  </span>
+
+                  <b-dropdown-item @click="analyze_fields('field_stat', sess_active_child_long_name, hot_selection_values, true)">Analyze Field(s)</b-dropdown-item>
+
+                  <b-dropdown-item @click="analyze_fields('test_pk', sess_active_child_long_name, [''], true, { fields_exp: hot_selection_values.join(is_hive_type? ', ' : ' || '), where_clause: '' })">Test PK Field(s)</b-dropdown-item>
+
+                  <b-dropdown-item @click="execute_sql(`select '${sess_active_child_long_name}' as table_nm, count(*) as cnt from ${sess_active_child_long_name}`)">SELECT COUNT(*)</b-dropdown-item>
+
+                  <b-dropdown-item v-if="is_hive_type" @click="execute_sql(`describe formatted ${sess_active_child_long_name}`)">DESCRIBE HIVE TABLE</b-dropdown-item>
+
+                  <b-dropdown-item v-if="is_hive_type" @click="execute_sql(`refresh table ${sess_active_child_long_name}`)">REFRESH TABLE</b-dropdown-item>
+
+                  <b-dropdown-item @click="set_clipboard(`drop table ${sess_active_child_long_name};`)">DROP TABLE</b-dropdown-item>
+
+                </b-dropdown>
+
+
                 <span class="button is-small"
                       @click="$store.query._session._tab.pinned = !$store.query._session._tab.pinned"
                       :style="{ color: $store.query._session._tab.pinned? 'red' : 'black'}">
@@ -247,9 +271,8 @@
 </template>
 
 <script>
-
 import HotTable from "./HotTable.vue";
-import AceEditor from "./AceEditor.vue";
+// import AceEditor from "./AceEditor.vue";
 export default {
   data() {
     return {
@@ -275,32 +298,32 @@ export default {
   },
   components: {
     // editor: require('vue2-ace-editor'),
-    editor: AceEditor,
+    // editor: AceEditor,
     HotTable: HotTable
   },
   methods: {
     editorInit() {
-      require('brace/ext/language_tools') //language extension prerequsite...
-      require('brace/mode/html')                
-      require('brace/mode/javascript')    //language
-      require('brace/mode/pgsql')    //language
-      require('brace/mode/less')
-      require('brace/theme/chrome')
-      require('brace/snippets/javascript') //snippet
+      require("brace/ext/language_tools"); //language extension prerequsite...
+      require("brace/mode/html");
+      require("brace/mode/javascript"); //language
+      require("brace/mode/pgsql"); //language
+      require("brace/mode/less");
+      require("brace/theme/chrome");
+      require("brace/snippets/javascript"); //snippet
 
-      self=this
+      let self = this;
       // Add F9 command
       this.$refs.ace_editor.editor.commands.addCommand({
         name: "Execute SQL",
         exec: function() {
           // self.execute_sql(self.$store.query._session._tab._child_tab.sql, self.$store.query._session._tab.id)
-          self.get_ace_selection(self.$refs.ace_editor)
+          self.get_ace_selection(self.$refs.ace_editor);
         },
-        bindKey: {mac: "f9", win: "f9"}
-      })
+        bindKey: { mac: "f9", win: "f9" }
+      });
     },
     toggle_tab_row_view() {
-      self = this;
+      let self = this;
       self.$store.vars.tab_row_data = [];
       this.$store.vars.show_tab_row_view = !this.$store.vars.show_tab_row_view;
 
@@ -309,7 +332,7 @@ export default {
       }, 20);
     },
     toggle_tab_sql() {
-      self = this;
+      let self = this;
 
       this.$store.vars.show_tab_sql = !this.$store.vars.show_tab_sql;
       this.log(this.$refs);
@@ -405,4 +428,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dropdown-item {
+  font-size: 11px;
+  // font-weight: bold;
+}
 </style>

@@ -1,7 +1,9 @@
+/* eslint-disable */
 <template>
   <div id="app" :style="{'height': this.$store.style.app_height}">
     <nav-bar></nav-bar>
     <main-content></main-content>
+    <iframe id="file-iframe" hidden/>
     <!-- <info-bar></info-bar>
     <footer-bar></footer-bar> -->
   </div>
@@ -38,7 +40,7 @@ export default {
       );
     },
     "client-response": function(data) {
-      self = this;
+      let self = this;
 
       data.ts_end = new Date().getTime();
 
@@ -86,7 +88,7 @@ export default {
       }
     },
     "query-data": function(data) {
-      self = this;
+      let self = this;
       if (!this._.isEmpty(data.options.meta)) {
         switch (data.options.meta) {
           case "get_schemas":
