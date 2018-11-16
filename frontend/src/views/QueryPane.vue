@@ -42,15 +42,15 @@
       style="font-size: 0.9em"
       @keyup.120="execute_sql(get_cursor_query(cm_editor)) /* f9 */" 
       @keyup.115="create_object_tab(get_editor_selection(cm_editor, true))  /* f4 */"
-      :style="{'height': $store.style.editor_height, 'font-size': $store.settings.editor_font_size}"
-      v-if="$store.query.pane_tab_index == 0">
+      :style="{'height': $store.style.editor_height, 'font-size': $store.settings.editor_font_size,
+        'display': $store.query.pane_tab_index == 0? 'block' : 'none'}"
+      >
       <codemirror ref="main_editor" v-model="$store.query.editor_text"
         :options="$store.main_editor.options"
         @ready="onEditorReady"
         @focus="onEditorFocus"
         @change="onEditorCodeChange"
         :style="{'height': $store.style.editor_height}">
-
       </codemirror>
     </div>
     <div v-if="$store.query.pane_tab_index == 1">
