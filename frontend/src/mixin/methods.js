@@ -224,6 +224,7 @@ var methods = {
       self.log(data3);
       self.$store.app.active_section = "Query";
       self.$store.query = new classes.StoreQuery(data3.payload);
+      self.$store.query.pane_tab_index = 0;
       if (!self._.isEmpty(self.sess_tabs)) self.activate_tab(null);
       self.$store.vars.app_loading = false;
       self.$store.vars.db_query_loaded = true;
