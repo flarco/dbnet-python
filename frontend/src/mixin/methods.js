@@ -315,7 +315,8 @@ var methods = {
       if (tab.query == null) {
         if (tab.name == "Data")
           this.get_object_data(tab.long_name, child_tab_id);
-        if (tab.name == "Properties") null;
+        if (tab.name == "Properties")
+          this.get_ddl(tab.long_name, child_tab_id);
       }
     } else if (tab == null) {
       tab = {
@@ -1133,6 +1134,47 @@ var methods = {
     this.submit_req(data1);
   },
 
+  // get_object_data(object_full_name, tab_id) {
+  get_ddl(object_full_name, tab_id) {
+    let query = new classes.SqlQuery({
+      database: this.$store.query.db_name,
+      limit: 1000,
+      options: {
+        meta: "get_ddl",
+        kwargs: {
+          table_name: object_full_name
+        }
+      }
+    });
+
+    let sql_req = new classes.ReqData({
+      req_type: "submit-sql",
+      database: query.database,
+      sql: "",
+      limit: query.limit,
+      tab_id: tab_id,
+      session_name: this.$store.query.session_name,
+      options: query.options
+    });
+
+    this.$store.vars.query_time_interval = setInterval(
+      self.update_query_time,
+      200
+    );
+
+    this.$store.vars.query_time = setInterval(self.update_query_time, 200);
+    this.set_tab_prop(tab_id, "query", query);
+    this.set_tab_prop(tab_id, "loading", true);
+    this.$store.vars.query_time = 0;
+    if (this.$store.query._session.tabs[tab_id].parent_id != null)
+      this.set_tab_prop(
+        this.$store.query._session.tabs[tab_id].parent_id,
+        "loading",
+        true
+      );
+    this.submit_req(sql_req);
+  },
+
   submit_meta(options) {
     options.kwargs = options.kwargs || {}; // default empty
 
@@ -1576,6 +1618,11 @@ var methods = {
       this.set_tab_prop(tab_id, "rows", data.rows, sess_name);
       this.set_tab_prop(tab_id, "loading", false, sess_name);
       this.set_tab_prop(tab_id, "headers", data.headers, sess_name);
+      if (data.options.meta == 'get_ddl') {
+        let text_data = data.rows.length == 1 ? data.rows[0][0] : '(null)'
+        this.set_tab_prop(tab_id, "text_data", text_data, sess_name);
+      }
+
       this.set_tab_query_prop(
         tab_id,
         "ts_end",
@@ -1615,6 +1662,7 @@ var methods = {
       this.$forceUpdate();
     } else if (data.orig_req.tab_id != null) {
       // add to queue so that when switched back to database it can be processes
+      this.log('queued to $store.queue.rcv_query_data')
       this.$store.queue.rcv_query_data.push(data);
     }
   }

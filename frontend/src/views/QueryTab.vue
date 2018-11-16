@@ -257,12 +257,17 @@
         </div>
         <div class="column">
           <div class="hot_div" :style="{'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}">
-            <HotTable v-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.query.error==null"></HotTable>
             <textarea readonly class="textarea codelike" v-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.query.error!=null"
                 v-model="$store.query._session._tab._child_tab.query.error"
                 style="color:red"
                 :style="{'font-size': $store.settings.editor_font_size, 'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}"
                 title="Query Error"></textarea>
+            <HotTable v-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.text_data==''"></HotTable>
+            <textarea v-else readonly class="textarea codelike"
+                v-model="$store.query._session._tab._child_tab.text_data"
+                style="color:blue"
+                :style="{'font-size': $store.settings.editor_font_size, 'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}"
+                title="Text Data"></textarea>
           </div>
         </div>
       </div>

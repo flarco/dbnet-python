@@ -117,6 +117,9 @@ export default {
           case "get_columns":
             self.rcv_query_data(data);
             break;
+          case "get_ddl":
+            self.rcv_query_data(data);
+            break;
           case "analyze_fields":
             self.rcv_query_data(data);
             break;

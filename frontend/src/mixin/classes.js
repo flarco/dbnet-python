@@ -8,6 +8,7 @@ let Tab = class {
     this.name = data.name || ''
     this.long_name = data.long_name || ''
     this.rows = data.rows || []
+    this.text_data = data.text_data || ''
     this.headers = data.headers || []
     this.filter_text = data.filter_text || ''
     this.pid = data.pid || null
