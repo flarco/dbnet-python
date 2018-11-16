@@ -230,8 +230,9 @@ var methods = {
       self.resize_panes();
 
       // Process queue
-      for (let data4 of self.$store.queue.rcv_query_data) {
-        self.rcv_query_data(data4);
+      let ll = self.$store.queue.rcv_query_data.length // start length
+      for (let ii = 0; ii < ll; ii++) { // cycle through all items once
+        self.rcv_query_data(self.$store.queue.rcv_query_data.shift()); // process 1st positioned item
       }
     });
   },
