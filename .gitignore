@@ -126,3 +126,4 @@ selenium-debug.log
 
 spark-warehouse
 package-lock.json
+frontend/package-lock.json
