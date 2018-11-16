@@ -13,8 +13,8 @@
         </b-autocomplete> -->
 
         <b-input expanded
-        v-model="schema_filter"
-        @keyup.native.esc="schema_filter = null"
+        v-model="$store.query._session.schema_filter"
+        @keyup.native.esc="$store.query._session.schema_filter = null"
         placeholder="Filter Schemas..." type="search">
         </b-input>
         <p class="control">
@@ -48,8 +48,8 @@
         <option value="views">Views</option>
       </b-select>
         <b-input
-        v-model="object_filter"
-        @keyup.native.esc="object_filter=null"
+        v-model="$store.query._session.schema_obj_filter"
+        @keyup.native.esc="$store.query._session.schema_obj_filter=null"
         placeholder="Filter..." type="search">
         </b-input>
         <p class="control">
@@ -116,11 +116,13 @@ export default {
     filertered_schemas() {
       try {
         return this.get_schema_list().filter(name => {
-          return this.schema_filter
+          return this.$store.query._session.schema_filter
             ? name
                 .toString()
                 .toLowerCase()
-                .indexOf(this.schema_filter.toLowerCase()) >= 0
+                .indexOf(
+                  this.$store.query._session.schema_filter.toLowerCase()
+                ) >= 0
             : name;
         });
       } catch (error) {
@@ -131,11 +133,13 @@ export default {
     filertered_tables() {
       try {
         return this.get_schema_objects().filter(name => {
-          return this.object_filter
+          return this.$store.query._session.schema_obj_filter
             ? name
                 .toString()
                 .toLowerCase()
-                .indexOf(this.object_filter.toLowerCase()) >= 0
+                .indexOf(
+                  this.$store.query._session.schema_obj_filter.toLowerCase()
+                ) >= 0
             : name;
         });
       } catch (error) {
@@ -147,9 +151,7 @@ export default {
   data() {
     return {
       loading: false,
-      object_filter: null,
-      schema_list: [],
-      schema_filter: null
+      schema_list: []
     };
   },
   mounted() {
