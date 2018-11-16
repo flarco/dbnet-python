@@ -1,5 +1,5 @@
 const nanoid = require('nanoid')
-const _ = require('lodash');
+// const _ = require('lodash');
 
 let Tab = class {
   constructor(data = {}) {
