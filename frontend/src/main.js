@@ -48,7 +48,7 @@ Vue.mixin({
 })
 
 /* eslint-disable */
-new Vue({
+const app = new Vue({
   el: '#app',
   router,
   template: '<App/>',
@@ -60,3 +60,5 @@ new Vue({
   },
   render: h => h(App)
 }).$mount('#app')
+
+window.vm = app
