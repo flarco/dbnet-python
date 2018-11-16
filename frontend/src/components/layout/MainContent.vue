@@ -1,7 +1,8 @@
 <template>
   <section class="main-content">
-
+    
     <div class="tile is-ancestor animated fadeInLeftBig" style="margin: -5px">
+      <b-loading :is-full-page="true" :active.sync="$store.vars.app_loading" :can-cancel="true"></b-loading>
       <div id="side-menu" class="tile is-parent is-2" style="padding-right: 0px" :style="{'max-width': $store.style.sidebar_width}" v-if="$store.settings.sidebar_shown">
         <article class="tile is-child box">
           <side-menu></side-menu>

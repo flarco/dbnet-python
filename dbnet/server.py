@@ -237,6 +237,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
 
     # send to worker queue
     db_worker.put_child_q(data_dict)
+    response_data['worker_name'] = db_worker.name
     response_data['queued'] = True
 
   elif data.req_type == 'stop-worker':

@@ -176,7 +176,7 @@
                   <b-icon pack="fa" icon="envelope" size="is-small"></b-icon>
                 </a>
                 <a v-if="$store.query._session._tab.loading" title="Kill Current Query and Restart Worker."
-                  class="button is-small" @click="kill_query" style="color:red" >
+                  class="button is-small" @click="kill_query(null)" style="color:red" >
                   Kill
                 </a>
 

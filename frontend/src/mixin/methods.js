@@ -892,8 +892,24 @@ var methods = {
     return self.get_editor_selection(cm_editor);
   },
 
-  kill_query() {
+  kill_query(tab_id = null) {
+    if (tab_id == null) tab_id = this.sess_active_child_tab_id
     this.log("kill_query");
+    let data1 = new classes.ReqData({
+      req_type: "stop-worker",
+      database: this.$store.query.db_name,
+      worker_name: this.$store.query._session.tabs[tab_id].query.worker_name
+    });
+
+    this.submit_req(data1);
+    this.set_tab_prop(tab_id, "loading", false, this.sess_name);
+    this.set_tab_query_prop(tab_id, "error", "Killed!", this.sess_name)
+    if (this.$store.query._session.tabs[tab_id].parent_id != null)
+      this.set_tab_prop(
+        this.$store.query._session.tabs[tab_id].parent_id,
+        "loading",
+        false
+      );
   },
 
   execute_sql(sql, tab_id = null) {
@@ -1506,8 +1522,8 @@ var methods = {
   rcv_tables(data) {
     this.log("receive_tables");
     this.$store.query._session.schema_loading = false;
-    if (data.database == this.curr_database && !this._.isEmpty(data.rows)) {
-      let schema = data.rows.map(row => row[0])[0];
+    let schema = data.orig_req.options.kwargs.schema
+    if (data.database == this.curr_database) {
       let tables = data.rows.map(row => row[1]);
       this.$store.query.meta.schema[schema].tables = tables;
       if (schema == this.sess_schema)
@@ -1530,8 +1546,8 @@ var methods = {
   rcv_views(data) {
     this.log("receive_views");
     this.$store.query._session.schema_loading = false;
-    if (data.database == this.curr_database && !this._.isEmpty(data.rows)) {
-      let schema = data.rows.map(row => row[0])[0];
+    let schema = data.orig_req.options.kwargs.schema
+    if (data.database == this.curr_database) {
       let views = data.rows.map(row => row[1]);
       this.$store.query.meta.schema[schema].views = views;
       if (schema == this.sess_schema)

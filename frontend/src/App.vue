@@ -46,6 +46,20 @@ export default {
 
       if (!data.completed && !data.queued) {
         this.notify(data);
+      } else if (data.queued && data.orig_req.tab_id != null) {
+        switch (data.orig_req.req_type) {
+          case "submit-sql":
+            // set the worker name
+            self.set_tab_query_prop(
+              data.orig_req.tab_id,
+              "worker_name",
+              data.worker_name,
+              data.orig_req.session_name
+            );
+            break;
+          default:
+            data;
+        }
       } else {
         switch (data.orig_req.req_type) {
           case "get-databases":

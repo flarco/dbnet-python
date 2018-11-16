@@ -26,7 +26,7 @@
         </p>
     </b-field>
 
-    <div id="schema_div">
+    <div class="schema_div">
       <select multiple v-model="$store.query._session.schema"
               class="schema_select item_select" style="font-size: 1.1em; width:100%; height: 150px">
         <option v-for="schema in filertered_schemas()"
@@ -81,7 +81,7 @@
 
         </b-dropdown>
     </b-field>
-    <div id="schema_div">
+    <div class="schema_div">
       <select multiple v-model="$store.query._session.schema_objects_selected"
               class="schema_select item_select" style="font-size: 1.1em; width:100%" :style="{'height': $store.style.schema_object_height}">
         <option v-for="object in filertered_tables()"
@@ -165,7 +165,7 @@ export default {
 .schema_field {
   max-width: 50px;
 }
-#schema_div > div > div > span > select {
+.schema_div > div > div > span > select {
   height: 100%;
 }
 

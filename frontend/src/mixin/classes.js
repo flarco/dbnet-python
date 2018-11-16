@@ -69,6 +69,7 @@ let SqlQuery = class {
     self.sql = data.sql || ''
     self.limit = data.limit || 200
     self.error = data.error || null
+    self.worker_name = data.worker_name || null
     self.options = data.options || {}
     self.tab_id = data.tab_id
   }
