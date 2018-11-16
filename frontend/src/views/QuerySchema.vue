@@ -112,6 +112,7 @@ export default {
       new_schema = new_schema == null ? this.sess_schema : new_schema;
       if (this.sess_schema_obj_type == "tables") this.get_tables(new_schema);
       else if (this.sess_schema_obj_type == "views") this.get_views(new_schema);
+      this.$store.query._session.schema_obj_filter = "";
     },
     filertered_schemas() {
       try {
