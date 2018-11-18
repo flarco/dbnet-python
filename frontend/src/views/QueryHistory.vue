@@ -20,7 +20,7 @@
 
     <div class="history_div">
       <select multiple v-model="history_selected"
-              class="schema_select item_select" style="font-size: 0.7em; width:100%" :style="{'height': $store.style.schema_object_height}">
+              class="schema_select item_select" style="font-size: 0.7em; width:100%; height: 150px">
         <option v-for="object in filtered_history()" class="codelike"
           @click="history_selected_sql = $store.queue.rcv_queries.filter(rec => rec.task_id == object.split(' | ')[1])[0].sql_text"
           @dblclick="execute_sql(history_selected_sql = $store.queue.rcv_queries.filter(rec => rec.task_id == object.split(' | ')[1])[0].sql_text)"
