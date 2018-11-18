@@ -38,7 +38,8 @@ Vue.config.productionTip = false
 Vue.use(VueContextMenu)
 
 if (Vue.config.productionTip || process.env.NODE_ENV != 'development') {
-  sio_url = `http://${document.domain}:${location.port}`
+  let prefix = document.URL.toLocaleLowerCase().includes("https:") ? 'https' : 'http'
+  sio_url = `${prefix}://${document.domain}:${location.port}`
 }
 Vue.use(VueSocketio, sio_url);
 
