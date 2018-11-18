@@ -2,6 +2,11 @@
 
 dbnet
 
+# Install
+```bash
+pip install -U git+git://github.com/flarco/dbnet.git
+```
+
 # TODO
 
 ## API Endpoints:
