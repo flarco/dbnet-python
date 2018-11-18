@@ -262,7 +262,7 @@
                 style="color:red"
                 :style="{'font-size': $store.settings.editor_font_size, 'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}"
                 title="Query Error"></textarea>
-            <HotTable v-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.text_data==''"></HotTable>
+            <HotTable v-else-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.text_data==''"></HotTable>
             <textarea v-else readonly class="textarea codelike"
                 v-model="$store.query._session._tab._child_tab.text_data"
                 style="color:blue"
