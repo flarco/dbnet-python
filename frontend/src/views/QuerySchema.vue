@@ -1,30 +1,30 @@
 <template>
   <div style="font-size:0.9rem">
       <b-field horizontal label="Schema">
-        <!-- <b-autocomplete
-          @keyup.native.esc="$store.query._session.schema=null"
-          v-model="$store.query._session.schema"
-          :data="get_schema_list()"
-          :open-on-focus="true"
-          :keep-first="true"
-          :loading="loading"
-          placeholder="Schema"
-          @select="option => change_schema(option)">
-        </b-autocomplete> -->
+          <!-- <b-autocomplete
+            @keyup.native.esc="$store.query._session.schema=null"
+            v-model="$store.query._session.schema"
+            :data="get_schema_list()"
+            :open-on-focus="true"
+            :keep-first="true"
+            :loading="loading"
+            placeholder="Schema"
+            @select="option => change_schema(option)">
+          </b-autocomplete> -->
 
-        <b-input expanded
-        v-model="$store.query._session.schema_filter"
-        @keyup.native.esc="$store.query._session.schema_filter = null"
-        placeholder="Filter Schemas..." type="search">
-        </b-input>
-        <p class="control">
-          <b-tooltip label="Add Schema to Favorites" position="is-bottom" type="is-dark">
-            <a class="button is-outlined is-info">
-              <b-icon pack="fa" icon="heart-o" size="is-small"></b-icon>
-            </a>
-        </b-tooltip>
-        </p>
-    </b-field>
+          <b-input expanded
+          v-model="$store.query._session.schema_filter"
+          @keyup.native.esc="$store.query._session.schema_filter = null"
+          placeholder="Filter Schemas..." type="search">
+          </b-input>
+          <p class="control">
+            <b-tooltip label="Add Schema to Favorites" position="is-bottom" type="is-dark">
+              <a class="button is-outlined is-info">
+                <b-icon pack="fa" icon="heart-o" size="is-small"></b-icon>
+              </a>
+          </b-tooltip>
+          </p>
+      </b-field>
 
     <div class="schema_div">
       <select multiple v-model="$store.query._session.schema"

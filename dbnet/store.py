@@ -148,6 +148,7 @@ tables['queries'] = Table(
   'queries',
   metadata,
   Column('task_id', String, primary_key=True),  #same as task_id
+  Column('database', String),
   Column('sql_text', String),
   Column('exec_date', DateTime),
   Column('duration_sec', Numeric),

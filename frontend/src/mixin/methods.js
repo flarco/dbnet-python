@@ -231,8 +231,9 @@ var methods = {
       self.resize_panes();
 
       // Process queue
-      let ll = self.$store.queue.rcv_query_data.length // start length
-      for (let ii = 0; ii < ll; ii++) { // cycle through all items once
+      let ll = self.$store.queue.rcv_query_data.length; // start length
+      for (let ii = 0; ii < ll; ii++) {
+        // cycle through all items once
         self.rcv_query_data(self.$store.queue.rcv_query_data.shift()); // process 1st positioned item
       }
     });
@@ -315,8 +316,7 @@ var methods = {
       if (tab.query == null) {
         if (tab.name == "Data")
           this.get_object_data(tab.long_name, child_tab_id);
-        if (tab.name == "Properties")
-          this.get_ddl(tab.long_name, child_tab_id);
+        if (tab.name == "Properties") this.get_ddl(tab.long_name, child_tab_id);
       }
     } else if (tab == null) {
       tab = {
@@ -390,7 +390,7 @@ var methods = {
   copy_hot_headers() {
     // Ctrl + h: copy headers
     let headers = [];
-    let self = this
+    let self = this;
     if (self.$store.vars.hot_selection) {
       for (
         var c = self.$store.vars.hot_selection.c_start; c <= self.$store.vars.hot_selection.c_end; c++
@@ -405,7 +405,7 @@ var methods = {
 
   copy_tab_row_view_data() {
     let tsv_rows = [];
-    let self = this
+    let self = this;
     tsv_rows.push('"' + ["N", "Field", "Value"].join('"\t"') + '"');
     for (let obj of self.$store.vars.tab_row_data) {
       let row = [obj.n, obj.field, obj.value];
@@ -417,7 +417,7 @@ var methods = {
     let headers = [];
     let tsv_rows = [];
 
-    let self = this
+    let self = this;
 
     // get headers
     if (self.$store.vars.hot_selection) {
@@ -644,7 +644,9 @@ var methods = {
         let c = value.substring(i - 1, i);
         if (c == " " || c == "\t" || c == "\n" || i == textLength) {
           end =
-            i == textLength && c != " " && c != "\t" && c != "\n" && c != ";" ? i : i - 1;
+            i == textLength && c != " " && c != "\t" && c != "\n" && c != ";" ?
+            i :
+            i - 1;
           done = true;
         }
       }
@@ -656,7 +658,10 @@ var methods = {
         i--;
         let c = value.substring(i, i + 1);
         if (c == " " || c == "\t" || c == "\n" || i == 0) {
-          start = i == 0 && c != " " && c != "\t" && c != "\n" && c != ";" ? i : i + 1;
+          start =
+            i == 0 && c != " " && c != "\t" && c != "\n" && c != ";" ?
+            i :
+            i + 1;
           done = true;
         }
       }
@@ -820,7 +825,9 @@ var methods = {
         let c = value.substring(i - 1, i);
         if (c == " " || c == "\t" || c == "\n" || i == textLength) {
           end =
-            i == textLength && c != " " && c != "\t" && c != "\n" && c != ";" ? i : i - 1;
+            i == textLength && c != " " && c != "\t" && c != "\n" && c != ";" ?
+            i :
+            i - 1;
           done = true;
         }
       }
@@ -832,7 +839,10 @@ var methods = {
         i--;
         let c = value.substring(i, i + 1);
         if (c == " " || c == "\t" || c == "\n" || i == 0) {
-          start = i == 0 && c != " " && c != "\t" && c != "\n" && c != ";" ? i : i + 1;
+          start =
+            i == 0 && c != " " && c != "\t" && c != "\n" && c != ";" ?
+            i :
+            i + 1;
           done = true;
         }
       }
@@ -894,7 +904,7 @@ var methods = {
   },
 
   kill_query(tab_id = null) {
-    if (tab_id == null) tab_id = this.sess_active_child_tab_id
+    if (tab_id == null) tab_id = this.sess_active_child_tab_id;
     this.log("kill_query");
     let data1 = new classes.ReqData({
       req_type: "stop-worker",
@@ -904,7 +914,7 @@ var methods = {
 
     this.submit_req(data1);
     this.set_tab_prop(tab_id, "loading", false, this.sess_name);
-    this.set_tab_query_prop(tab_id, "error", "Killed!", this.sess_name)
+    this.set_tab_query_prop(tab_id, "error", "Killed!", this.sess_name);
     if (this.$store.query._session.tabs[tab_id].parent_id != null)
       this.set_tab_prop(
         this.$store.query._session.tabs[tab_id].parent_id,
@@ -1192,6 +1202,22 @@ var methods = {
     this.$socket.emit("client-request", data1, function (data2) {
       on_resp(data2);
     });
+  },
+
+  get_queries(filter = "", limit = null) {
+    let sql_req = new classes.ReqData({
+      req_type: "get-queries",
+      database: this.curr_database,
+      filter: filter,
+      limit: limit ? limit : 100
+    });
+    this.submit_req(sql_req);
+  },
+
+  rcv_queries(data) {
+    this.log("rcv_queries");
+    this.log(data);
+    this.$store.queue.rcv_queries = data.data;
   },
 
   submit_sql(sql, tab_id = null, options = {}) {
@@ -1564,7 +1590,7 @@ var methods = {
   rcv_tables(data) {
     this.log("receive_tables");
     this.$store.query._session.schema_loading = false;
-    let schema = data.orig_req.options.kwargs.schema
+    let schema = data.orig_req.options.kwargs.schema;
     if (data.database == this.curr_database) {
       let tables = data.rows.map(row => row[1]);
       this.$store.query.meta.schema[schema].tables = tables;
@@ -1588,7 +1614,7 @@ var methods = {
   rcv_views(data) {
     this.log("receive_views");
     this.$store.query._session.schema_loading = false;
-    let schema = data.orig_req.options.kwargs.schema
+    let schema = data.orig_req.options.kwargs.schema;
     if (data.database == this.curr_database) {
       let views = data.rows.map(row => row[1]);
       this.$store.query.meta.schema[schema].views = views;
@@ -1618,8 +1644,8 @@ var methods = {
       this.set_tab_prop(tab_id, "rows", data.rows, sess_name);
       this.set_tab_prop(tab_id, "loading", false, sess_name);
       this.set_tab_prop(tab_id, "headers", data.headers, sess_name);
-      if (data.options.meta == 'get_ddl') {
-        let text_data = data.rows.length == 1 ? data.rows[0][0] : '(null)'
+      if (data.options.meta == "get_ddl") {
+        let text_data = data.rows.length == 1 ? data.rows[0][0] : "(null)";
         this.set_tab_prop(tab_id, "text_data", text_data, sess_name);
       }
 
@@ -1662,7 +1688,7 @@ var methods = {
       this.$forceUpdate();
     } else if (data.orig_req.tab_id != null) {
       // add to queue so that when switched back to database it can be processes
-      this.log('queued to $store.queue.rcv_query_data')
+      this.log("queued to $store.queue.rcv_query_data");
       this.$store.queue.rcv_query_data.push(data);
     }
   }

@@ -333,7 +333,13 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
 
   elif data.req_type == 'get-queries':
     rows = store.sqlx('queries').select(
-      where='1=1 order by exec_date desc', limit=100)
+      where="""
+        lower(sql_text) like '%{}%'
+        and database = '{}'
+        and sql_text <> ''
+        order by exec_date desc
+      """.format(data.filter.lower(), data.database),
+      limit=int(data.limit))
     recs = [row._asdict() for row in rows]
     response_data = dict(data=recs, completed=True)
 

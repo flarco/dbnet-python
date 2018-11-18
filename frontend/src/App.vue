@@ -71,6 +71,9 @@ export default {
           case "get-meta-columns":
             self.rcv_query_data(data);
             break;
+          case "get-queries":
+            self.rcv_queries(data);
+            break;
           case "get-meta-tables":
             if (data.rows != null) self.rcv_query_data(data);
             break;

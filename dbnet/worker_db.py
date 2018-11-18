@@ -147,6 +147,7 @@ def execute_sql(worker: Worker, data_dict):
       # Add query
       store.sqlx('queries').add(
         task_id=data_dict['id'],
+        database=database,
         sql_text=sql,
         exec_date=s_t,
         duration_sec=secs,
@@ -157,10 +158,12 @@ def execute_sql(worker: Worker, data_dict):
         last_updated=epoch(),
       )
 
-      sql_fpath = '{}/{}.{}.sql'.format(SQL_FOLDER, database, data_dict['id'])
-      sql_text = '-- Completed @ {} in {} seconds.\n\n{}'.format(
-        now_str(), secs, sql)
-      write_file(sql_fpath, sql_text)
+      if sql.strip():
+        sql_fpath = '{}/{}.{}.sql'.format(SQL_FOLDER, database,
+                                          data_dict['id'])
+        sql_text = '-- Completed @ {} in {} seconds.\n\n{}'.format(
+          now_str(), secs, sql)
+        write_file(sql_fpath, sql_text)
 
       # time.sleep(0.5)
       data = dict(

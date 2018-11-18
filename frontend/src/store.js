@@ -39,6 +39,7 @@ export default {
   },
   queue: {
     messages: [],
+    rcv_queries: [],
     rcv_query_data: [],
   },
   hotSettings: {
