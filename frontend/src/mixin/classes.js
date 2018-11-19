@@ -72,8 +72,8 @@ let StoreQuerySession = class {
     // All Tables
     if (data.tabs != null) {
       Object.keys(data.tabs).forEach(function (tab_id) {
-        let tab = data.tabs[tab_id];
-        self.tabs[tab_id] = new Tab(tab)
+        let tab = new Tab(data.tabs[tab_id]);
+        if (tab.long_name != 'null') self.tabs[tab_id] = new Tab(tab)
       }, this);
     }
   }
