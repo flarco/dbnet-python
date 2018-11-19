@@ -5,7 +5,7 @@
           v-model="history_filter"
           @keyup.native.esc="history_filter = ''"
           @keyup.native.enter="get_queries(history_filter, null)"
-          @input="dbc_get_query({get_queries: get_queries, history_filter: history_filter})"
+          @input="dbc_get_query({get_queries, history_filter})"
           placeholder="Filter History..." type="search">
         </b-input>
         <p class="control">

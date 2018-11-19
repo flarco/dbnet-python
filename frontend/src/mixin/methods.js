@@ -1250,6 +1250,7 @@ var methods = {
     this.set_tab_prop(tab_id, "sql", sql_req.sql);
     this.set_tab_prop(tab_id, "query", query);
     this.set_tab_prop(tab_id, "loading", true);
+    this.set_tab_prop(tab_id, "cache_used", false);
     this.$store.vars.query_time = 0;
     if (this.$store.query._session.tabs[tab_id].parent_id != null)
       this.set_tab_prop(
@@ -1641,6 +1642,7 @@ var methods = {
       // TODO: not going to work when viewing another database...
 
       this.set_tab_prop(tab_id, "query_records", data.rows.length, sess_name);
+      this.set_tab_prop(tab_id, "cache_used", data.cache_used, sess_name);
       this.set_tab_prop(tab_id, "rows", data.rows, sess_name);
       this.set_tab_prop(tab_id, "loading", false, sess_name);
       this.set_tab_prop(tab_id, "headers", data.headers, sess_name);

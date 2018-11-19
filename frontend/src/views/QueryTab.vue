@@ -196,7 +196,10 @@
                 <p class="control">
                   <span class="button is-small" @click="$store.query._session._tab._child_tab.filter_text = null; filter_tab_data()">
                     <b-icon pack="fa" icon="remove" size="is-small"></b-icon>
-                </span>
+                  </span>
+                  <span class="button is-small" style="font-size: 0.75rem" v-if="sess_active_child_tab.cache_used">
+                    <strong style="color: green">cache</strong>
+                  </span>  
                 </p>
               </div>
             </div>

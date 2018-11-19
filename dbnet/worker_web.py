@@ -101,7 +101,10 @@ def transmit_payload(payload_type):
       _data_dict['rows'] = '{} cols X {} rows'.format(ncols, nrows)
     app.log('-Response -> {}'.format(_data_dict))
   else:
-    app.log('Confirmation -> {}'.format(data_dict))
+    _data_dict = copy.deepcopy(data_dict)
+    if 'data' in _data_dict:
+      _data_dict['data'] = '{} chars'.format(len(_data_dict['data']))
+    app.log('Confirmation -> {}'.format(_data_dict))
   app.emit(payload_type, data_dict, namespace='/', room=data_dict['sid'])
   return 'OK'
 

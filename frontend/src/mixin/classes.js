@@ -16,6 +16,7 @@ let Tab = class {
     this.query_records = data.query_records || 0
     this.loading = data.loading || false
     this.pinned = data.pinned || false
+    this.cache_used = data.cache_used || false
     this.show_tab_functions = data.show_tab_functions || false
     this.type = data.type || 'data'
     this.limit = data.limit || 200

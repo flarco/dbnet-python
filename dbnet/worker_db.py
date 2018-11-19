@@ -4,6 +4,7 @@ from xutil.helpers import (
   log,
   struct,
   now,
+  now_minus,
   epoch,
   jdumps,
   get_db_profile,
@@ -26,6 +27,7 @@ worker_name = None
 worker_status = 'IDLE'
 worker_queue = deque([])
 worker_pid = os.getpid()
+worker_sql_cache = {}
 
 WEBAPP_PORT = int(os.getenv('DBNET_WEBAPP_PORT', default=5566))
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
@@ -73,18 +75,43 @@ def execute_sql(worker: Worker, data_dict):
     rows = fields = []
     get_fields = lambda r: r.__fields__ if hasattr(r, '__fields__') else r._fields
     s_t = epoch()
+    cache_used = False
 
     try:
 
-      def exec_sql(sql):
+      def exec_sql(sql, limit_def=5000):
         log(
           '\n------------SQL-START------------\n{}\n------------SQL-END------------ \n'.
           format(sql),
           color='blue')
         log('LIMIT: ' + str(limit), color='blue')
-        for fields, rows in conn.execute_multi(
-            sql, dtype='tuple', limit=int(limit)):
-          yield fields, rows
+        cache_used = False
+        if sql in worker_sql_cache:
+          for fields, rows in list(worker_sql_cache[sql]['results']):
+            # if limit above limit_def, then refresh
+            if limit > limit_def: break
+
+            # if limit is same, then refresh
+            if limit == worker_sql_cache[sql]['limit']: break
+
+            # if ran more than 10 minutes ago, then refresh
+            if now_minus(minutes=10) > worker_sql_cache[sql]['timestamp']:
+              del worker_sql_cache[sql]
+
+            if len(fields) > 0:
+              cache_used = True  # must return data/fields
+              worker_sql_cache[sql]['limit'] = limit
+              log('+Cache Used')
+
+            yield fields, rows, cache_used
+
+        if not cache_used:
+          worker_sql_cache[sql] = dict(
+            timestamp=now(), results=[], limit=limit)
+          for fields, rows in conn.execute_multi(
+              sql, dtype='tuple', limit=limit_def):
+            worker_sql_cache[sql]['results'].append((fields, rows))
+            yield fields, rows, cache_used
 
       if 'meta' in options:
         # get_schemas or
@@ -96,18 +123,10 @@ def execute_sql(worker: Worker, data_dict):
       elif 'special' in options:
         pass
 
-      #   elif options['special'] == 'analyze-match-rate':
-      #     src_table = options['special_values']['src_table']
-      #     src_field = options['special_values']['src_field']
-      #     tgt_table = options['special_values']['tgt_table']
-      #     tgt_field = options['special_values']['tgt_field']
-      #     rows = conn.analyze_match_rate(src_table, src_field, tgt_table,
-      #                                    tgt_field)
-      #     fields = get_fields(rows[0]) if rows else []
-
       else:
-        for fields, rows in exec_sql(sql):
+        for fields, rows, cache_used in exec_sql(sql):
           fields, rows = fields, rows
+          rows = rows[:limit] if len(rows) > limit else rows
 
       if rows == None: rows = []
 
@@ -153,7 +172,7 @@ def execute_sql(worker: Worker, data_dict):
         duration_sec=secs,
         row_count=len(rows),
         limit_val=limit,
-        cached=False,
+        cached=cache_used,
         sql_md5=hashlib.md5(sql.encode('utf-8')).hexdigest(),
         last_updated=epoch(),
       )
@@ -176,6 +195,7 @@ def execute_sql(worker: Worker, data_dict):
         end_ts=e_t,
         execute_time=round(secs, 2),
         completed=True,
+        cache_used=cache_used,
         options=options,
         pid=worker_pid,
         orig_req=data_dict,
