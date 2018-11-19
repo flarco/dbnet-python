@@ -65,16 +65,16 @@ let StoreQuerySession = class {
     // this.tabs = data.tabs || {'META': new Tab({id: 'META', name:'META', type:'meta'}), 22:{name:'S04'}, 33:{name:'T04'}}
     this._tab = new Tab(data._tab || meta_tab)
 
+    self.tabs = {
+      'META': meta_tab
+    }
+
     // All Tables
     if (data.tabs != null) {
       Object.keys(data.tabs).forEach(function (tab_id) {
         let tab = data.tabs[tab_id];
         self.tabs[tab_id] = new Tab(tab)
       }, this);
-    } else {
-      this.tabs = data.tabs || {
-        'META': meta_tab
-      }
     }
   }
 }
