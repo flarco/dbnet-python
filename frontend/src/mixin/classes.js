@@ -6,7 +6,7 @@ let Tab = class {
     let prefix = data.parent_id == null ? 'TAB-' : 'CHILD-'
     this.id = data.id || prefix + nanoid(11)
     this.name = data.name || ''
-    this.long_name = data.long_name || ''
+    this.long_name = data.long_name || 'null'
     this.rows = data.rows || []
     this.text_data = data.text_data || ''
     this.headers = data.headers || []
@@ -37,6 +37,7 @@ let Tab = class {
 
 let StoreQuerySession = class {
   constructor(data = {}) {
+    let self = this
     let meta_tab = new Tab({
       id: 'META',
       name: 'META',
@@ -62,10 +63,19 @@ let StoreQuerySession = class {
     this.schema_obj_type = data.schema_obj_type || 'tables'
     this.schema_objects_selected = data.schema_objects_selected || []
     // this.tabs = data.tabs || {'META': new Tab({id: 'META', name:'META', type:'meta'}), 22:{name:'S04'}, 33:{name:'T04'}}
-    this._tab = data._tab || meta_tab
-    this.tabs = data.tabs || {
-      'META': meta_tab
-    } // All Tables
+    this._tab = new Tab(data._tab || meta_tab)
+
+    // All Tables
+    if (data.tabs != null) {
+      Object.keys(data.tabs).forEach(function (tab_id) {
+        let tab = data.tabs[tab_id];
+        self.tabs[tab_id] = new Tab(tab)
+      }, this);
+    } else {
+      this.tabs = data.tabs || {
+        'META': meta_tab
+      }
+    }
   }
 }
 
@@ -119,7 +129,7 @@ export default {
       this.pane_tab_index = data.pane_tab_index || 0
       this.session_name = data.session_name || 'default'
       this.editor_text = data.editor_text || ''
-      self._session = data._session || new StoreQuerySession({
+      self._session = new StoreQuerySession(data._session || {
         name: 'default'
       }) // Active session
 

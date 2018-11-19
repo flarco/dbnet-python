@@ -302,7 +302,7 @@ var methods = {
       tab_id = this.$store.query._session._tab.id;
 
     let tab = this.$store.query._session.tabs[tab_id];
-    if (this.$store.query._session._tab.id == tab_id) {
+    if (this.$store.query._session._tab && this.$store.query._session._tab.id == tab_id) {
       tab = this.$store.query._session._tab;
     } else {
       tab = this.$store.query._session.tabs[tab_id];
@@ -1026,6 +1026,7 @@ var methods = {
 
   create_object_tab(object_full_name) {
     // let object_full_name = this.sess_schema + '.' + this.sess_schema_objects_selected[0]
+    if (!object_full_name || object_full_name.split(".").length != 2) return
 
     // Create the Tab
     let parent_tab = new classes.Tab({
@@ -1506,7 +1507,8 @@ var methods = {
         url: url
       };
       self.$socket.emit("spark-progress", data1, function (data2) {
-        self.$store.vars.query_progress_prct = data2["query_progress_prct"];
+        if (self.$store.query._session._tab._child_tab.loading)
+          self.$store.vars.query_progress_prct = data2["query_progress_prct"];
       });
 
       self.$store.app.databases[

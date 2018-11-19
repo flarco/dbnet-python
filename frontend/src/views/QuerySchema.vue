@@ -59,7 +59,7 @@
 
 
         <b-dropdown style="z-index: 10000; font-size: 10px">
-          <button title="Functions"  class="button is-primary is-outlined" slot="trigger" style="color: blue">
+          <button title="Functions" id="schema-obj-funcs" class="button is-primary is-outlined" slot="trigger" style="color: blue">
             <b-icon pack="fa" icon="snowflake-o" ></b-icon>
           </button>
 
@@ -86,6 +86,7 @@
               class="schema_select item_select" style="font-size: 1.1em; width:100%" :style="{'height': $store.style.schema_object_height}">
         <option v-for="object in filertered_tables()"
           @dblclick="create_object_tab(sess_schema + '.' + sess_schema_objects_selected[0])"
+          @contextmenu.prevent="click_id('schema-obj-funcs')"
           v-bind:key="object"
           :value="object"
         >{{object}}</option>
@@ -108,6 +109,9 @@ export default {
   },
   computed: {},
   methods: {
+    click_id(id_str) {
+      document.getElementById(id_str).click();
+    },
     change_schema(new_schema = null) {
       new_schema = new_schema == null ? this.sess_schema : new_schema;
       if (this.sess_schema_obj_type == "tables") this.get_tables(new_schema);
