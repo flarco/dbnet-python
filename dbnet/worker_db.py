@@ -91,12 +91,14 @@ def execute_sql(worker: Worker, data_dict):
             # if limit above limit_def, then refresh
             if limit > limit_def: break
 
-            # if limit is same, then refresh
-            if limit == worker_sql_cache[sql]['limit']: break
+            # if limit is same and not a csv call, then refresh
+            if limit == worker_sql_cache[sql]['limit'] and 'csv' not in options:
+              break
 
             # if ran more than 10 minutes ago, then refresh
             if now_minus(minutes=10) > worker_sql_cache[sql]['timestamp']:
               del worker_sql_cache[sql]
+              break
 
             if len(fields) > 0:
               cache_used = True  # must return data/fields
