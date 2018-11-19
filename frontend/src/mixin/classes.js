@@ -24,6 +24,14 @@ let Tab = class {
     this.child_tab_ids = data.child_tab_ids || {}
     this.child_active_tab = data.child_active_tab || 0
     this.parent_id = data.parent_id || null
+    this.form_data = data.form_data || {
+      jm: { // join-match
+        _show: false
+      },
+      email: {
+        _show: false
+      },
+    }
   }
 }
 

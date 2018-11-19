@@ -246,12 +246,15 @@ def get_analysis_sql(worker: Worker, data_dict):
 
   try:
     conn = get_conn(database)
-    sql = conn.analyze_fields(
-      analysis=data_dict['analysis'],
-      table_name=data_dict['table_name'],
-      fields=data_dict['fields'],
-      as_sql=True,
-      **data_dict['kwargs'])
+    if data_dict['analysis'] == 'join-match':
+      sql = conn.analyze_join_match(as_sql=True, **data_dict['kwargs'])
+    else:
+      sql = conn.analyze_fields(
+        analysis=data_dict['analysis'],
+        table_name=data_dict['table_name'],
+        fields=data_dict['fields'],
+        as_sql=True,
+        **data_dict['kwargs'])
 
     data = dict(
       id=data_dict['id'],

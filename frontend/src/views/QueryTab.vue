@@ -84,6 +84,8 @@
 
                   <b-dropdown-item @click="analyze_fields('test_pk', sess_active_child_long_name, [''], true, { fields_exp: hot_selection_values.join(is_hive_type? ', ' : ' || '), where_clause: '' })">Test PK Field(s)</b-dropdown-item>
 
+                  <b-dropdown-item @click="$store.query._session._tab._child_tab.form_data.jm._show = true">JOIN-MATCH</b-dropdown-item>
+
                   <b-dropdown-item @click="execute_sql(`select '${sess_active_child_long_name}' as table_nm, count(*) as cnt from ${sess_active_child_long_name}`)">SELECT COUNT(*)</b-dropdown-item>
 
                   <b-dropdown-item v-if="is_hive_type" @click="execute_sql(`describe formatted ${sess_active_child_long_name}`)">DESCRIBE HIVE TABLE</b-dropdown-item>
@@ -216,6 +218,24 @@
           </div>
         </nav>
         <div id="tab-sql">
+          <section>
+            <b-message style="font-size: 0.8rem" title="Join Match Rate Analysis" :active.sync="$store.query._session._tab._child_tab.form_data.jm._show">
+              <b-field grouped>
+                  <b-field expanded>
+                      <b-input size="is-small" placeholder="Src Fields" v-model="$store.query._session._tab._child_tab.form_data.jm.t1_field"></b-input>
+                  </b-field>
+                  <b-field expanded>
+                      <b-input size="is-small" placeholder="Tgt Table" v-model="$store.query._session._tab._child_tab.form_data.jm.t2"></b-input>
+                  </b-field>
+                  <b-field expanded>
+                      <b-input size="is-small" placeholder="Tgt Fields" v-model="$store.query._session._tab._child_tab.form_data.jm.t2_field"></b-input>
+                  </b-field>
+                  <p class="control ">
+                    <button class="button is-primary is-small" @click="analyze_join_match(sess_active_child_long_name, sess_active_child_tab.form_data.jm.t2, sess_active_child_tab.form_data.jm.t1_field, sess_active_child_tab.form_data.jm.t2_field); $store.query._session._tab._child_tab.form_data.jm._show = false">Submit</button>
+                  </p>
+              </b-field>
+            </b-message>
+          </section>
           <!-- <editor v-if="$store.vars.show_tab_sql"></editor> -->
           <!-- <editor ref="ace_editor" v-model="$store.query._session._tab._child_tab.sql"
               @init="editorInit" v-if="$store.vars.show_tab_sql"

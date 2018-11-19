@@ -1146,6 +1146,43 @@ var methods = {
     this.submit_req(data1);
   },
 
+  analyze_join_match(t1, t2, t1_field, t2_field, t1_filter = '1=1', t2_filter = '1=1', tab_id = null) {
+    if (!(t1 && t2 && t1_field && t2_field)) {
+      this.$snackbar.open({
+        duration: 5000,
+        message: `Must input all fields (t1, t2, t1_field, t2_field).`
+      });
+      return;
+    }
+
+    if (tab_id == null) {
+      this.sess_active_child_tab.form_data.jm._show = false
+      // need to create new tab
+      let parent_tab_id = this.create_data_tab(
+        `-- Waiting for Template SQL for 'join-match'`
+      );
+      tab_id = this.$store.query._session.tabs[parent_tab_id]._child_tab.id;
+      this.set_tab_prop(tab_id, "loading", true);
+    }
+
+    let data1 = new classes.ReqData({
+      tab_id: tab_id,
+      req_type: "get-analysis-sql",
+      database: this.$store.query.db_name,
+      analysis: 'join-match',
+      as_sql: true,
+      kwargs: {
+        t1,
+        t2,
+        t1_field,
+        t2_field,
+        t1_filter,
+        t2_filter
+      }
+    });
+    this.submit_req(data1);
+  },
+
   // get_object_data(object_full_name, tab_id) {
   get_ddl(object_full_name, tab_id) {
     let query = new classes.SqlQuery({
