@@ -925,6 +925,26 @@ var methods = {
       );
   },
 
+  email_exec_sql(sql, email_options, tab_id = null) {
+    if (tab_id == null) {
+      tab_id = this.$store.query._session._tab.id;
+    }
+
+    if (!(email_options.name && email_options.email_address && email_options.limit)) {
+      this.$snackbar.open({
+        duration: 5000,
+        message: `Must input all fields (name, to_address, limit).`
+      });
+      return;
+    }
+
+    this.$store.query._session._tab._child_tab.form_data.email._show = false
+
+    this.activate_tab(tab_id);
+    let child_tab = this.sess_active_child_tab;
+    this.submit_sql(sql, child_tab.id, email_options);
+  },
+
   execute_sql(sql, tab_id = null) {
     // get or create tab
     // use active unpinned tab or get unpinned tabs
@@ -1273,7 +1293,7 @@ var methods = {
     let query = new classes.SqlQuery({
       database: this.$store.query.db_name,
       sql: sql,
-      limit: this.$store.query._session.tabs[tab_id].limit
+      limit: options.limit ? options.limit : this.$store.query._session.tabs[tab_id].limit
     });
 
     let sql_req = new classes.ReqData({

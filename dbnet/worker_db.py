@@ -15,7 +15,7 @@ from xutil.helpers import (
 )
 from xutil import get_conn
 from xutil.database.base import fwa, fwo
-from xutil.web import send_email_exchange
+from xutil.web import send_email_exchange, send_from_outlook, send_from_gmail
 from collections import deque
 import time, socket
 import os, hashlib
@@ -132,7 +132,7 @@ def execute_sql(worker: Worker, data_dict):
 
       if rows == None: rows = []
 
-      if 'email' in options or 'csv' in options:
+      if 'email_address' in options or 'csv' in options:
         file_name = '{}-{}-{}.csv'.format(database, options['name'],
                                           data_dict['id'])
         file_path = '{}/{}'.format(CSV_FOLDER, file_name)
@@ -149,15 +149,22 @@ def execute_sql(worker: Worker, data_dict):
         )
         options['url'] = url
 
-      if 'email' in options:
-        subj = 'dbNet -- Result for Query {}'.format(data_dict['id'])
+      if 'email_address' in options:
+        subj = 'DbNet -- Result for Query {}'.format(data_dict['id'])
         body_text = 'URL: {url}\n\nROWS: {rows}\n\nSQL:\n{sql}'.format(
           url=url, rows=len(rows), sql=sql)
-        if 'exchange_server' in options:
-          os.environ['SMTP_SERVER'] = options['exchange_server']
-          send_email_exchange(options['email'], subj, body_text)
+        to_address = options['email_address']
+        email_template = os.getenv("SMTP_TEMPLATE")
+        if 'exchange_server' == email_template:
+          email_func = send_email_exchange
+        elif 'outlook' == email_template:
+          email_func = send_from_outlook
+        elif 'gmail' == email_template:
+          email_func = send_from_gmail
         else:
           raise Exception('Email method not implemented!')
+
+        email_func(to_address, subj, body_text)
 
         if len(rows) > 100:
           rows = rows[:100]

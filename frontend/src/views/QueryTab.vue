@@ -174,7 +174,7 @@
                   <b-icon pack="fa" icon="file-excel-o" size="is-small"></b-icon>
                 </a>
                 <a title="Email Results (CSV)" class="button is-small"
-                  @click="$store.vars.show_tab_modal_email = !$store.vars.show_tab_modal_email">
+                  @click="$store.query._session._tab._child_tab.form_data.email._show = true">
                   <b-icon pack="fa" icon="envelope" size="is-small"></b-icon>
                 </a>
                 <a v-if="$store.query._session._tab.loading" title="Kill Current Query and Restart Worker."
@@ -218,6 +218,8 @@
           </div>
         </nav>
         <div id="tab-sql">
+
+          <!-- Join Match Rate Analysis -->
           <section>
             <b-message style="font-size: 0.8rem" title="Join Match Rate Analysis" :active.sync="$store.query._session._tab._child_tab.form_data.jm._show">
               <b-field grouped>
@@ -231,11 +233,32 @@
                       <b-input size="is-small" placeholder="Tgt Fields" v-model="$store.query._session._tab._child_tab.form_data.jm.t2_field"></b-input>
                   </b-field>
                   <p class="control ">
-                    <button class="button is-primary is-small" @click="analyze_join_match(sess_active_child_long_name, sess_active_child_tab.form_data.jm.t2, sess_active_child_tab.form_data.jm.t1_field, sess_active_child_tab.form_data.jm.t2_field); $store.query._session._tab._child_tab.form_data.jm._show = false">Submit</button>
+                    <button class="button is-primary is-small" @click="analyze_join_match(sess_active_child_long_name, sess_active_child_tab.form_data.jm.t2, sess_active_child_tab.form_data.jm.t1_field, sess_active_child_tab.form_data.jm.t2_field)">Submit</button>
                   </p>
               </b-field>
             </b-message>
           </section>
+
+          <!-- Email Form -->
+          <section>
+            <b-message style="font-size: 0.8rem" title="Email CSV Results" :active.sync="$store.query._session._tab._child_tab.form_data.email._show">
+              <b-field grouped>
+                  <b-field expanded>
+                      <b-input size="is-small" placeholder="File Name Alias" v-model="$store.query._session._tab._child_tab.form_data.email.name"></b-input>
+                  </b-field>
+                  <b-field expanded>
+                      <b-input size="is-small" placeholder="To Addresses (;)" v-model="$store.query._session._tab._child_tab.form_data.email.email_address"></b-input>
+                  </b-field>
+                  <b-field expanded>
+                      <b-input size="is-small" placeholder="Limit" v-model="$store.query._session._tab._child_tab.form_data.email.limit"></b-input>
+                  </b-field>
+                  <p class="control ">
+                    <button class="button is-primary is-small" @click="email_exec_sql($store.query._session._tab._child_tab.sql, {email_address: $store.query._session._tab._child_tab.form_data.email.email_address, name:$store.query._session._tab._child_tab.form_data.email.name, limit:$store.query._session._tab._child_tab.form_data.email.limit}, $store.query._session._tab.id)">Submit</button>
+                  </p>
+              </b-field>
+            </b-message>
+          </section>
+
           <!-- <editor v-if="$store.vars.show_tab_sql"></editor> -->
           <!-- <editor ref="ace_editor" v-model="$store.query._session._tab._child_tab.sql"
               @init="editorInit" v-if="$store.vars.show_tab_sql"
