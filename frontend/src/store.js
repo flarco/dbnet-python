@@ -135,6 +135,7 @@ export default {
     db_query_loaded: true,
     show_meta_hot: true,
     hot: null,
+    hot_selections: [],
     hot_selection_values: [],
     hot_selection_rows: [],
     hot_selection_rows_full: [],

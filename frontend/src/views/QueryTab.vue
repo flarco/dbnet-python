@@ -72,7 +72,7 @@
             <div class="level-item">
               <div class="buttons has-addons">
                 
-                <b-dropdown style="z-index: 10000; font-size: 10px" v-if="sess_active_tab.type == 'object'">
+                <b-dropdown style="z-index: 10000; font-size: 10px" v-if="sess_active_tab.type == 'object' && $store.query._session._tab.child_active_tab == 0">
                   <span class="button is-small" style="color: blue"
                       slot="trigger">
                       <b-tooltip label="Functions" position="is-top" type="is-light">

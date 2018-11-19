@@ -392,10 +392,10 @@ var methods = {
     let headers = [];
     let self = this;
     if (self.$store.vars.hot_selection) {
-      for (
-        var c = self.$store.vars.hot_selection.c_start; c <= self.$store.vars.hot_selection.c_end; c++
-      ) {
-        headers.push(self.$store.hotSettings.colHeaders[c]);
+      for (let selection of self.$store.vars.hot_selections) {
+        for (let c = selection.c_start; c <= selection.c_end; c++) {
+          headers.push(self.$store.hotSettings.colHeaders[c]);
+        }
       }
     } else {
       headers = self.$store.hotSettings.colHeaders;
@@ -523,6 +523,7 @@ var methods = {
       return;
     }
 
+    self.$store.vars.hot_selections = [];
     self.$store.vars.hot_selection_values = [];
     self.$store.vars.hot_selection_rows = [];
     self.$store.vars.hot_selection_rows_full = [];
@@ -536,6 +537,7 @@ var methods = {
       };
 
       self.$store.vars.hot_selection = selection;
+      self.$store.vars.hot_selections.push(selection)
       for (var r = selection.r_start; r <= selection.r_end; r++) {
         let row = [];
         for (var c = selection.c_start; c <= selection.c_end; c++) {
