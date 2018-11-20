@@ -78,7 +78,7 @@ def execute_sql(worker: Worker, data_dict):
     get_fields = lambda r: r.__fields__ if hasattr(r, '__fields__') else r._fields
     s_t = epoch()
     cache_used = False
-    limit = options['limit'] if 'limit' in options else limit
+    limit = int(options['limit']) if 'limit' in options else limit
 
     try:
 
