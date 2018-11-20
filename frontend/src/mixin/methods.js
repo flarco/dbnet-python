@@ -981,6 +981,8 @@ var methods = {
     this.activate_tab(tab_id);
     let child_tab = this.sess_active_child_tab;
     this.submit_sql(sql, child_tab.id);
+    this.$store.hotSettings.colHeaders = []
+    this.$store.hotSettings.columns = []
   },
 
   create_data_tab(sql = "") {
