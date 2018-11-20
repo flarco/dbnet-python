@@ -17,7 +17,7 @@ let Tab = class {
     this.loading = data.loading || false
     this.pinned = data.pinned || false
     this.cache_used = data.cache_used || false
-    this.show_tab_functions = data.show_tab_functions || false
+    this.show_sql = data.show_sql || false
     this.type = data.type || 'data'
     this.limit = data.limit || 200
     this._child_tab = data._child_tab || {} // Active child tab
@@ -29,7 +29,8 @@ let Tab = class {
         _show: false
       },
       email: {
-        _show: false
+        _show: false,
+        limit: 100000
       },
     }
   }

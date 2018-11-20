@@ -27,6 +27,7 @@ export default {
     default_query_limit: 200,
     editor_font_size: '0.7rem',
     progress_interval: 1000,
+    email_address: '',
     message: {
       show: false,
       width: '370px',

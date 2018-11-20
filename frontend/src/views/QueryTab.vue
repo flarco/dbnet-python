@@ -106,7 +106,7 @@
                 </span>
 
                 <span class="button is-small"
-                      :class="{'is-info':$store.vars.show_tab_sql}"
+                      :class="{'is-info':$store.query._session._tab.show_sql}"
                       @click="toggle_tab_sql">
                   <b-tooltip label="Show SQL Tab Editor" position="is-top" type="is-light">
                     SQL
@@ -174,7 +174,7 @@
                   <b-icon pack="fa" icon="file-excel-o" size="is-small"></b-icon>
                 </a>
                 <a title="Email Results (CSV)" class="button is-small"
-                  @click="$store.query._session._tab._child_tab.form_data.email._show = true">
+                  @click="$store.query._session._tab._child_tab.form_data.email._show = true; $store.query._session._tab._child_tab.form_data.email.name = sess_active_child_long_name">
                   <b-icon pack="fa" icon="envelope" size="is-small"></b-icon>
                 </a>
                 <a v-if="$store.query._session._tab.loading" title="Kill Current Query and Restart Worker."
@@ -241,31 +241,31 @@
 
           <!-- Email Form -->
           <section>
-            <b-message style="font-size: 0.8rem" title="Email CSV Results" :active.sync="$store.query._session._tab._child_tab.form_data.email._show">
+            <b-message  title="Email CSV Results" :active.sync="$store.query._session._tab._child_tab.form_data.email._show">
               <b-field grouped>
-                  <b-field expanded>
-                      <b-input size="is-small" placeholder="File Name Alias" v-model="$store.query._session._tab._child_tab.form_data.email.name"></b-input>
+                  <b-field horizontal expanded label="Name:">
+                      <b-input expanded size="is-small" placeholder="File Name Alias" v-model="$store.query._session._tab._child_tab.form_data.email.name"></b-input>
                   </b-field>
-                  <b-field expanded>
-                      <b-input size="is-small" placeholder="To Addresses (;)" v-model="$store.query._session._tab._child_tab.form_data.email.email_address"></b-input>
+                  <b-field horizontal expanded label="Email:">
+                      <b-input size="is-small" placeholder="To Addresses (;)" v-model="$store.settings.email_address"></b-input>
                   </b-field>
-                  <b-field expanded>
+                  <b-field  horizontal label="Limit:">
                       <b-input size="is-small" placeholder="Limit" v-model="$store.query._session._tab._child_tab.form_data.email.limit"></b-input>
                   </b-field>
-                  <p class="control ">
-                    <button class="button is-primary is-small" @click="email_exec_sql($store.query._session._tab._child_tab.sql, {email_address: $store.query._session._tab._child_tab.form_data.email.email_address, name:$store.query._session._tab._child_tab.form_data.email.name, limit:$store.query._session._tab._child_tab.form_data.email.limit}, $store.query._session._tab.id)">Submit</button>
+                  <p class="control">
+                    <button class="button is-primary is-small" @click="email_exec_sql($store.query._session._tab._child_tab.sql, {email_address: $store.settings.email_address, name:$store.query._session._tab._child_tab.form_data.email.name, limit:$store.query._session._tab._child_tab.form_data.email.limit}, $store.query._session._tab.id)">Submit</button>
                   </p>
               </b-field>
             </b-message>
           </section>
 
-          <!-- <editor v-if="$store.vars.show_tab_sql"></editor> -->
+          <!-- <editor v-if="$store.query._session._tab.show_sql"></editor> -->
           <!-- <editor ref="ace_editor" v-model="$store.query._session._tab._child_tab.sql"
-              @init="editorInit" v-if="$store.vars.show_tab_sql"
+              @init="editorInit" v-if="$store.query._session._tab.show_sql"
               @keyup.120="execute_sql($store.query._session._tab._child_tab.sql, $store.query._session._tab.id)"
               lang="pgsql" theme="chrome" width="100%" height="100"
               title="F9 to Submit"></editor> -->
-          <textarea id="tab-sql-textarea" class="textarea codelike" v-if="$store.vars.show_tab_sql"
+          <textarea id="tab-sql-textarea" class="textarea codelike" v-if="$store.query._session._tab.show_sql"
             v-model="$store.query._session._tab._child_tab.sql" rows="8"
             @keyup.120="execute_sql($store.query._session._tab._child_tab.sql, $store.query._session._tab.id)"
             :style="{'font-size': $store.settings.editor_font_size}"
@@ -384,8 +384,8 @@ export default {
     },
     toggle_tab_sql() {
       let self = this;
-
-      this.$store.vars.show_tab_sql = !this.$store.vars.show_tab_sql;
+      this.$store.query._session._tab.show_sql = !this.$store.query._session
+        ._tab.show_sql;
       this.log(this.$refs);
       this.log(this.$store.vars.hot.table.getSelected());
 
