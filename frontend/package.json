@@ -23,6 +23,7 @@
     "vue-codemirror": "^3.1.8",
     "vue-context-menu": "^2.0.6",
     "vue-lodash": "^2.0.0",
+    "vue-native-notification": "^1.0.5",
     "vue-router": "^3.0.1",
     "vue-socket.io": "^2.1.1-b",
     "vue-stash": "^2.0.1-beta",

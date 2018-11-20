@@ -10,6 +10,7 @@ import VueLodash from 'vue-lodash'
 import VueSocketio from 'vue-socket.io';
 import Clipboard from 'v-clipboard'
 import VueContextMenu from 'vue-context-menu'
+import VueNativeNotification from 'vue-native-notification'
 
 import axios from 'axios'
 import VueAxios from 'vue-axios'
@@ -43,10 +44,27 @@ if (Vue.config.productionTip || process.env.NODE_ENV != 'development') {
 }
 Vue.use(VueSocketio, sio_url);
 
+// https://www.npmjs.com/package/vue-native-notification
+Vue.use(VueNativeNotification, {
+  // Automatic permission request before
+  // showing notification (default: true)
+  requestOnNotify: true
+})
+
 Vue.mixin({
   computed: computed,
   methods: methods
 })
+
+// Window focus variable
+window.onfocus = () => window.windowActive = true;
+window.onblur = () => window.windowActive = false;
+window.windowActive = true
+
+// test
+setInterval(function () {
+  console.log(window.isTabActive ? 'active' : 'inactive');
+}, 1000);
 
 /* eslint-disable */
 const app = new Vue({

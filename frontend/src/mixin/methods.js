@@ -1750,12 +1750,17 @@ var methods = {
         document.getElementById("file-iframe").src = data.options.url;
       }
 
+
       this.$forceUpdate();
     } else if (data.orig_req.tab_id != null) {
       // add to queue so that when switched back to database it can be processes
       this.log("queued to $store.queue.rcv_query_data");
       this.$store.queue.rcv_query_data.push(data);
     }
+    if (!window.windowActive) this.$notification.show(`${data.orig_req.database} Query Finished`, {
+      body: `Query ${data.id} Finished`,
+      image: '../../assets/logo-brand2.png'
+    }, {})
   }
 };
 
