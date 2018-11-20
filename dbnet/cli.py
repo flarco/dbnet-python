@@ -14,6 +14,8 @@ def dbnet_cli():
     '--reset_db',
     help='Reset the backend SQLite database',
     action='store_true')
+  parser.add_argument(
+    '--force', help='Kill any running instance.', action='store_true')
   parser.add_argument('--port', help='The web application port')
 
   args = parser.parse_args()
@@ -30,6 +32,6 @@ def dbnet_cli():
     store.create_tables(drop_first=True)
   elif args.serve:
     store.create_tables()
-    server.main()
+    server.main(kill_existing=args.force)
   else:
     parser.print_help()

@@ -382,9 +382,12 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
   send_to_webapp(response_data)
 
 
-def main():
+def main(kill_existing=False):
   log('Main Loop PID is {}'.format(os.getpid()))
-  register_pid(get_pid_path('dbnet', DBNET_FOLDER), exit_queue=exit_queue)
+  register_pid(
+    get_pid_path('dbnet', DBNET_FOLDER),
+    exit_queue=exit_queue,
+    kill_if_running=kill_existing)
   exiting = False
   start_worker_mon()
   workers['mon'].put_child_q(dict(name='main', pid=os.getpid()))
