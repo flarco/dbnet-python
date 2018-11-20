@@ -119,15 +119,20 @@ export default {
       this.$store.query._session.schema_obj_filter = "";
     },
     filertered_schemas() {
+      // filter schema name by comma delimited keyword
+      let filter_arr = this.$store.query._session.schema_filter
+        ? this.$store.query._session.schema_filter.split(",")
+        : [];
       try {
         return this.get_schema_list().filter(name => {
           return this.$store.query._session.schema_filter
-            ? name
-                .toString()
-                .toLowerCase()
-                .indexOf(
-                  this.$store.query._session.schema_filter.toLowerCase()
-                ) >= 0
+            ? filter_arr.some(
+                filter =>
+                  name
+                    .toString()
+                    .toLowerCase()
+                    .indexOf(filter.toLowerCase()) >= 0
+              )
             : name;
         });
       } catch (error) {
