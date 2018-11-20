@@ -114,7 +114,9 @@ def execute_sql(worker: Worker, data_dict):
           worker_sql_cache[sql] = dict(
             timestamp=now(), results=[], limit=limit)
           for fields, rows in conn.execute_multi(
-              sql, dtype='tuple', limit=limit_def):
+              sql,
+              dtype='tuple',
+              limit=limit if limit > limit_def else limit_def):
             worker_sql_cache[sql]['results'].append((fields, rows))
             yield fields, rows, cache_used
 
