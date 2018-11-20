@@ -56,16 +56,6 @@ Vue.mixin({
   methods: methods
 })
 
-// Window focus variable
-window.onfocus = () => window.windowActive = true;
-window.onblur = () => window.windowActive = false;
-window.windowActive = true
-
-// test
-setInterval(function () {
-  console.log(window.isTabActive ? 'active' : 'inactive');
-}, 1000);
-
 /* eslint-disable */
 const app = new Vue({
   el: '#app',

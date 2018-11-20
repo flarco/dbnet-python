@@ -1757,7 +1757,8 @@ var methods = {
       this.log("queued to $store.queue.rcv_query_data");
       this.$store.queue.rcv_query_data.push(data);
     }
-    if (!window.windowActive) this.$notification.show(`${data.orig_req.database} Query Finished`, {
+
+    if (document.visibilityState == 'hidden') this.$notification.show(`${data.orig_req.database} Query Finished`, {
       body: `Query ${data.id} Finished`,
       image: '../../assets/logo-brand2.png'
     }, {})
