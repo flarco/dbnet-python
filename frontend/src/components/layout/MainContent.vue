@@ -15,7 +15,7 @@
         </article>
       </div>
       <div class="tile is-parent" style="padding-left: 0px">
-        <article class="tile is-child box" style="padding-top: 4px; padding-left: 7px" v-if="$route.name != 'Home' && $store.query.db_name != null">
+        <article class="tile is-child box" style="padding-top: 4px; padding-left: 7px" v-if="$route.name == 'Settings' || ($route.name != 'Home' && $store.query.db_name != null)">
 
           <transition
               mode="out-in"
