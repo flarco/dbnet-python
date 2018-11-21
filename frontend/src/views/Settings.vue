@@ -178,6 +178,7 @@ export default {
             duration: 2000,
             message: `Saved.`
           });
+          self.get_databases(); // refresh database list
         } else {
           self.notify(data2);
         }
