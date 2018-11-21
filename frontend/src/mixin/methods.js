@@ -181,7 +181,7 @@ var methods = {
     } else if ("completed" in data) {
       msg = {
         title: `Completed Req #${data.id}`,
-        type: "is-primary",
+        type: data.completed ? "is-primary" : "is-danger",
         text: data.notify || JSON.stringify(data)
       };
     }

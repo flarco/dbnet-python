@@ -2,7 +2,7 @@ import os, sys, copy, requests, json
 from io import StringIO, BytesIO
 
 from xutil.web import WebApp, process_request
-from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, get_dir_path, get_home_path
+from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, get_dir_path, get_home_path, load_profile, write_file
 from xutil.diskio import read_file, read_csv
 from dbnet.store import store_func
 from flask import render_template
@@ -194,6 +194,24 @@ def client_request(sid, data, *args, **kwargs):
   _data2 = copy.deepcopy(data2)
   _data2['payload'] = '{} bytes'.format(len(jdumps(_data2['payload'])))
   app.log('-Resp Data => {}'.format(_data2))
+  return data2
+
+
+@app.on('profile-request')
+def profile_request(sid, data, *args, **kwargs):
+  data2 = dict(completed=False)
+  try:
+    if data['type'] == 'load':
+      data2['text'] = load_profile(raw_text=True)
+      data2['completed'] = True
+    elif data['type'] == 'save':
+      yaml.load(data['text'])  # validate
+      path = os.getenv('PROFILE_YAML')
+      write_file(path, data['text'], echo=True)
+      data2['completed'] = True
+  except Exception as E:
+    log(E)
+    data2['error'] = get_error_str(E)
   return data2
 
 
