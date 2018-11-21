@@ -4,6 +4,8 @@ dbnet
 
 # Install
 ```bash
+pip install -U git+git://github.com/flarco/xutil.git
+pip install -U git+git://github.com/flarco/xutil.git#egg=xutil[web]
 pip install -U git+git://github.com/flarco/dbnet.git
 ```
 
