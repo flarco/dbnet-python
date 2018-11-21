@@ -6,6 +6,7 @@ from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, g
 from xutil.diskio import read_file, read_csv
 from dbnet.store import store_func
 from flask import render_template
+import yaml
 
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
 CSV_FOLDER = DBNET_FOLDER + '/csv'
