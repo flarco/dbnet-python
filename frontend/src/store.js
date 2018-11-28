@@ -127,6 +127,7 @@ export default {
     tabs_active: false,
     query_progress_prct: null,
     query_time_interval: null,
+    query_storage_size: null,
     mon_interval: null,
     query_time: null,
     loading: false,

@@ -114,7 +114,7 @@
                 </span>
 
                 <span class="button is-small" title="Refresh Tab Data"
-                      @click="execute_sql($store.query._session._tab._child_tab.sql, $store.query._session._tab.id)">
+                      @click="execute_sql($store.query._session._tab._child_tab.query.sql, $store.query._session._tab.id)">
                     <b-icon pack="fa" icon="refresh" size="is-small"></b-icon>
                 </span>
 
@@ -253,21 +253,21 @@
                       <b-input size="is-small" placeholder="Limit" v-model="$store.query._session._tab._child_tab.form_data.email.limit"></b-input>
                   </b-field>
                   <p class="control">
-                    <button class="button is-primary is-small" @click="email_exec_sql($store.query._session._tab._child_tab.sql, {email_address: $store.settings.email_address, name:$store.query._session._tab._child_tab.form_data.email.name, limit:$store.query._session._tab._child_tab.form_data.email.limit}, $store.query._session._tab.id)">Submit</button>
+                    <button class="button is-primary is-small" @click="email_exec_sql($store.query._session._tab._child_tab.query.sql, {email_address: $store.settings.email_address, name:$store.query._session._tab._child_tab.form_data.email.name, limit:$store.query._session._tab._child_tab.form_data.email.limit}, $store.query._session._tab.id)">Submit</button>
                   </p>
               </b-field>
             </b-message>
           </section>
 
           <!-- <editor v-if="$store.query._session._tab.show_sql"></editor> -->
-          <!-- <editor ref="ace_editor" v-model="$store.query._session._tab._child_tab.sql"
+          <!-- <editor ref="ace_editor" v-model="$store.query._session._tab._child_tab.query.sql"
               @init="editorInit" v-if="$store.query._session._tab.show_sql"
-              @keyup.120="execute_sql($store.query._session._tab._child_tab.sql, $store.query._session._tab.id)"
+              @keyup.120="execute_sql($store.query._session._tab._child_tab.query.sql, $store.query._session._tab.id)"
               lang="pgsql" theme="chrome" width="100%" height="100"
               title="F9 to Submit"></editor> -->
           <textarea id="tab-sql-textarea" class="textarea codelike" v-if="$store.query._session._tab.show_sql"
-            v-model="$store.query._session._tab._child_tab.sql" rows="8"
-            @keyup.120="execute_sql($store.query._session._tab._child_tab.sql, $store.query._session._tab.id)"
+            v-model="$store.query._session._tab._child_tab.query.sql" rows="8"
+            @keyup.120="execute_sql($store.query._session._tab._child_tab.query.sql, $store.query._session._tab.id)"
             :style="{'font-size': $store.settings.editor_font_size}"
             title="F9 to Submit"></textarea>
         </div>
@@ -367,7 +367,7 @@ export default {
       this.$refs.ace_editor.editor.commands.addCommand({
         name: "Execute SQL",
         exec: function() {
-          // self.execute_sql(self.$store.query._session._tab._child_tab.sql, self.$store.query._session._tab.id)
+          // self.execute_sql(self.$store.query._session._tab._child_tab.query.sql, self.$store.query._session._tab.id)
           self.get_ace_selection(self.$refs.ace_editor);
         },
         bindKey: { mac: "f9", win: "f9" }

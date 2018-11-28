@@ -236,6 +236,8 @@ var methods = {
         // cycle through all items once
         self.rcv_query_data(self.$store.queue.rcv_query_data.shift()); // process 1st positioned item
       }
+      
+      self.$store.vars.query_storage_size = `${ Math.round(JSON.stringify(self.$store.query).length / 1024) } KB`
     });
   },
 
@@ -1343,7 +1345,7 @@ var methods = {
       name: "export"
     };
     this.submit_sql(
-      this.$store.query._session._tab._child_tab.sql,
+      this.$store.query._session._tab._child_tab.query.sql,
       this.$store.query._session._tab.id,
       options
     );

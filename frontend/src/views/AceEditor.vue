@@ -1,8 +1,8 @@
 <template>
   <div>
-    <editor ref="ace_editor" v-model="$store.query._session._tab._child_tab.sql"
+    <editor ref="ace_editor" v-model="$store.query._session._tab._child_tab.query.sql"
               @init="editorInit" v-if="$store.vars.show_tab_sql"
-              @keyup.120="execute_sql($store.query._session._tab._child_tab.sql, $store.query._session._tab.id)"
+              @keyup.120="execute_sql($store.query._session._tab._child_tab.query.sql, $store.query._session._tab.id)"
               lang="pgsql" theme="chrome" width="100%" height="100"
               title="F9 to Submit"></editor>
   </div>
@@ -29,7 +29,7 @@ export default {
       this.$refs.ace_editor.editor.commands.addCommand({
         name: "Execute SQL",
         exec: function() {
-          // self.execute_sql(self.$store.query._session._tab._child_tab.sql, self.$store.query._session._tab.id)
+          // self.execute_sql(self.$store.query._session._tab._child_tab.query.sql, self.$store.query._session._tab.id)
           // self.get_ace_selection()
           self.get_ace_cursor_query()
         },
@@ -40,7 +40,7 @@ export default {
       this.$refs.ace_editor.editor.commands.addCommand({
         name: "Get Object",
         exec: function() {
-          // self.execute_sql(self.$store.query._session._tab._child_tab.sql, self.$store.query._session._tab.id)
+          // self.execute_sql(self.$store.query._session._tab._child_tab.query.sql, self.$store.query._session._tab.id)
           self.get_ace_selection(null, true)
           // self.log('hey')
         },

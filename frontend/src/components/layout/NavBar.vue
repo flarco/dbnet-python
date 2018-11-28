@@ -48,10 +48,10 @@
           <a class="navbar-item" style="min-width: 55px; color: teal">
             <i class="fa fa-cog fa-spin fa-fw fa-1x" v-if="$store.vars.app_loading"></i>
           </a>
-          <a class="navbar-item" style="min-width: 55px; color: teal">
-            {{get_localstorage_size()}}
+          <a class="navbar-item" style="min-width: 55px; color: teal" title="App In-Mem size for active DB">
+            {{ $store.vars.query_storage_size }}
           </a>
-          <b-tooltip :label="`Save DB Session (${get_localstorage_size()})`" position="is-bottom" type="is-dark">
+          <b-tooltip :label="`Save DB Session (${ localstorage_size })`" position="is-bottom" type="is-dark">
             <a class="navbar-item" @click="save_dbquery_state()">
               <b-icon pack="fa" icon="hdd-o"></b-icon>
             </a>
@@ -90,14 +90,10 @@
 export default {
   computed: {
     localstorage_size() {
-      return get_localstorage_size();
+      return `${ Math.round(JSON.stringify(localStorage).length / 1024) } KB`
     }
   },
   methods: {
-    get_localstorage_size() {
-      let storageSize = Math.round(JSON.stringify(localStorage).length / 1024);
-      return `${storageSize} KB`;
-    },
     toggle_side_menu() {
       let self = this;
       this.$store.settings.sidebar_shown = !this.$store.settings.sidebar_shown;

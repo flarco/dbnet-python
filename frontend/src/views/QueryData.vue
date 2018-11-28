@@ -23,7 +23,7 @@
             <a @click="activate_tab(tab_id)" @auxclick="delete_tab(tab.id)">
 
               <span v-if="tab.long_name != 'META' && tab.type=='data'">
-                <b-tooltip :label="trim_text(tab._child_tab.sql)" position="is-right" type="is-white" size="is-small">
+                <b-tooltip :label="trim_text(tab._child_tab.query.sql)" position="is-right" type="is-white" size="is-small">
                   <i class="fa fa-spinner fa-fw" v-if="$store.query._session.tabs[tab_id].loading" style="color:blue"></i>
                   <span style="font-size: 0.8rem">{{tab.long_name}}</span>
                 </b-tooltip>
