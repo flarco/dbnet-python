@@ -1,19 +1,27 @@
-import os, sys, copy, requests, json
+import os, sys, copy, requests, json, random, string
 from io import StringIO, BytesIO
 
 from xutil.web import WebApp, process_request
-from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, get_dir_path, get_home_path, load_profile, write_file
-from xutil.diskio import read_file, read_csv
+from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, get_dir_path, get_home_path, load_profile, file_exists
+from xutil.diskio import read_file, write_file, read_csv
 from dbnet.store import store_func
 from flask import render_template
 import yaml
 
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
 CSV_FOLDER = DBNET_FOLDER + '/csv'
+AUTH_PATH = DBNET_FOLDER + '/.authorized'
 app = WebApp('dbnet', root_path=get_dir_path(__file__))
 SID = None
 last_perf_data = {}
 
+get_authorized = lambda: read_file(AUTH_PATH).splitlines() if file_exists(AUTH_PATH) else []
+add_authorized = lambda new_id: write_file(AUTH_PATH, new_id + '\n', append=True)
+app_password = os.getenv('DBNET_PASSWD', default=None)
+app_token = ''.join(
+    random.SystemRandom().choice(string.ascii_uppercase + string.digits +
+                                string.ascii_lowercase) for _ in range(16))
+valid_SIDs = set()
 
 @app.route('/logo.ico')
 def favicon():
@@ -64,11 +72,26 @@ def index():
   """Serve the client-side application."""
   (val_dict, form_dict, data_dict) = app.proc_request()
   session_id = app.get_cookie_session_id()
+  in_token = val_dict.get('token', None)
+  if in_token in (app_token, app_password):
+    add_authorized(session_id)
+    resp = app.make_response(app.redirect(app.url_for('index'))) # remove token from URL
+  elif session_id in get_authorized():
+    resp = app.make_response(render_template('index.html'))
+  else:
+    resp = app.make_response(app.redirect(app.url_for('login')))
 
-  resp = app.make_response(render_template('index.html'))
   resp.set_cookie(app.cookie_session_key, session_id)
   resp.headers['Cache-Control'] = 'no-cache'
 
+  return resp
+
+
+@app.route('/login', methods=['GET'])
+def login():
+  (val_dict, form_dict, data_dict) = app.proc_request()
+  resp = app.make_response(render_template('login.html'))
+  log('+Web-App Token: ' + app_token)
   return resp
 
 
@@ -158,6 +181,13 @@ def spark_progess(sid, data):
 
 @app.on('connect')
 def connect(sid, environ):
+  cookies = app.parse_sio_cookies(sio_environ=environ)
+  session_id = cookies.get(app.cookie_session_key, None)
+  if session_id in get_authorized():
+    valid_SIDs.add(sid)
+  else:
+    log('~~Session ID {} is not authorized'.format(session_id))
+
   app.log('connect ' + sid)
   SID = sid
 
@@ -174,6 +204,8 @@ def client_request(sid, data, *args, **kwargs):
   """
   Operation on Store. Returns Data as needed
   """
+  if sid not in valid_SIDs: return {'error': 'Invalid SID'}
+
   data['sid'] = sid
   _data = copy.deepcopy(data)
   if _data['store_func'] == 'set_dbquery_state':
@@ -200,6 +232,8 @@ def client_request(sid, data, *args, **kwargs):
 
 @app.on('profile-request')
 def profile_request(sid, data, *args, **kwargs):
+  if sid not in valid_SIDs: return {'error': 'Invalid SID'}
+
   data2 = dict(completed=False)
   try:
     if data['type'] == 'load':
@@ -225,6 +259,8 @@ def client_request(sid, data, *args, **kwargs):
    * stop-worker
    * get-workers
   """
+  if sid not in valid_SIDs: return {'error': 'Invalid SID'}
+
   data['sid'] = sid
   SID = sid
 
