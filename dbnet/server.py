@@ -434,5 +434,5 @@ def main(kill_existing=False):
 
 
 if __name__ == '__main__':
-  store.create_tables(drop_first=True)
+  store.create_tables(drop_first=False)
   main()

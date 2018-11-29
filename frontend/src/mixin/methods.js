@@ -362,7 +362,7 @@ var methods = {
 
   filter_rows(rows, filter_text = null) {
     // use $store.query._session._tab.filter_text to filter rows
-    if (filter_text == null) return rows;
+    if (filter_text == null || filter_text == "") return rows;
 
     return rows.filter(row => {
       let new_row = row.filter(val => {
