@@ -37,7 +37,7 @@ workers = OrderedDict()
 db_workers_map = OrderedDict()
 conf_queue = Queue()
 exit_queue = Queue()
-profile = get_profile()
+profile = get_profile(create_if_missing=True)
 databases = get_databases(profile)
 
 
