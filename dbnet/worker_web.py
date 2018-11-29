@@ -73,7 +73,7 @@ def index():
   (val_dict, form_dict, data_dict) = app.proc_request()
   session_id = app.get_cookie_session_id()
   in_token = val_dict.get('token', None)
-  if in_token in (app_token, app_password):
+  if in_token and in_token in (app_token, app_password):
     add_authorized(session_id)
     resp = app.make_response(app.redirect(app.url_for('index'))) # remove token from URL
   elif session_id in get_authorized():
