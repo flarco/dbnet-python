@@ -128,6 +128,7 @@ export default {
     query_progress_prct: null,
     query_time_interval: null,
     query_storage_size: null,
+    query_history_selected: [],
     mon_interval: null,
     query_time: null,
     loading: false,

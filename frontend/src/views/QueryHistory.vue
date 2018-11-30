@@ -19,7 +19,7 @@
     
 
     <div class="history_div">
-      <select multiple v-model="history_selected"
+      <select multiple v-model="$store.vars.query_history_selected"
               class="schema_select item_select" style="font-size: 0.7em; width:100%; height: 150px">
         <option v-for="object in filtered_history()" class="codelike"
           @click="history_selected_sql = $store.queue.rcv_queries.filter(rec => rec.task_id == object.split(' | ')[1])[0].sql_text"
@@ -84,6 +84,10 @@ export default {
   },
   mounted() {
     this.get_queries(this.history_filter, null);
+    if(this.$store.vars.query_history_selected.length > 0){
+      let object  = this.$store.vars.query_history_selected[0]
+      this.history_selected_sql = this.$store.queue.rcv_queries.filter(rec => rec.task_id == object.split(' | ')[1])[0].sql_text
+    }
   }
 };
 </script>
