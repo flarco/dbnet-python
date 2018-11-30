@@ -269,7 +269,7 @@
             v-model="$store.query._session._tab._child_tab.query.sql" rows="8"
             @keyup.120="execute_sql($store.query._session._tab._child_tab.query.sql, $store.query._session._tab.id)"
             :style="{'font-size': $store.settings.editor_font_size}"
-            title="F9 to Submit"></textarea>
+            title="F9 to Submit" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
         </div>
       </div>
       <div class="columns">
@@ -307,13 +307,13 @@
                 v-model="$store.query._session._tab._child_tab.query.error"
                 style="color:red"
                 :style="{'font-size': $store.settings.editor_font_size, 'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}"
-                title="Query Error"></textarea>
+                title="Query Error" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
             <HotTable v-else-if="$store.query._session._tab._child_tab.query != null && $store.query._session._tab._child_tab.text_data==''"></HotTable>
             <textarea v-else readonly class="textarea codelike"
                 v-model="$store.query._session._tab._child_tab.text_data"
                 style="color:blue"
                 :style="{'font-size': $store.settings.editor_font_size, 'height': $store.style.query_hot_height, 'width': $store.style.query_hot_width}"
-                title="Text Data"></textarea>
+                title="Text Data" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
       </div>

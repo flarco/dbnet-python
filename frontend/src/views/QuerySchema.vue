@@ -93,6 +93,10 @@
         >Open</b-dropdown-item>
 
         <b-dropdown-item
+          @click="get_tables_columns()"
+        >Columns</b-dropdown-item>
+
+        <b-dropdown-item
           @click="set_clipboard(sess_schema_objects_selected.map(tbl => `${sess_schema}.${tbl}`).join('\n'))"
         >Copy Name</b-dropdown-item>
 
@@ -133,7 +137,7 @@
       >
         <option
           v-for="object in filertered_tables()"
-          @dblclick="create_object_tab(sess_schema + '.' + sess_schema_objects_selected[0])"
+          @dblclick="create_object_tab(sess_schema_objects_selected.map(o => sess_schema + '.' + o)[0])"
           @contextmenu.prevent="click_id('schema-obj-funcs')"
           v-bind:key="object"
           :value="object"
@@ -209,6 +213,14 @@ export default {
         this.log(error);
         return [];
       }
+    },
+    get_tables_columns(){
+      let self = this
+      let objs = this.sess_schema_objects_selected.map(o => self.sess_schema + '.' + o)
+      if(objs.length == 0) return
+
+      let tab_id = this.create_data_tab();
+      this.get_object_columns(objs, this.sess_active_child_tab_id, true)
     }
   },
   data() {

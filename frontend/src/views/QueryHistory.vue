@@ -33,7 +33,8 @@
     <div>
       <textarea class="textarea codelike" name="history_sql" id=""
         :style="{'height': $store.style.schema_object_height}"
-        style="width: 100%; font-size: 0.7em" v-model="history_selected_sql"></textarea>
+        style="width: 100%; font-size: 0.7em" v-model="history_selected_sql"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
     </div>
   </div>
 </template>

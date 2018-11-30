@@ -1388,15 +1388,16 @@ var methods = {
     });
   },
 
-  get_object_columns(object_full_name, tab_id) {
+  get_object_columns(object_full_name, tab_id, include_schema_table = false) {
     let query = new classes.SqlQuery({
       database: this.$store.query.db_name,
+      sql: JSON.stringify(object_full_name),
       limit: 1000,
       options: {
         meta: "get_columns",
         kwargs: {
           table_name: object_full_name,
-          include_schema_table: false
+          include_schema_table: include_schema_table
         }
       }
     });
@@ -1404,7 +1405,7 @@ var methods = {
     let sql_req = new classes.ReqData({
       req_type: "submit-sql",
       database: query.database,
-      sql: "",
+      sql: query.sql,
       limit: query.limit,
       tab_id: tab_id,
       session_name: this.$store.query.session_name,
