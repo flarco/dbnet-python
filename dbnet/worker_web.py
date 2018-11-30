@@ -283,4 +283,5 @@ def disconnect(sid):
 def run(port, worker, mon_worker):
   global _mon_worker
   _mon_worker = mon_worker
-  app.run(port, log=worker.log, worker=worker)
+  url_suffix = '/?token=' + app_token
+  app.run(port, url_suffix=url_suffix, log=worker.log, worker=worker)
