@@ -982,7 +982,13 @@ var methods = {
 
     this.activate_tab(tab_id);
     let child_tab = this.sess_active_child_tab;
-    this.submit_sql(sql, child_tab.id);
+
+    if(sql[0] == '@'){
+      let obj = this.decode_function(sql)
+      obj.f(...obj.a)
+    } else {
+      this.submit_sql(sql, child_tab.id);
+    }
     this.$store.hotSettings.colHeaders = []
     this.$store.hotSettings.columns = []
   },
@@ -1388,10 +1394,28 @@ var methods = {
     });
   },
 
+  encode_function(func_name, args){
+    return `@${func_name}=${JSON.stringify(args)}`
+  },
+
+  decode_function(code_string){
+    if (code_string[0] != '@') return 
+    let parsed = code_string.replace('@', '').replace('=', '`@`&`').split('`@`&`')
+    let func_name = parsed[0]
+    let args = JSON.parse(parsed[1])
+
+    // check authorized function name
+    let authorized = {
+      'get_object_columns': this.get_object_columns
+    }
+    if (!(func_name in authorized)) return {f: () => { console.error(`Function ${func_name} is not authorized`)}, a: {}}
+    else return {f: authorized[func_name], a: args}
+  },
+
   get_object_columns(object_full_name, tab_id, include_schema_table = false) {
     let query = new classes.SqlQuery({
       database: this.$store.query.db_name,
-      sql: JSON.stringify(object_full_name),
+      sql: this.encode_function('get_object_columns', [object_full_name, tab_id, include_schema_table]),
       limit: 1000,
       options: {
         meta: "get_columns",
