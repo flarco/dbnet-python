@@ -162,6 +162,9 @@ def spark_progess(sid, data):
     api_applications = '{}/api/v1/applications'.format(url)
     headers = {'Content-type': 'application/json'}
     resp = requests.get(api_applications, headers=headers)
+    if not resp.text:
+      return data2
+
     resp1 = json.loads(resp.text)
 
     app_id = resp1[0]['id']
