@@ -909,11 +909,12 @@ var methods = {
 
   kill_query(tab_id = null) {
     if (tab_id == null) tab_id = this.sess_active_child_tab_id;
+    let worker_name = this.$store.query._session.tabs[tab_id].query.worker_name
     this.log("kill_query");
     let data1 = new classes.ReqData({
       req_type: "stop-worker",
       database: this.$store.query.db_name,
-      worker_name: this.$store.query._session.tabs[tab_id].query.worker_name
+      worker_name: worker_name
     });
 
     this.submit_req(data1);
@@ -925,6 +926,11 @@ var methods = {
         "loading",
         false
       );
+
+    this.$snackbar.open({
+      duration: 3000,
+      message: `Worker '${worker_name}' killed.`
+    });
   },
 
   email_exec_sql(sql, email_options, tab_id = null) {
@@ -982,6 +988,7 @@ var methods = {
 
     this.activate_tab(tab_id);
     let child_tab = this.sess_active_child_tab;
+    this.set_tab_prop(child_tab.id, "filter_text", '', this.sess_name);
 
     if(sql[0] == '@'){
       let obj = this.decode_function(sql)

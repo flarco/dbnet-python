@@ -191,6 +191,7 @@ def stop_worker(worker_name):
       if len(db_workers_map[db]) == 0:
         del db_workers_map[db]
     del workers[worker_name]
+  log('+Worker "{}" stopped.'.format(worker_name))
   return True
 
 

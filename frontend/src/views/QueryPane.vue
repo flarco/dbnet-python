@@ -24,6 +24,13 @@
         </b-tooltip>
 
         <span style="padding-left:10px"></span>
+        <b-tooltip label="Stop Worker" position="is-bottom" type="is-dark">
+          <a @click="kill_query(null)">
+            <b-icon pack="fa" icon="stop-circle-o" size="is-small"></b-icon>
+          </a>
+        </b-tooltip>
+
+        <span style="padding-left:10px"></span>
         <query-session></query-session>
 
       </span>
