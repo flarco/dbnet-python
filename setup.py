@@ -12,10 +12,11 @@ setup(
   keywords=['dbnet'],
   packages=find_packages(exclude=['tests']),
   include_package_data=True,
-  dependency_links = [
-   'https://github.com/flarco/xutil/archive/master.zip',
+  dependency_links=[
+    'https://github.com/flarco/xutil/archive/master.zip',
   ],
   install_requires=[
+    "python-socketio",
     "verboselogs",
     "coloredlogs",
     "psutil",
