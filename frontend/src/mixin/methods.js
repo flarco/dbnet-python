@@ -1249,7 +1249,6 @@ var methods = {
       200
     );
 
-    this.$store.vars.query_time = setInterval(self.update_query_time, 200);
     this.set_tab_prop(tab_id, "query", query);
     this.set_tab_prop(tab_id, "loading", true);
     this.$store.vars.query_time = 0;
@@ -1447,7 +1446,7 @@ var methods = {
       self.update_query_time,
       200
     );
-    this.$store.vars.query_time = setInterval(self.update_query_time, 200);
+    
     this.set_tab_prop(tab_id, "query", query);
     this.set_tab_prop(tab_id, "loading", true);
     this.$store.vars.query_time = 0;
