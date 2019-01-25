@@ -1,8 +1,10 @@
 import os, sys, argparse
 from xutil import log
+from xutil.helpers import set_nice 
 
 
 def dbnet_cli():
+  set_nice(1)
   parser = argparse.ArgumentParser(description='DbNet Application')
   parser.add_argument(
     '--serve', help='Start the DbNet server', action='store_true')
