@@ -41,8 +41,10 @@ optional arguments:
 # Screenshots
 
 ![Screenshot 2](dbnet.screenshot.2.png)
+
 ![Screenshot 1](dbnet.screenshot.1.png)
-![Screenshot schema](dbnet.screenshot.schema.png)
+
+<img src="dbnet.screenshot.schema.png" alt="Screenshot schema" width="300"/>
 
 # TODO
 
