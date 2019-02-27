@@ -1,7 +1,5 @@
 
-<center>
-<img src="frontend/src/assets/logo-brand.png" alt="Logo" width="180"/>
-</center>
+<img align="center" src="frontend/src/assets/logo-brand.png" alt="Logo" width="180"/>
 
 DbNet is a Python/VueJS database client to access Oracle, Spark (Hive), Postgres, etc. It is still a work in progess, but should work fine for daily use. MS SQL Server is supported, although with some bugs here and there due to JDBC/JTDS bridge.
 
