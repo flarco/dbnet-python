@@ -6,6 +6,8 @@
 
 DbNet is a Python/VueJS database client to access Oracle, Spark (Hive), Postgres, etc. It is still a work in progess, but should work fine for daily use. MS SQL Server is supported, although with some bugs here and there due to JDBC/JTDS bridge.
 
+**Only Chrome and Firefox are supported at the moment.**
+
 # Install
 ```bash
 pip install -U git+git://github.com/flarco/xutil.git
