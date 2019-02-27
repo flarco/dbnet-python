@@ -9,6 +9,41 @@ pip install -U git+git://github.com/flarco/xutil.git#egg=xutil[web]
 pip install -U git+git://github.com/flarco/dbnet.git
 ```
 
+# Running
+
+`dbnet --help`
+
+```bash
+usage: dbnet [-h] [--serve] [--init_db] [--reset_db] [--force] [--port PORT]
+
+DbNet Application
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --serve      Start the DbNet server
+  --init_db    Initiatlize the backend SQLite database
+  --reset_db   Reset the backend SQLite database
+  --force      Kill any running instance.
+  --port PORT  The web application port
+```
+
+`dbnet --serve`
+
+```bash
+2019-02-27 10:08:11 -- DB Tables OK.
+2019-02-27 10:08:11 -- Main Loop PID is 39685
+2019-02-27 10:08:11 -- Monitor Loop PID is 39691
+2019-02-27 10:08:11 -- Web Server PID is 39692
+2019-02-27 10:08:11 -- URL -> http://macbook1:5566/?token=CqPahSJIeg1Nl4Kj
+(39692) wsgi starting up on http://0.0.0.0:5566
+```
+
+# Screenshots
+
+![Screenshot 2](dbnet.screenshot.2.png)
+![Screenshot 1](dbnet.screenshot.1.png)
+![Screenshot schema](dbnet.screenshot.schema.png)
+
 # TODO
 
 ## API Endpoints:
