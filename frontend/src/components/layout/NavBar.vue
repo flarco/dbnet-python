@@ -32,7 +32,7 @@
             <div class="navbar-start">
               <div class="navbar-brand">
                 <a class="navbar-item">
-                  <img src="../../assets/logo-brand2.png" alt=""/>
+                  <img src="../../assets/logo-brand.png" alt=""/>
                 </a>
               </div>
             </div>
