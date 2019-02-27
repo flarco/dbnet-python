@@ -42,6 +42,7 @@ databases = get_databases(profile)
 
 
 def start_worker_webapp():
+  """Starts the WebApp worker"""
   worker_name = '{}-webapp'.format(WORKER_PREFIX)
 
   worker = Worker(
@@ -76,6 +77,7 @@ def start_worker_webapp():
 
 
 def start_worker_mon():
+  """Starts the Monitoring worker"""
   worker_name = '{}-mon'.format(WORKER_PREFIX)
   worker = Worker(
     worker_name,
@@ -111,6 +113,15 @@ def start_worker_mon():
 
 
 def start_worker_db(db_name, start=False):
+  """Create and start a dabatase worker
+  
+  Args:
+    db_name: the name of the database
+    start: Whether to automatically start the worker or not
+  
+  Returns:
+    The worker object.
+  """
   db_prof = get_db_profile(db_name)
   db_workers_map[db_name] = db_workers_map.get(db_name, [])
 
@@ -156,16 +167,23 @@ def start_worker_db(db_name, start=False):
   return worker
 
 
-def get_avail_worker(data):
+def get_avail_worker(database):
+  """Get the available / running worker for the specified database.
 
-  if data.database not in db_workers_map:
-    db_worker = start_worker_db(data.database, start=True)
+  Args:
+    database: the name of the database
+  
+  Returns:
+    the matched database worker
+  """
+  if database not in db_workers_map:
+    db_worker = start_worker_db(database, start=True)
 
   # matched & available workers
   db_workers_matched = []
   db_workers_avail = []
 
-  for wkr in db_workers_map[data.database]:
+  for wkr in db_workers_map[database]:
     wkr_rec = store.worker_get(hostname, wkr.name)
     db_workers_matched.append(wkr.name)
     if wkr_rec.status == 'IDLE':
@@ -181,6 +199,11 @@ def get_avail_worker(data):
 
 
 def stop_worker(worker_name):
+  """Stop / Kill the specified worker.
+  
+  Args:
+    worker_name: the name of the worker to be stopped.
+  """
   if worker_name in workers:
     worker_ = workers[worker_name]
     worker_.stop()
@@ -196,7 +219,13 @@ def stop_worker(worker_name):
 
 
 def send_to_webapp(data, host='localhost', port=WEBAPP_PORT):
-  "Send data to Web App"
+  """Send data to Web App
+  
+  Args:
+    data: the payload data
+    host: the webapp host (default to localhost)
+    port: the port of the webapp  
+  """
   payload_type = data['payload_type']
   headers = {'Content-type': 'application/json'}
   url = 'http://{}:{}/api/{}'.format(host, port, payload_type)
@@ -204,10 +233,22 @@ def send_to_webapp(data, host='localhost', port=WEBAPP_PORT):
 
 
 def handle_worker_req(worker: Worker, data_dict):
+  """A function for a unhandled worker request.
+  
+  Args:
+    worker: the respective worker
+    data_dict: the request payload dictionary
+  """
   log('Received unhandled worker ({}) data: {}'.format(worker.name, data_dict))
 
 
 def handle_db_worker_req(worker: Worker, data_dict):
+  """Handler for for a database worker request.
+  
+  Args:
+    worker: the respective worker
+    data_dict: the request payload dictionary
+  """
   data = struct(data_dict)
   if worker.type == 'monitor':
     send_to_webapp(data_dict)
@@ -222,6 +263,12 @@ def handle_db_worker_req(worker: Worker, data_dict):
 
 
 def handle_web_worker_req(web_worker: Worker, data_dict):
+  """Handler for a web worker request
+  
+  Args:
+    worker: the respective worker
+    data_dict: the request payload dictionary
+  """
   # print('data_dict: {}'.format(data_dict))
   # return
   data = struct(data_dict)
@@ -234,7 +281,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
   }
 
   if data.req_type in ('submit-sql'):
-    db_worker = get_avail_worker(data)
+    db_worker = get_avail_worker(data.database)
 
     # send to worker queue
     db_worker.put_child_q(data_dict)
@@ -272,7 +319,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
       })
 
   elif data.req_type == 'get-analysis-sql':
-    db_worker = get_avail_worker(data)
+    db_worker = get_avail_worker(data.database)
     db_worker.put_child_q(data_dict)
     response_data['queued'] = True
 
@@ -290,7 +337,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
       rows = [list(r) for r in rows]
       response_data = dict(completed=True, headers=headers, rows=rows)
     else:
-      db_worker = get_avail_worker(data)
+      db_worker = get_avail_worker(data.database)
       db_worker.put_child_q(data_dict)
       response_data['queued'] = True
 
@@ -312,7 +359,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
       rows = [list(r) for r in rows]
       response_data = dict(completed=True, headers=headers, rows=rows)
     else:
-      db_worker = get_avail_worker(data)
+      db_worker = get_avail_worker(data.database)
       db_worker.put_child_q(data_dict)
       response_data['queued'] = True
 
@@ -384,6 +431,11 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
 
 
 def main(kill_existing=False):
+  """The main function
+  
+  Args:
+    kill_existing: whether to kill an existing instance.
+  """
   log('Main Loop PID is {}'.format(os.getpid()))
   register_pid(
     get_pid_path('dbnet', DBNET_FOLDER),

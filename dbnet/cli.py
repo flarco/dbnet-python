@@ -4,6 +4,7 @@ from xutil.helpers import set_nice
 
 
 def dbnet_cli():
+  """The main CLI launcher"""
   set_nice(1)
   parser = argparse.ArgumentParser(description='DbNet Application')
   parser.add_argument(

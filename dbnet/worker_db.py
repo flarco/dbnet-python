@@ -254,6 +254,12 @@ def execute_sql(worker: Worker, data_dict):
 
 
 def get_analysis_sql(worker: Worker, data_dict):
+  """Run the specified analysis and send results to frontend.
+
+  Args:
+    worker: the respective worker
+    data_dict: the request payload dictionary
+  """
   database = data_dict['database']
 
   try:
@@ -296,6 +302,12 @@ def get_analysis_sql(worker: Worker, data_dict):
 
 
 def update_meta(worker: Worker, data_dict):
+  """Update the worker's metadata and send results to frontend.
+
+  Args:
+    worker: the respective worker
+    data_dict: the request payload dictionary
+  """
   database = data_dict['database']
 
   try:
@@ -352,6 +364,14 @@ func_map = {
 
 
 def run(db_prof, conf_queue: Queue, worker: Worker):
+  """Launch the database worker and await requests.
+  
+  Args:
+    db_prof: the db profile
+    conf_queue: a multiprocessing Queue
+    worker: the respective worker.
+  """
+
   global worker_name, worker_status
   log = worker.log
   worker_name = worker.name

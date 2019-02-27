@@ -207,6 +207,15 @@ add_task = lambda **kws: sqlx('tasks').replace_rec(**kws)
 
 
 def load_session(db_name, session_name):
+  """Load and return a saved session
+  
+  Args:
+    db_name: the database name.
+    session_name: the session name
+  
+  Returns:
+    The session record
+  """
   sess_rec = sqlx('sessions').select_one(
     fwa(db_name=db_name, session_name=session_name),
     as_dict=True,
@@ -223,6 +232,11 @@ def load_session(db_name, session_name):
 
 
 def save_session(**kws):
+  """Save a session.
+
+  Args:
+    kws: the record fields as keyword arguments.
+  """
   tabs_rec = kws['tabs']
   del kws['tabs']
   sqlx('databases').replace_rec(
@@ -232,6 +246,11 @@ def save_session(**kws):
 
 
 def set_dbquery_state(**kws):
+  """Save the DB Query state.
+
+  Args:
+    kws: the record fields as keyword arguments.
+  """
   dbquery_data = kws['data']
   db_name = dbquery_data['db_name']
   meta_last_updated = sqlx('databases').select_one(
@@ -265,6 +284,14 @@ def set_dbquery_state(**kws):
 
 
 def get_dbquery_state(**kws):
+  """Get the DB Query state.
+
+  Args:
+    kws: the record fields as keyword arguments.
+  
+  Returns:
+    the DB Query state record.
+  """
   db_name = kws['db_name']
   rec = sqlx('databases').select_one(fwa(db_name=db_name), as_dict=True)
   return jloads(rec['state_json']) if rec else {'db_name': db_name}
@@ -287,6 +314,12 @@ store_func = dict(
 
 
 def create_tables(drop_first=False, ask=True):
+  """Create the needed store database tables
+
+  Args:
+    drop_first: whether to drop the tables if they exist
+    ask: whether to confirm before dropping.
+  """
   if drop_first:
     if ask:
       ans = input('Authorize Tables Drop. Please confirm with "Y": ')
