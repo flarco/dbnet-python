@@ -22,6 +22,8 @@ app_token = ''.join(
     random.SystemRandom().choice(string.ascii_uppercase + string.digits +
                                 string.ascii_lowercase) for _ in range(16))
 valid_SIDs = set()
+cookie_to_sid = {}
+sid_to_sid = {}
 
 @app.route('/logo.ico')
 def favicon():
@@ -129,6 +131,8 @@ def transmit_payload(payload_type):
     if 'data' in _data_dict:
       _data_dict['data'] = '{} chars'.format(len(_data_dict['data']))
     app.log('Confirmation -> {}'.format(_data_dict))
+  if data_dict['sid'] in sid_to_sid:
+    data_dict['sid'] = sid_to_sid[data_dict['sid']]
   app.emit(payload_type, data_dict, namespace='/', room=data_dict['sid'])
   return 'OK'
 
@@ -192,6 +196,12 @@ def connect(sid, environ):
     log('~~Session ID {} is not authorized'.format(session_id))
 
   app.log('connect ' + sid)
+
+  # if client loses connection, this will map the old SID to the new SID
+  if session_id in cookie_to_sid:
+    sid_to_sid[cookie_to_sid[session_id]] = sid
+
+  cookie_to_sid[session_id] = sid
   SID = sid
 
 
