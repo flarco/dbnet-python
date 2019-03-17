@@ -29,7 +29,7 @@ worker_status = 'IDLE'
 worker_queue = deque([])
 worker_pid = os.getpid()
 worker_sql_cache = {}
-load_profile()  # load profile environments
+load_profile(create_if_missing=True)  # load profile environments
 
 WEBAPP_PORT = int(os.getenv('DBNET_WEBAPP_PORT', default=5566))
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
