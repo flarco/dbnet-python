@@ -92,8 +92,7 @@ bash build.sh
 ```
 git clone https://github.com/flarco/dbnet.git
 cd dbnete
-python setup.py sdist
-twine upload dist/*
+python setup.py sdist && twine upload dist/*
 ```
 
 # TODO
