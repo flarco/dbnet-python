@@ -52,15 +52,15 @@ Run command `xutil-create-profile` to create from template.
 ### Example Entry
 
 ```yaml
-PG1:
-  name: PG1
-  host: pg1
+PG_XENIAL:
+  name: PG_XENIAL
+  host: xenial-server
   database: db1
   port: 5432
   user: user
   password: password
   type: postgresql
-  url: "jdbc:postgresql://host:port/database?&ssl=false"
+  url: "jdbc:postgresql://xenial-server:5432/db1?&ssl=false"
 ```
 
 
