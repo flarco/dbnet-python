@@ -10,9 +10,7 @@ DbNet is a Python/VueJS database client to access Oracle, Spark (Hive), Postgres
 
 # Install
 ```bash
-pip install -U git+git://github.com/flarco/xutil.git
-pip install -U git+git://github.com/flarco/xutil.git#egg=xutil[web]
-pip install -U git+git://github.com/flarco/dbnet.git
+pip install dbnet
 ```
 
 Command `dbnet` should now be available in the PATH.
