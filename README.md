@@ -42,9 +42,29 @@ optional arguments:
 2019-02-27 10:08:11 -- Main Loop PID is 39685
 2019-02-27 10:08:11 -- Monitor Loop PID is 39691
 2019-02-27 10:08:11 -- Web Server PID is 39692
-2019-02-27 10:08:11 -- URL -> http://macbook1:5566/?token=CqPahSJIeg1Nl4Kj
+2019-02-27 10:08:11 -- URL -> http://macbook:5566/?token=CqPahSJIeg1Nl4Kj
 (39692) wsgi starting up on http://0.0.0.0:5566
 ```
+
+## Setting up Dababase Profile
+
+Your database profile / credentials needs to be set up at `~/profile.yaml` or env var `PROFILE_YAML`.
+Run command `xutil-create-profile` to create from template.
+
+### Example Entry
+
+```yaml
+PG1:
+  name: PG1
+  host: pg1
+  database: db1
+  port: 5432
+  user: user
+  password: password
+  type: postgresql
+  url: "jdbc:postgresql://host:port/database?&ssl=false"
+```
+
 
 # Screenshots
 
@@ -62,6 +82,18 @@ optional arguments:
 git clone https://github.com/flarco/dbnet.git
 cd dbnet
 bash build.sh
+```
+
+## Release
+
+- Update version and `download_url` in [setup.py](./setup.py).
+- Draft new release on Github: <https://github.com/flarco/dbnet/releases/new>
+
+```
+git clone https://github.com/flarco/dbnet.git
+cd dbnete
+python setup.py sdist
+twine upload dist/*
 ```
 
 # TODO
