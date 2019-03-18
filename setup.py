@@ -1,7 +1,8 @@
 from distutils.core import setup
 from setuptools import find_packages
+import os
 
-version = '0.0.2'
+version = '0.0.3'
 
 setup(
   name='dbnet',
@@ -10,10 +11,13 @@ setup(
   author='Fritz Larco',
   author_email='flarco@live.com',
   url='https://github.com/flarco/dbnet',
-  download_url='https://github.com/flarco/dbnet/archive/{}.tar.gz'.format(version),
+  download_url='https://github.com/flarco/dbnet/archive/{}.tar.gz'.format(
+    version),
   keywords=['dbnet'],
   packages=find_packages(exclude=['tests']),
   include_package_data=True,
+  long_description=open(os.path.join(os.path.dirname(__file__),
+                                     'README.rst')).read(),
   install_requires=[
     "python-socketio",
     "verboselogs",
