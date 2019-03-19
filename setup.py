@@ -11,8 +11,7 @@ setup(
   author='Fritz Larco',
   author_email='flarco@live.com',
   url='https://github.com/flarco/dbnet',
-  download_url='https://github.com/flarco/dbnet/archive/{}.tar.gz'.format(
-    version),
+  download_url='https://github.com/flarco/dbnet/archive/master.zip',
   keywords=['dbnet'],
   packages=find_packages(exclude=['tests']),
   include_package_data=True,
