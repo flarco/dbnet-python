@@ -91,5 +91,5 @@ bash build.sh
 git clone https://github.com/flarco/dbnet.git
 cd dbnet
 m2r --overwrite README.md
-python setup.py sdist && twine upload dist/*
+python setup.py sdist && twine upload --skip-existing dist/*
 ```
