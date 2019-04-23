@@ -94,6 +94,16 @@ Screenshots
 Development
 ===========
 
+Install Vue & Dependencies
+--------------------------
+
+.. code-block:: bash
+
+   npm install -g @vue/cli @vue/cli-service @vue/cli-plugin-babel @vue/cli-plugin-eslint
+   git clone https://github.com/flarco/dbnet.git
+   cd dbnet/frontend
+   npm install
+
 Building
 --------
 
@@ -113,5 +123,6 @@ Release
 .. code-block::
 
    git clone https://github.com/flarco/dbnet.git
-   cd dbnete
-   python setup.py sdist && twine upload dist/*
+   cd dbnet
+   m2r --overwrite README.md
+   python setup.py sdist && twine upload --skip-existing dist/*
