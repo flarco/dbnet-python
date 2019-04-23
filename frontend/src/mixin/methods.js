@@ -1553,9 +1553,11 @@ var methods = {
   },
 
   get_object_data(object_full_name, tab_id) {
+    let sql = "select * from " + object_full_name
+    if(this.curr_database_type.toLowerCase() == 'redshift') sql = sql + ' limit 5000' 
     let query = new classes.SqlQuery({
       database: this.$store.query.db_name,
-      sql: "select * from " + object_full_name,
+      sql: sql,
       limit: this.$store.query._session.tabs[tab_id].limit
     });
 
