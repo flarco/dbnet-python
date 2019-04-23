@@ -74,6 +74,15 @@ PG_XENIAL:
 
 # Development
 
+## Install Vue & Dependencies
+
+```bash
+npm install -g @vue/cli @vue/cli-service @vue/cli-plugin-babel @vue/cli-plugin-eslint
+git clone https://github.com/flarco/dbnet.git
+cd dbnet/frontend
+npm install
+```
+
 ## Building
 
 ```bash
