@@ -8,6 +8,9 @@ export default {
   is_hive_type() {
     return this.curr_database_type.toLowerCase() == 'spark' || this.curr_database_type.toLowerCase() == 'hive'
   },
+  is_postgres_type() {
+    return this.curr_database_type.toLowerCase() == 'redshift' || this.curr_database_type.toLowerCase() == 'postgresql'
+  },
   sess_name() {
     return this.$store.query._session.name
   },
