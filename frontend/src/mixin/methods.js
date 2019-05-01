@@ -1400,6 +1400,11 @@ var methods = {
       self.$store.app.databases[name] = data.data[name];
       self.$store.app.databases[name].favorite = favorite;
     }, this);
+    Object.keys(self.$store.app.databases).forEach(function(name) {
+      if (name in data.data) {} else {
+        delete self.$store.app.databases[name]
+      }
+    }, this);
     setTimeout(() => {
       self.$store.settings.sidebar_shown = orig_setting;
     }, 100);
