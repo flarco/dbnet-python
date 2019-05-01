@@ -9,7 +9,7 @@
       </p>
       <ul class="menu-list" style="overflow: scroll" :style="{'max-height': $store.style.menu_connections_height}">
         <li
-          v-for="(obj, name) in $store.app.databases"
+          v-for="name in Object.keys($store.app.databases)"
           v-bind:key="name"
           @click="activate_query_db(name)"
         ><a href="/#/query" :class="{'is-active': name == curr_database}">{{ name }}</a></li>

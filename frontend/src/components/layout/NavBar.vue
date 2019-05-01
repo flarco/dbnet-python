@@ -11,16 +11,14 @@
           <!-- Favorite connections on top -->
           <div class="navbar-dropdown is-boxed" style="overflow: scroll" :style="{'max-height': $store.style.menu_connections_height}">
             <a 
-              v-for="(obj, name2) in $store.app.databases"
+              v-for="name2 in favorite_databases()"
               v-bind:key="name2"
               @click="activate_query_db(name2)"
-              v-if="obj.favorite"
               href="/#/query" class="navbar-item" :class="{'is-active': name2 == curr_database}">{{ name2 }}</a>
             <hr class="navbar-divider">
             <a 
-              v-for="(obj, name) in $store.app.databases"
+              v-for="name in non_favorite_databases()"
               v-bind:key="name"
-              v-if="!obj.favorite"
               @click="activate_query_db(name)"
               href="/#/query" class="navbar-item" :class="{'is-active': name == curr_database}">{{ name }}</a>
               

@@ -34,6 +34,17 @@ var methods = {
     }, 100);
   },
 
+
+  favorite_databases(){
+    return Object.keys(this.$store.app.databases).sort(function(a,b){return a-b})
+      .filter(name => {return this.$store.app.databases[name].favorite})
+  },
+
+  non_favorite_databases(){
+    return Object.keys(this.$store.app.databases).sort(function(a,b){return a-b})
+      .filter(name => {return !this.$store.app.databases[name].favorite})
+  },
+
   set(key, value) {
     localStorage.setItem(key, LZString.compress(JSON.stringify(value)));
   },
