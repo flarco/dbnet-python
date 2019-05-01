@@ -156,6 +156,10 @@ export default {
   },
   mounted() {
     this.resize_panes();
+    const self = this
+    window.addEventListener("keydown", function(e) {
+      if(e.keyCode == 113) self.show_db_name_filter()
+    });
   }
 };
 </script>

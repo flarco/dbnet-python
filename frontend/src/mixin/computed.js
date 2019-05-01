@@ -61,6 +61,14 @@ export default {
   db_names() {
     return Object.keys(this.$store.app.databases)
   },
+  db_names_filtered() {
+    return Object.keys(this.$store.app.databases).filter((option) => {
+      return option
+          .toString()
+          .toLowerCase()
+          .indexOf(this.$store.vars.db_name_filter.toLowerCase()) >= 0
+  })
+  },
   get_schema_select_heigth() {
     return parseInt(window.innerHeight / 56, 10);
   },

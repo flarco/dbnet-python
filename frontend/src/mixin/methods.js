@@ -16,11 +16,22 @@ var methods = {
     this.log("test");
   },
 
+  focus_app() {
+    document.getElementById('app').focus()
+  },
+
   handleKey(e) {
     this.log("keyCode -> " + e.keyCode);
     if ((e.metaKey || e.ctrlKey) && e.keyCode == 72) {
       this.log("bingo");
     }
+  },
+
+  show_db_name_filter(){
+    this.$store.vars.db_name_filter = '';
+    setTimeout(() => {
+      document.getElementById('db-name-filter').focus();
+    }, 100);
   },
 
   set(key, value) {
@@ -1095,6 +1106,7 @@ var methods = {
   },
 
   activate_query_db(db_name) {
+    if(!db_name) return
     this.$store.vars.app_loading = true;
     this.save_state();
 

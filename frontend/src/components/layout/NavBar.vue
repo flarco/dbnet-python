@@ -26,9 +26,27 @@
               
           </div>
         </div>
+        <div class="navbar-item is-hoverable" @keyup.27="$store.vars.db_name_filter=null; focus_app()">
+          <a @click="show_db_name_filter()" v-if="$store.vars.db_name_filter == null">
+            <b-icon pack="fa" icon="search" ></b-icon>
+          </a>
+          <b-field v-if="$store.vars.db_name_filter != null">
+              <b-autocomplete
+                id="db-name-filter"
+                rounded
+                v-model="$store.vars.db_name_filter"
+                :data="db_names_filtered"
+                placeholder="Find database..."
+                icon="magnify"
+                @select="option => {activate_query_db(option); $store.vars.db_name_filter=null}"
+              >
+                  <template slot="empty">No results found</template>
+              </b-autocomplete>
+          </b-field>
+        </div>
         <div class="container">
 
-          <div id="navbarDropdown" class="navbar-menu" style="heigth: 100px">
+          <div id="navbarMiddle" class="navbar-menu" style="heigth: 100px">
             <div class="navbar-start">
               <div class="navbar-brand">
                 <a class="navbar-item">
