@@ -20,11 +20,15 @@ def dbnet_cli():
   parser.add_argument(
     '--force', help='Kill any running instance.', action='store_true')
   parser.add_argument('--port', help='The web application port')
+  parser.add_argument('--host', help='The web application host. Default is 0.0.0.0')
 
   args = parser.parse_args()
 
   if args.port:
     os.environ['DBNET_WEBAPP_PORT'] = args.port
+
+  if args.host:
+    os.environ['DBNET_WEBAPP_HOST'] = args.host
 
   # import after setting port
   from dbnet import server, store

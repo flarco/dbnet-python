@@ -293,8 +293,8 @@ def disconnect(sid):
   SID = sid
 
 
-def run(port, worker, mon_worker):
+def run(host, port, worker, mon_worker):
   global _mon_worker
   _mon_worker = mon_worker
   url_suffix = '/?token=' + app_token
-  app.run(port, url_suffix=url_suffix, log=worker.log, worker=worker)
+  app.run(port, host=host, url_suffix=url_suffix, log=worker.log, worker=worker)

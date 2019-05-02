@@ -27,6 +27,7 @@ from collections import OrderedDict
 import dbnet.store as store
 
 WORKER_PREFIX = os.getenv('DBNET_WORKER_PREFIX', default='dbnet')
+WEBAPP_HOST = os.getenv('DBNET_WEBAPP_HOST', default='0.0.0.0')
 WEBAPP_PORT = int(os.getenv('DBNET_WEBAPP_PORT', default=5566))
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
 
@@ -51,7 +52,7 @@ def start_worker_webapp():
     fn=webapp_worker.run,
     log=log,
     kill_if_running=True,
-    args=(WEBAPP_PORT, ),
+    args=(WEBAPP_HOST, WEBAPP_PORT),
     kwargs={'mon_worker': workers['mon']},
     pid_folder=DBNET_FOLDER)
   worker.start()
