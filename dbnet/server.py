@@ -229,7 +229,8 @@ def send_to_webapp(data, host='localhost', port=WEBAPP_PORT):
   """
   payload_type = data['payload_type']
   headers = {'Content-type': 'application/json'}
-  url = 'http://{}:{}/api/{}'.format(host, port, payload_type)
+  scheme = 'https' if os.getenv('SECURE_SSL_REDIRECT', default=False) else 'http'
+  url = '{}://{}:{}/api/{}'.format(scheme, host, port, payload_type)
   requests.post(url, data=jdumps(data), headers=headers, verify=False)
 
 

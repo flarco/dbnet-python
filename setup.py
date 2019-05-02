@@ -2,7 +2,7 @@ from distutils.core import setup
 from setuptools import find_packages
 import os
 
-version = '0.0.6'
+version = '0.0.7'
 
 setup(
   name='dbnet',
