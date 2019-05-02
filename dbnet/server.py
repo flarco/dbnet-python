@@ -230,7 +230,7 @@ def send_to_webapp(data, host='localhost', port=WEBAPP_PORT):
   payload_type = data['payload_type']
   headers = {'Content-type': 'application/json'}
   url = 'http://{}:{}/api/{}'.format(host, port, payload_type)
-  requests.post(url, data=jdumps(data), headers=headers)
+  requests.post(url, data=jdumps(data), headers=headers, verify=False)
 
 
 def handle_worker_req(worker: Worker, data_dict):

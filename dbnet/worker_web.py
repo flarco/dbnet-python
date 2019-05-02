@@ -165,7 +165,7 @@ def spark_progess(sid, data):
     url = data['url']
     api_applications = '{}/api/v1/applications'.format(url)
     headers = {'Content-type': 'application/json'}
-    resp = requests.get(api_applications, headers=headers)
+    resp = requests.get(api_applications, headers=headers, verify=False)
     if not resp.text:
       return data2
 
@@ -173,7 +173,7 @@ def spark_progess(sid, data):
 
     app_id = resp1[0]['id']
     api_jobs = '{}/api/v1/applications/{}/jobs'.format(url, app_id)
-    resp = requests.get(api_jobs, headers=headers)
+    resp = requests.get(api_jobs, headers=headers, verify=False)
     resp2 = json.loads(resp.text)
     if resp2:
       job = resp2[0]
