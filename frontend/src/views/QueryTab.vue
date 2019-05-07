@@ -125,6 +125,13 @@
                   </b-tooltip>
                 </span>
 
+                <span class="button is-small" @click="toggle_tab_text_view"
+                      :class="{'is-info':$store.vars.show_tab_text_view}">
+                  <b-tooltip label="View Text" position="is-top" type="is-light">
+                    <b-icon pack="fa" icon="text-width" size="is-small"></b-icon>
+                  </b-tooltip>
+                </span>
+
 
                 <p id="tab-limit" class="button is-small">
                   <select title="Limit" class="select is-small"
@@ -377,6 +384,30 @@ export default {
       let self = this;
       self.$store.vars.tab_row_data = [];
       this.$store.vars.show_tab_row_view = !this.$store.vars.show_tab_row_view;
+
+      setTimeout(() => {
+        self.resize_panes();
+      }, 20);
+    },
+    toggle_tab_text_view() {
+      const PrettyTable = require('prettytable')
+      let self = this;
+      self.$store.vars.tab_row_data = [];
+      this.$store.vars.show_tab_text_view = !this.$store.vars.show_tab_text_view;
+
+
+      if(this.$store.vars.show_tab_text_view && 
+        (this.sess_active_tab.type == 'data'  || (this.sess_active_tab.type == 'object' &&
+          this.$store.query._session._tab.child_active_tab != 2))) {
+        let pt = new PrettyTable()
+        pt.fieldNames(this.sess_active_child_tab.headers);
+        for(let row of this.sess_active_child_tab.rows) {
+          pt.addRow(row.join('$|$').split('$|$'))
+        }
+        this.set_tab_prop(this.sess_active_child_tab_id, "text_data", pt.toString(), this.sess_name);
+      } else if (!this.$store.vars.show_tab_text_view) {
+        this.set_tab_prop(this.sess_active_child_tab_id, "text_data", '', this.sess_name);
+      }
 
       setTimeout(() => {
         self.resize_panes();

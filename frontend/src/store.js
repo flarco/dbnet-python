@@ -123,6 +123,7 @@ export default {
     objects_ready: false,
     show_tab_sql: false,
     show_tab_row_view: true,
+    show_tab_text_view: false,
     show_tab_modal_email: false,
     tabs_active: false,
     query_progress_prct: null,

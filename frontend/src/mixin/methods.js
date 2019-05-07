@@ -319,7 +319,9 @@ var methods = {
     // let tab = this.sess_tabs[Object.keys(this.sess_tabs)[this.sess_active_tab_index]]
     let self = this;
     this.$store.vars.show_tab_row_view = false;
+    this.$store.vars.show_tab_text_view = false;
     this.$store.vars.tab_row_view_filter = "";
+    this.set_tab_prop(this.sess_active_child_tab_id, "text_data", '', this.sess_name);
     this.$store.vars.tabs_active = !this._.isEmpty(this.get_sess_tabs());
 
     if (tab_id == null && !this._.isEmpty(this.$store.query._session._tab))
