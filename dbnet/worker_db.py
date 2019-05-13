@@ -113,12 +113,13 @@ def execute_sql(worker: Worker, data_dict):
         if not cache_used:
           worker_sql_cache[sql] = dict(
             timestamp=now(), results=[], limit=limit)
-          for fields, rows in conn.execute_multi(
-              sql,
-              dtype='tuple',
-              limit=limit if limit > limit_def else limit_def):
-            worker_sql_cache[sql]['results'].append((fields, rows))
-            yield fields, rows, cache_used
+          rows = conn.query(
+            sql,
+            dtype='tuple',
+            limit=limit if limit > limit_def else limit_def)
+          fields = conn._fields
+          worker_sql_cache[sql]['results'].append((fields, rows))
+          yield fields, rows, cache_used
 
       if 'meta' in options:
         # get_schemas or
