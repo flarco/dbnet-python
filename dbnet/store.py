@@ -202,7 +202,7 @@ worker_add = lambda **kws: sqlx('workers').replace_rec(**kws)
 worker_set = lambda **kws: sqlx('workers').update_rec(**kws)
 worker_get = lambda hostname, worker_name: sqlx('workers').select_one(
   fwa(hostname=hostname, worker_name=worker_name),)
-worker_getall = lambda: sqlx('workers').select()
+worker_getall = lambda: sqlx('workers').query()
 add_task = lambda **kws: sqlx('tasks').replace_rec(**kws)
 
 
@@ -220,7 +220,7 @@ def load_session(db_name, session_name):
     fwa(db_name=db_name, session_name=session_name),
     as_dict=True,
   )
-  tabs_recs = sqlx('tabs').select(
+  tabs_recs = sqlx('tabs').query(
     fwa(db_name=db_name, session_name=session_name),
     as_dict=True,
   )
@@ -336,12 +336,12 @@ def create_tables(drop_first=False, ask=True):
 if __name__ == '__main__':
   create_tables(drop_first=True)
   state_set('key', 1)
-  print(sqlx('state').select())
+  print(sqlx('state').query())
   # time.sleep(2)
   state_set('key', 44)
-  print(sqlx('state').select())
+  print(sqlx('state').query())
   print(
-    conn.select(
+    conn.query(
       "select datetime(last_updated, 'unixepoch', 'localtime') as last_updated from main.state"
     ))
 

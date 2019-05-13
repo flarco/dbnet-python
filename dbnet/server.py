@@ -333,7 +333,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
     if data.filter_table:
       where = where + ''' and lower(table_name) like lower('%{}%')'''.format(
         data.filter_table)
-    rows = store.sqlx('meta_tables').select(where, limit=data.limit)
+    rows = store.sqlx('meta_tables').query(where, limit=data.limit)
     if rows:
       headers = store.sqlx('meta_tables').ntRec._fields
       rows = [list(r) for r in rows]
@@ -355,7 +355,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
     if data.filter_column:
       where = where + ''' and lower(column_name) like lower('%{}%')'''.format(
         data.filter_column)
-    rows = store.sqlx('meta_columns').select(where, limit=data.limit)
+    rows = store.sqlx('meta_columns').query(where, limit=data.limit)
     if rows:
       headers = store.sqlx('meta_columns').ntRec._fields
       rows = [list(r) for r in rows]
@@ -375,14 +375,14 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
     response_data = dict(completed=True, data=rec._asdict())
 
   elif data.req_type == 'get-tasks':
-    rows = store.sqlx('tasks').select(
+    rows = store.sqlx('tasks').query(
       where='1=1 order by end_date desc, start_date desc, queue_date desc',
       limit=100)
     recs = [row._asdict() for row in rows]
     response_data = dict(data=recs, completed=True)
 
   elif data.req_type == 'get-queries':
-    rows = store.sqlx('queries').select(
+    rows = store.sqlx('queries').query(
       where="""
         lower(sql_text) like '%{}%'
         and database = '{}'
@@ -396,7 +396,7 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
   elif data.req_type == 'search-queries':
     where = "sql_text like '%{}%' order by exec_date desc".format(
       data.query_filter)
-    rows = store.sqlx('queries').select(where=where, limit=100)
+    rows = store.sqlx('queries').query(where=where, limit=100)
     recs = [row._asdict() for row in rows]
     response_data = dict(data=recs, completed=True)
 
