@@ -1,14 +1,3 @@
-.. role:: raw-html-m2r(raw)
-   :format: html
-
-
-
-.. raw:: html
-
-   <p align="center">
-     <img align="center" src="frontend/src/assets/logo-brand.png" alt="Logo" width="180"/>
-   </p>
-
 
 DbNet is a Python/VueJS database client to access Oracle, Spark (Hive), Postgres, etc. It is still a work in progess, but should work fine for daily use. MS SQL Server is supported, although with some bugs here and there due to JDBC/JTDS bridge.
 
@@ -87,42 +76,3 @@ Screenshots
 .. image:: dbnet.screenshot.1.png
    :target: dbnet.screenshot.1.png
    :alt: Screenshot 1
-
-
-:raw-html-m2r:`<img src="dbnet.screenshot.schema.png" alt="Screenshot schema" width="300"/>`
-
-Development
-===========
-
-Install Vue & Dependencies
---------------------------
-
-.. code-block:: bash
-
-   npm install -g @vue/cli @vue/cli-service @vue/cli-plugin-babel @vue/cli-plugin-eslint
-   git clone https://github.com/flarco/dbnet.git
-   cd dbnet/frontend
-   npm install
-
-Building
---------
-
-.. code-block:: bash
-
-   git clone https://github.com/flarco/dbnet.git
-   cd dbnet
-   bash build.sh
-
-Release
--------
-
-
-* Update version in `setup.py <./setup.py>`_.
-* Draft new release on Github: https://github.com/flarco/dbnet/releases/new
-
-.. code-block::
-
-   git clone https://github.com/flarco/dbnet.git
-   cd dbnet
-   m2r --overwrite README.md
-   python setup.py sdist && twine upload --skip-existing dist/*
