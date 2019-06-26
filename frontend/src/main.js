@@ -21,7 +21,7 @@ Vue.use(Buefy, {
   defaultIconPack: 'fa'
 })
 
-let sio_url = `http://${document.domain}:5566`
+let sio_url = `${location.protocol}//${document.domain}:5566`
 
 // https://github.com/cklmercer/vue-stash
 Vue.use(VueStash)
