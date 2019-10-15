@@ -40,6 +40,7 @@ conf_queue = Queue()
 exit_queue = Queue()
 profile = get_profile(create_if_missing=True, def_profl_path=f'{DBNET_FOLDER}/profile.yaml')
 databases = get_databases(profile)
+print(f'profile `{os.getenv("PROFILE_YAML")}` databases -> {list(databases)}')
 
 
 def start_worker_webapp():
