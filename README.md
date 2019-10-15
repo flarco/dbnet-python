@@ -8,14 +8,16 @@ DbNet is a Python/VueJS database client to access Oracle, Spark (Hive), Postgres
 
 **Only Chrome and Firefox are supported at the moment.**
 
-# Install
+# Running with Docker
+
+`docker run --rm -it -p 5566:5566 -v $HOME/dbnet:/root/dbnet flarco/dbnet --serve`
+
+# Running with python
 ```bash
 pip install dbnet
 ```
 
 Command `dbnet` should now be available in the PATH.
-
-# Running
 
 `dbnet --help`
 
