@@ -25,3 +25,9 @@ jobs:
       run: |
         python setup.py sdist
         twine upload -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }} --skip-existing dist/*
+    - name: Create new docker image
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: flarco/dbnet
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}

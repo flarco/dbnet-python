@@ -24,6 +24,7 @@ setup(
     "psutil",
     "jmespath",
     "eventlet",
+    "pyyaml",
     "flask",
     "Flask-SSLify",
     "xutil",
