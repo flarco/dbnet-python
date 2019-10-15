@@ -1,6 +1,7 @@
 DIR=$(cd "$(dirname "$0")"; pwd)
 cd $DIR/frontend
 # cd frontend
+npm install
 npm run build
 mv dist ../dbnet
 cd ../dbnet

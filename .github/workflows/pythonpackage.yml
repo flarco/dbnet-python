@@ -17,14 +17,24 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Set up Node 10
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+      
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install m2r twine
+        
+    - name: Install Node dependencies & build frontend
+      run: bash build.sh
+
     - name: Create new package
       run: |
         python setup.py sdist
         twine upload -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }} --skip-existing dist/*
+    
     - name: Create new docker image
       uses: elgohr/Publish-Docker-Github-Action@master
       with:

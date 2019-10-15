@@ -35,6 +35,11 @@ var methods = {
   },
 
 
+  navigate_prev_db(){
+    if(this.$store.vars.prev_db) this.load_dbquery_state(this.$store.vars.prev_db)
+  },
+
+
   favorite_databases(){
     return Object.keys(this.$store.app.databases).sort(function(a,b){return a-b})
       .filter(name => {return this.$store.app.databases[name].favorite})
@@ -242,6 +247,7 @@ var methods = {
 
     self = self == null ? this : self;
     self.$store.vars.db_query_loaded = false;
+    self.$store.vars.prev_db = self.$store.query.db_name
     this.$socket.emit("store", data1b, function (data3) {
       self.log(data3);
       self.$store.app.active_section = "Query";

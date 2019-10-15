@@ -160,6 +160,9 @@ export default {
     window.addEventListener("keydown", function(e) {
       if(e.keyCode == 113) self.show_db_name_filter()
     });
+    window.addEventListener("keydown", function(e) {
+      if(e.keyCode == 66 && (e.ctrlKey || e.metaKey)) self.navigate_prev_db()
+    });
   }
 };
 </script>

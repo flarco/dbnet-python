@@ -121,6 +121,7 @@ export default {
   vars: {
     // Temp Variables that are needed for front end session (non-saved)
     objects_ready: false,
+    prev_db: null,
     show_tab_sql: false,
     show_tab_row_view: true,
     show_tab_text_view: false,
