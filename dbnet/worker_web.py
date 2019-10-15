@@ -213,7 +213,7 @@ def message(sid, data):
 
 
 @app.on('store')
-def client_request(sid, data, *args, **kwargs):
+def store_request(sid, data, *args, **kwargs):
   """
   Operation on Store. Returns Data as needed
   """
