@@ -36,7 +36,7 @@ var methods = {
 
 
   navigate_prev_db(){
-    if(this.$store.vars.prev_db) this.load_dbquery_state(this.$store.vars.prev_db)
+    if(this.$store.vars.prev_db) this.activate_query_db(this.$store.vars.prev_db)
   },
 
 
