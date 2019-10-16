@@ -114,7 +114,7 @@ def execute_sql(worker: Worker, data_dict):
           worker_sql_cache[sql] = dict(
             timestamp=now(), results=[], limit=limit)
           rows = conn.query(
-            sql,
+            sql.replace('%', '%%'),
             dtype='tuple',
             limit=limit if limit > limit_def else limit_def)
           fields = conn._fields
