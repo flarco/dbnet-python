@@ -6,7 +6,7 @@ from xutil.helpers import jdumps, jtrans, log, get_error_str, get_script_path, g
 from xutil.diskio import read_file, write_file, read_csv
 from dbnet.store import store_func
 from flask import render_template
-import yaml
+import yaml, apprise
 
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
 CSV_FOLDER = DBNET_FOLDER + '/csv'
@@ -150,6 +150,21 @@ def get_perf_mon(sid, data):
     last_perf_data = data2
 
   return data2
+
+@app.on('apprise')
+def apprise_notify(sid, data):
+  """
+  Send Notification on Apprise
+  """
+  url = os.getenv("NOTIFY_APPRISE_URL")
+  apobj = apprise.Apprise()
+  apobj.add(url)
+  apobj.notify(
+    title=data['title'],
+    body=data['body'],
+  )
+  log(f'''Sent notification: "{data['title']}"''')
+  return 'OK'
 
 
 @app.on('spark-progress')

@@ -2,7 +2,7 @@ from distutils.core import setup
 from setuptools import find_packages
 import os
 
-version = '0.1.4'
+version = '0.1.5'
 
 setup(
   name='dbnet',
@@ -28,6 +28,7 @@ setup(
     "flask",
     "Flask-SSLify",
     "xutil",
+    "apprise",
   ],
   entry_points={
     'console_scripts': ['dbnet=dbnet.cli:dbnet_cli'],

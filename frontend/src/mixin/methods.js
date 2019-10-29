@@ -1548,6 +1548,11 @@ var methods = {
     });
   },
 
+  apprise(title, body) {
+    let self = this;
+    self.$socket.emit("apprise", {title, body});
+  },
+
   set_tab_live_progress() {
     let self = this;
     let tab = this.sess_active_tab;
@@ -1766,6 +1771,13 @@ var methods = {
   rcv_query_data(data) {
     // all other SQL query data
     this.log("rcv_query_data");
+
+    let tab_id = data.orig_req.tab_id
+    if (tab_id != null && this.$store.query._session.tabs[tab_id].apprise){
+      this.apprise(`${data.orig_req.database}: SQL Finished`, `Tab : ${tab_id}`) 
+      this.set_tab_prop(tab_id, "apprise", false)
+    }
+
     if (
       data.orig_req.database == this.curr_database &&
       data.orig_req.tab_id != null

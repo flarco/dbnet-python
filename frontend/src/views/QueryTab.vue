@@ -184,6 +184,11 @@
                   @click="$store.query._session._tab._child_tab.form_data.email._show = true; $store.query._session._tab._child_tab.form_data.email.name = sess_active_child_long_name">
                   <b-icon pack="fa" icon="envelope" size="is-small"></b-icon>
                 </a>
+                <a title="Notify When Done" class="button is-small" :class="{'is-info':$store.query._session._tab._child_tab.apprise}"
+                  @click="$store.query._session._tab._child_tab.apprise = !$store.query._session._tab._child_tab.apprise">
+                  <b-icon pack="fa" icon="bell" size="is-small"></b-icon>
+                </a>
+
                 <a v-if="$store.query._session._tab.loading" title="Kill Current Query and Restart Worker."
                   class="button is-small" @click="kill_query(null)" style="color:red" >
                   Kill
