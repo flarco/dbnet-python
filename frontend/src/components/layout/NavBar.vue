@@ -99,6 +99,25 @@
           </b-message>
         </section>
       </div>
+
+      <!-- TODO: OmniBox-->
+      <div @keyup.27="$store.vars.table_view_filter=null; focus_app()">
+        <section class="modal-card animated fadeInTopBig" style="z-index: 1000; position: absolute; top: 20px; left: 45%;" :style="{'width': $store.settings.message.width}" v-if="$store.vars.table_view_filter != null">
+         <b-field>
+              <b-autocomplete
+                id="tables-views-filter"
+                rounded
+                v-model="$store.vars.table_view_filter"
+                :data="tables_views_filtered"
+                placeholder="Find table / view..."
+                icon="magnify"
+                @select="option => {create_object_tab(option); $store.vars.table_view_filter=null}"
+              >
+                  <template slot="empty">No results found</template>
+              </b-autocomplete>
+          </b-field>
+        </section>
+      </div>
     </div>
 </template>
 

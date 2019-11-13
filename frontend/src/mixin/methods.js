@@ -34,6 +34,13 @@ var methods = {
     }, 100);
   },
 
+  show_tables_views_filter(){
+    this.$store.vars.table_view_filter = '';
+    setTimeout(() => {
+      document.getElementById('tables-views-filter').focus();
+    }, 100);
+  },
+
 
   navigate_prev_db(){
     if(this.$store.vars.prev_db) this.activate_query_db(this.$store.vars.prev_db)
@@ -1685,6 +1692,14 @@ var methods = {
 
   get_schema_objects() {
     return this.$store.query.meta.schema_objects[this.sess_schema_obj_type];
+  },
+
+  get_all_tables_views() {
+    let self=this
+    Object.keys(this.$store.query.meta.schema).forEach(function(schema) {
+      self.get_tables(schema)
+      self.get_views(schema)
+    }, this);  
   },
 
   get_tables(schema) {

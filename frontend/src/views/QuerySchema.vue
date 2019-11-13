@@ -19,9 +19,9 @@
         type="search"
       ></b-input>
       <p class="control">
-        <b-tooltip label="Add Schema to Favorites" position="is-bottom" type="is-dark">
-          <a class="button is-outlined is-info">
-            <b-icon pack="fa" icon="heart-o" size="is-small"></b-icon>
+        <b-tooltip label="Refresh all tables / views" position="is-bottom" type="is-dark">
+          <a class="button is-outlined is-info" @click="get_all_tables_views()" style="color: orange">
+            <b-icon pack="fa" icon="refresh" size="is-small"></b-icon>
           </a>
         </b-tooltip>
       </p>

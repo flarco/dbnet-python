@@ -163,6 +163,9 @@ export default {
     window.addEventListener("keydown", function(e) {
       if(e.keyCode == 66 && (e.altKey || e.metaKey)) self.navigate_prev_db()
     });
+    window.addEventListener("keydown", function(e) {
+      if(e.keyCode == 79 && (e.altKey || e.metaKey)) self.show_tables_views_filter()
+    });
   }
 };
 </script>
