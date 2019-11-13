@@ -42,6 +42,26 @@ var methods = {
   },
 
 
+  get_tables_views_filtered(){
+    let self=this
+    let all_obj = []
+
+    Object.keys(self.$store.query.meta.schema).forEach(function(schema_nm) {
+      let schema = self.$store.query.meta.schema[schema_nm]
+      all_obj = all_obj.concat(schema.tables.map(t => `${schema_nm}.${t}`))
+      all_obj = all_obj.concat(schema.views.map(v => `${schema_nm}.${v}`))
+    }, this);  
+
+    return all_obj.filter((option) => {
+      return option
+        .toString()
+        .toLowerCase()
+        .indexOf(self.$store.vars.table_view_filter.toLowerCase()) >= 0
+    })
+
+  },
+
+
   navigate_prev_db(){
     if(this.$store.vars.prev_db) this.activate_query_db(this.$store.vars.prev_db)
   },
@@ -1309,13 +1329,14 @@ var methods = {
       options: options
     });
 
-    this.submit_req(data1);
+    return this.submit_req(data1);
   },
 
   submit_req(data1, on_resp = data => {}) {
     this.$socket.emit("client-request", data1, function (data2) {
       on_resp(data2);
     });
+    return data1.id
   },
 
   get_queries(filter = "", limit = null) {
@@ -1743,8 +1764,15 @@ var methods = {
   },
 
   rcv_tables(data) {
+    let self=this
     this.log("receive_tables");
-    this.$store.query._session.schema_loading = false;
+    if(this.$store.query._session.schema_loading) this.$store.query._session.schema_loading = false;
+    else {
+      self.$store.query._session.schema_loading = true
+      setTimeout(() => {
+        self.$store.query._session.schema_loading = false
+      }, 1000);
+    }
     let schema = data.orig_req.options.kwargs.schema;
     if (data.database == this.curr_database) {
       let tables = data.rows.map(row => row[1]);
@@ -1767,8 +1795,15 @@ var methods = {
   },
 
   rcv_views(data) {
+    let self=this
     this.log("receive_views");
-    this.$store.query._session.schema_loading = false;
+    if(this.$store.query._session.schema_loading) this.$store.query._session.schema_loading = false;
+    else {
+      self.$store.query._session.schema_loading = true
+      setTimeout(() => {
+        self.$store.query._session.schema_loading = false
+      }, 1000);
+    }
     let schema = data.orig_req.options.kwargs.schema;
     if (data.database == this.curr_database) {
       let views = data.rows.map(row => row[1]);

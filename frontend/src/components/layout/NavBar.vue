@@ -61,6 +61,23 @@
             </div>
           </div>
         </div>
+
+          <div class="navbar-item is-hoverable" @keyup.27="$store.vars.table_view_filter=null; focus_app()">
+            <b-field v-if="$store.vars.table_view_filter != null" style="width:350px">
+                  <b-autocomplete
+                    id="tables-views-filter"
+                    rounded
+                    v-model="$store.vars.table_view_filter"
+                    :data="get_tables_views_filtered()"
+                    placeholder="Find table / view..."
+                    icon="magnify"
+                    @select="option => {create_object_tab(option); $store.vars.table_view_filter=null}"
+                  >
+                      <template slot="empty">No results found</template>
+                  </b-autocomplete>
+              </b-field>
+          </div>
+
           <a class="navbar-item" style="min-width: 55px; color: teal">
             <i class="fa fa-cog fa-spin fa-fw fa-1x" v-if="$store.vars.app_loading"></i>
           </a>
@@ -97,25 +114,6 @@
             :active.sync="$store.settings.message.show">
               {{ $store.settings.message.text }}
           </b-message>
-        </section>
-      </div>
-
-      <!-- TODO: OmniBox-->
-      <div @keyup.27="$store.vars.table_view_filter=null; focus_app()">
-        <section class="modal-card animated fadeInTopBig" style="z-index: 1000; position: absolute; top: 20px; left: 45%;" :style="{'width': $store.settings.message.width}" v-if="$store.vars.table_view_filter != null">
-         <b-field>
-              <b-autocomplete
-                id="tables-views-filter"
-                rounded
-                v-model="$store.vars.table_view_filter"
-                :data="tables_views_filtered"
-                placeholder="Find table / view..."
-                icon="magnify"
-                @select="option => {create_object_tab(option); $store.vars.table_view_filter=null}"
-              >
-                  <template slot="empty">No results found</template>
-              </b-autocomplete>
-          </b-field>
         </section>
       </div>
     </div>

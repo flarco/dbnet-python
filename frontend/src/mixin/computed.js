@@ -70,23 +70,6 @@ export default {
     })
   },
   
-  tables_views_filtered(){
-    let all_obj = []
-
-    Object.keys(this.$store.query.meta.schema).forEach(function(schema_nm) {
-      let schema = this.$store.query.meta.schema[schema_nm]
-      all_obj.concat(schema.tables.map(t => `${schema_nm}.${t}`))
-      all_obj.concat(schema.views.map(v => `${schema_nm}.${v}`))
-    }, this);  
-
-    return all_obj.filter((option) => {
-      return option
-        .toString()
-        .toLowerCase()
-        .indexOf(this.$store.vars.table_view_filter.toLowerCase()) >= 0
-    })
-
-  },
   get_schema_select_heigth() {
     return parseInt(window.innerHeight / 56, 10);
   },
