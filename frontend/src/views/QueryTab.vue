@@ -279,7 +279,8 @@
               title="F9 to Submit"></editor> -->
           <textarea id="tab-sql-textarea" class="textarea codelike" v-if="$store.query._session._tab.show_sql"
             v-model="$store.query._session._tab._child_tab.query.sql" rows="8"
-            @keyup.120="execute_sql($store.query._session._tab._child_tab.query.sql, $store.query._session._tab.id)"
+            @keyup.ctrl.13="execute_sql($store.query._session._tab._child_tab.query.sql, $store.query._session._tab.id)"
+            @keyup.exact.120="execute_sql($store.query._session._tab._child_tab.query.sql, $store.query._session._tab.id)"
             :style="{'font-size': $store.settings.editor_font_size}"
             title="F9 to Submit" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
         </div>
