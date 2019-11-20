@@ -29,6 +29,7 @@ setup(
     "Flask-SSLify",
     "xutil",
     "apprise",
+    "ruamel.yaml",
   ],
   entry_points={
     'console_scripts': ['dbnet=dbnet.cli:dbnet_cli'],
