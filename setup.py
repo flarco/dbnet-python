@@ -18,6 +18,7 @@ setup(
   long_description=open(os.path.join(os.path.dirname(__file__),
                                      'README.rst')).read(),
   install_requires=[
+    "python-dateutil==2.7.5",
     "python-socketio",
     "verboselogs",
     "coloredlogs",
