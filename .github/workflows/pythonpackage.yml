@@ -24,7 +24,6 @@ jobs:
       
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip
         pip install m2r twine
         
     - name: Install Node dependencies & build frontend
