@@ -35,7 +35,7 @@
         style="font-size: 1.1em; width:100%; height: 150px"
       >
         <option
-          v-for="schema in filertered_schemas()"
+          v-for="schema in get_filertered_schemas()"
           @click="change_schema(schema)"
           v-bind:key="schema"
           :value="schema"

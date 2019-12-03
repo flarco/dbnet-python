@@ -42,11 +42,35 @@ var methods = {
   },
 
 
+  get_filertered_schemas() {
+    // filter schema name by comma delimited keyword
+    let filter_arr = this.$store.query._session.schema_filter
+      ? this.$store.query._session.schema_filter.split(",")
+      : [];
+    try {
+      return this.get_schema_list().filter(name => {
+        return this.$store.query._session.schema_filter
+          ? filter_arr.some(
+              filter =>
+                name
+                  .toString()
+                  .toLowerCase()
+                  .indexOf(filter.toLowerCase()) >= 0
+            )
+          : name;
+      });
+    } catch (error) {
+      this.log(error);
+      return [];
+    }
+  },
+
+
   get_tables_views_filtered(){
     let self=this
     let all_obj = []
 
-    Object.keys(self.$store.query.meta.schema).forEach(function(schema_nm) {
+    self.get_filertered_schemas().forEach(function(schema_nm) {
       let schema = self.$store.query.meta.schema[schema_nm]
       all_obj = all_obj.concat(schema.tables.map(t => `${schema_nm}.${t}`))
       all_obj = all_obj.concat(schema.views.map(v => `${schema_nm}.${v}`))
