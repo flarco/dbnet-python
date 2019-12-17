@@ -26,7 +26,7 @@ setup(
     "jmespath",
     "eventlet==0.21.0",
     "pyyaml",
-    "flask==0.11.1",
+    "flask==1.0",
     "Flask-SSLify==0.1.5",
     "xutil",
     "apprise",
