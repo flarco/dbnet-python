@@ -131,6 +131,7 @@ export default {
       this.pane_tab_index = data.pane_tab_index || 0
       this.session_name = data.session_name || 'default'
       this.editor_text = data.editor_text || ''
+      this.all_tables_views_refresh = data.all_tables_views_refresh || null,
       self._session = new StoreQuerySession(data._session || {
         name: 'default'
       }) // Active session

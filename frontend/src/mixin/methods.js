@@ -1681,16 +1681,18 @@ var methods = {
     this.log("receive_schemas");
     if (data.database == this.curr_database) {
       let schemas = data.rows.map(row => row[0]);
-      let schemas_obj = toObject(schemas);
 
       // remove not present in latest
-      for (let schema of this.schemas) {
-        delete this.$store.query.meta.schema[schema];
-      }
+      Object.keys(this.$store.query.meta.schema).forEach(function(schema) {
+        if (schemas.indexOf(schema) == -1) {
+          // if schema no longer exists in latest list then delete
+          delete this.$store.query.meta.schema[schema];
+        }
+      }, this);
 
       // add new missing
       for (let schema of schemas) {
-        if (!(schema in this.schemas)) {
+        if (!(schema in this.$store.query.meta.schema)) {
           this.$store.query.meta.schema[schema] = {
             tables: [],
             tables_obj: {},
@@ -1698,9 +1700,9 @@ var methods = {
           };
         }
       }
+      
       if (this._.isEmpty(this.sess_schema)) {
-        this.$store.query._session.schema = [this.schemas[0]];
-        this.schema_objects;
+        this.$store.query._session.schema = [schemas[0]];
       }
       this.$store.query._session.schema_loading = false;
       this.$forceUpdate();
@@ -1742,8 +1744,9 @@ var methods = {
 
   get_all_tables_views(force=false) {
     let self=this
+    let now = Math.floor(new Date() / 1000)
 
-    let proceed = force || this.$store.vars.all_tables_views_refresh == null || this.$store.vars.all_tables_views_refresh < Date.now() - 3*60*60 // if older than 3 hours, refresh
+    let proceed = force || this.$store.query.all_tables_views_refresh == null || this.$store.query.all_tables_views_refresh < now - 3*60*60 // if older than 3 hours, refresh
     if(!proceed) return
 
     self.get_filertered_schemas().forEach(function(schema) {
@@ -1751,7 +1754,7 @@ var methods = {
       self.get_views(schema)
     }, this);
 
-    this.$store.vars.all_tables_views_refresh = Date.now()
+    this.$store.query.all_tables_views_refresh = now
   },
 
   get_tables(schema) {

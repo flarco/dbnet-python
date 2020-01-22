@@ -157,7 +157,6 @@ export default {
   mounted() {
     const self = this
     self.resize_panes();
-    self.get_all_tables_views()
     window.addEventListener("keydown", function(e) {
       if(e.keyCode == 113) self.show_db_name_filter()
     });

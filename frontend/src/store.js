@@ -152,7 +152,6 @@ export default {
       ram: 0,
       threads: 0,
     },
-    all_tables_views_refresh: null,
     tab_row_view_filter: '',
     tab_row_hotSettings: {
       data: [
