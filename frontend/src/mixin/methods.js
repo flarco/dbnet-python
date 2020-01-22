@@ -308,6 +308,7 @@ var methods = {
       self.$store.vars.app_loading = false;
       self.$store.vars.db_query_loaded = true;
       self.resize_panes();
+      self.get_all_tables_views()
 
       // Process queue
       let ll = self.$store.queue.rcv_query_data.length; // start length
@@ -1739,12 +1740,18 @@ var methods = {
     return this.$store.query.meta.schema_objects[this.sess_schema_obj_type];
   },
 
-  get_all_tables_views() {
+  get_all_tables_views(force=false) {
     let self=this
-    Object.keys(this.$store.query.meta.schema).forEach(function(schema) {
+
+    let proceed = force || this.$store.vars.all_tables_views_refresh == null || this.$store.vars.all_tables_views_refresh < Date.now() - 3*60*60 // if older than 3 hours, refresh
+    if(!proceed) return
+
+    self.get_filertered_schemas().forEach(function(schema) {
       self.get_tables(schema)
       self.get_views(schema)
-    }, this);  
+    }, this);
+
+    this.$store.vars.all_tables_views_refresh = Date.now()
   },
 
   get_tables(schema) {
