@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="query_meta_tab_headers_heigth">
+    <!-- <div id="query_meta_tab_headers_heigth">
       <h4 class="title is-4" style="margin-left: 10px; margin-top: 10px; margin-bottom: 0px"
         >Metadata Browser</h4>
 
@@ -26,13 +26,6 @@
             </div>
           </div>
       
-      <!--
-      For Objects
-        schema_name, object_name, object_type, column_cnt, num_rows, last_analyzed_date
-      For Columns
-        schema_name, object_name, object_type, column_name, data_type,, num_distinct, num_nulls, num_rows, prct_distinct, prct_nulls 
-        
-      -->
       </section>
       <section style="margin-bottom:10px">
         <b-field position="is-centered"  @keyup.native.esc="clear_meta_fields()" @keyup.native.enter="get_meta()">
@@ -41,7 +34,7 @@
             <b-input :placeholder="`Filter Columns...`" size="is-small" rounded v-if="$store.app.meta_level == 'Columns'" expanded style="max-width:220px" v-model="filter_column"></b-input>
         </b-field>
       </section>
-    </div>
+    </div> -->
       <div class="hot_div" :style="{'height': $store.style.query_meta_hot_height, 'width': $store.style.query_hot_width}" v-if="$store.vars.show_meta_hot">
         <HotTable :settings="$store.hotSettings" ></HotTable>
       </div>

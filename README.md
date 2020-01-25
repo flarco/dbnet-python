@@ -62,8 +62,17 @@ PG_XENIAL:
   user: user
   password: password
   type: postgresql
-  url: "jdbc:postgresql://xenial-server:5432/db1?&ssl=false"
+  jdbc_url: "jdbc:postgresql://xenial-server:5432/db1?&ssl=false"
 ```
+
+## Environment variables
+
+- `DBNET_WEBAPP_PORT` = Web application port (default is `5566`)
+- `DBNET_WEBAPP_HOST` = Web application host (default is `0.0.0.0`)
+- `DBNET_WORKER_PREFIX` = database worker name prefix (default is `dbnet`)
+- `DBNET_FOLDER` = local storage / queires folder (default `~/dbnet`) 
+- `DBNET_MAX_WORKER_PER_DB` = the maximum number of workers per database (default is `3`)
+- `DBNET_APPRISE_URL` = the [apprise](https://github.com/caronc/apprise) URL to send notifications to.
 
 
 # Screenshots

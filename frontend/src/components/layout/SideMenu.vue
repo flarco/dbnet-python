@@ -19,8 +19,6 @@
       </p>
       <ul id="menu-sections" class="menu-list">
         <li><a href="/#/">Query</a></li>
-        <li><a href="/#/meta">Meta Explorer</a></li>
-        <li><a href="/#/transfer">Data Transfer</a></li>
         <li><a href="/#/settings">Settings</a></li>
       </ul>
     </aside>

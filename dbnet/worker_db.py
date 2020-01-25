@@ -382,7 +382,7 @@ def run(db_prof, conf_queue: Queue, worker: Worker):
 
   while True:
     try:
-      time.sleep(0.005)  # brings down CPU loop usage
+      time.sleep(0.05)  # brings down CPU loop usage
     except (KeyboardInterrupt, SystemExit):
       return
     # data_dict = worker.pipe.recv_from_parent(timeout=0)

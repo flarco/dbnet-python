@@ -156,7 +156,7 @@ def apprise_notify(sid, data):
   """
   Send Notification on Apprise
   """
-  url = os.getenv("NOTIFY_APPRISE_URL")
+  url = os.getenv("DBNET_APPRISE_URL")
   apobj = apprise.Apprise()
   apobj.add(url)
   apobj.notify(

@@ -16,11 +16,16 @@
           <a style="padding-left: 5px; padding-right: 1px"><span><b-icon pack="fa" icon="times" size="is-small"></b-icon></span></a>
         </li>
 
+        <li @click="create_data_tab('')">
+            <!--<span class="icon is-small"><i class="fas fa-image" aria-hidden="true"></i></span>-->
+          <a style="padding-left: 5px; padding-right: 1px"><span><b-icon pack="fa" icon="plus" size="is-small"></b-icon></span></a>
+        </li>
+
         <li v-for="(tab, tab_id) in $store.query._session.tabs"
             v-if="tab != null && tab.parent_id == null"
             v-bind:key="tab_id"
             :class="{'is-active': $store.query._session._tab.id == tab_id}">
-            <a @click="activate_tab(tab_id)" @auxclick="delete_tab(tab.id)">
+            <a @click="activate_tab(tab_id)" @auxclick="delete_tab(tab.id)" v-if="tab.long_name != 'META'">
 
               <span v-if="tab.long_name != 'META' && tab.type=='data'">
                 <b-tooltip :label="trim_text(tab._child_tab.query.sql)" position="is-right" type="is-white" size="is-small">

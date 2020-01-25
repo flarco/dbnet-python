@@ -30,6 +30,7 @@ WORKER_PREFIX = os.getenv('DBNET_WORKER_PREFIX', default='dbnet')
 WEBAPP_HOST = os.getenv('DBNET_WEBAPP_HOST', default='0.0.0.0')
 WEBAPP_PORT = int(os.getenv('DBNET_WEBAPP_PORT', default=5566))
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
+MAX_WORKER_PER_DB = int(os.getenv('DBNET_MAX_WORKER_PER_DB', default=3))
 
 os.makedirs(DBNET_FOLDER, exist_ok=True)
 
@@ -169,17 +170,18 @@ def start_worker_db(db_name, start=False):
   return worker
 
 
-def get_avail_worker(database):
+def get_or_create_worker(database):
   """Get the available / running worker for the specified database.
+  If there is none available, then create another.
 
   Args:
     database: the name of the database
   
   Returns:
-    the matched database worker
+    the matched database worker. None if no workers are available.
   """
   if database not in db_workers_map:
-    db_worker = start_worker_db(database, start=True)
+    start_worker_db(database, start=True)
 
   # matched & available workers
   db_workers_matched = []
@@ -191,13 +193,13 @@ def get_avail_worker(database):
     if wkr_rec.status == 'IDLE':
       db_workers_avail.append(wkr.name)
 
-  # just pick the first? need to add ability to specify in front-end
   if not db_workers_avail:
-    db_workers_avail = [sorted(db_workers_matched)[0]]
+    if len(db_workers_matched) < MAX_WORKER_PER_DB:
+      db_workers_avail.append(start_worker_db(database, start=True).name)
+    else:
+      return None
 
-  db_worker = workers[db_workers_avail[0]]
-
-  return db_worker
+  return workers[db_workers_avail[0]]
 
 
 def stop_worker(worker_name):
@@ -271,6 +273,9 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
   Args:
     worker: the respective worker
     data_dict: the request payload dictionary
+  
+  Returns:
+    True if successful. False if no worked is available.
   """
   # print('data_dict: {}'.format(data_dict))
   # return
@@ -284,7 +289,8 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
   }
 
   if data.req_type in ('submit-sql'):
-    db_worker = get_avail_worker(data.database)
+    db_worker = get_or_create_worker(data.database)
+    if db_worker is None: return False
 
     # send to worker queue
     db_worker.put_child_q(data_dict)
@@ -322,7 +328,8 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
       })
 
   elif data.req_type == 'get-analysis-sql':
-    db_worker = get_avail_worker(data.database)
+    db_worker = get_or_create_worker(data.database)
+    if db_worker is None: return False
     db_worker.put_child_q(data_dict)
     response_data['queued'] = True
 
@@ -340,7 +347,8 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
       rows = [list(r) for r in rows]
       response_data = dict(completed=True, headers=headers, rows=rows)
     else:
-      db_worker = get_avail_worker(data.database)
+      db_worker = get_or_create_worker(data.database)
+      if db_worker is None: return False
       db_worker.put_child_q(data_dict)
       response_data['queued'] = True
 
@@ -362,7 +370,8 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
       rows = [list(r) for r in rows]
       response_data = dict(completed=True, headers=headers, rows=rows)
     else:
-      db_worker = get_avail_worker(data.database)
+      db_worker = get_or_create_worker(data.database)
+      if db_worker is None: return False
       db_worker.put_child_q(data_dict)
       response_data['queued'] = True
 
@@ -432,6 +441,8 @@ def handle_web_worker_req(web_worker: Worker, data_dict):
   # Respond to WebApp Worker
   send_to_webapp(response_data)
 
+  return True
+
 
 def main(kill_existing=False):
   """The main function
@@ -455,7 +466,7 @@ def main(kill_existing=False):
     try:
       # Main loop
 
-      time.sleep(0.005)  # brings down CPU loop usage
+      time.sleep(0.05)  # brings down CPU loop usage
       for wkr_key in list(workers):
         worker = workers.get(wkr_key, None)
         if not worker: continue
@@ -465,7 +476,11 @@ def main(kill_existing=False):
 
         if recv_data:
           if wkr_key == 'webapp':
-            handle_web_worker_req(worker, recv_data)
+            handled = handle_web_worker_req(worker, recv_data)
+            if not handled:
+              # no workers available, put back in queue
+              worker.put_parent_q(recv_data)
+
           elif wkr_key == 'mon':
             handle_db_worker_req(worker, recv_data)
           elif worker.type == 'database-client':
