@@ -93,7 +93,7 @@ def index():
 def login():
   (val_dict, form_dict, data_dict) = app.proc_request()
   resp = app.make_response(render_template('login.html'))
-  log('+Web-App Token: ' + app_token)
+  log('+Web-App Token / Password: ' + app_token)
   return resp
 
 
