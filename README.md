@@ -71,7 +71,7 @@ PG_XENIAL:
 - `DBNET_WEBAPP_HOST` = Web application host (default is `0.0.0.0`)
 - `DBNET_PASSWD` = password to access application (default is random string)
 - `DBNET_WORKER_PREFIX` = database worker name prefix (default is `dbnet`)
-- `DBNET_FOLDER` = local storage / queires folder (default `~/dbnet`) 
+- `DBNET_FOLDER` = local storage / queries folder (default `~/dbnet`) 
 - `DBNET_MAX_WORKER_PER_DB` = the maximum number of workers per database (default is `3`)
 - `DBNET_APPRISE_URL` = the [apprise](https://github.com/caronc/apprise) URL to send notifications to.
 
