@@ -85,8 +85,8 @@ let SqlQuery = class {
   constructor(data = {}) {
     let self = this
     self.id = 'QUERY-' + nanoid(11)
-    self.ts_start = new Date().getTime()
-    self.ts_end = null
+    self.ts_start = data.ts_start || new Date().getTime()
+    self.ts_end = data.ts_end || null
     self.database = data.database
     self.sql = data.sql || ''
     self.limit = data.limit || 200
@@ -99,12 +99,12 @@ let SqlQuery = class {
 
 export default {
   Session: class {
-    constructor(db_name, session_name, editor_text, active_tab_name, tabs) {
-      this.db_name = db_name;
-      this.session_name = session_name;
-      this.editor_text = editor_text;
-      this.active_tab_name = active_tab_name;
-      this.tabs = tabs;
+    constructor(data = {}) {
+      this.db_name = data.db_name || '';
+      this.session_name = data.session_name || '';
+      this.editor_text = data.editor_text || '';
+      this.active_tab_name = data.active_tab_name;
+      this.tabs = data.tabs;
     }
   },
 
@@ -142,8 +142,7 @@ export default {
 
       if (data.sessions != null) {
         Object.keys(data.sessions).forEach(function (name) {
-          let session = data.sessions[name];
-          self.sessions[name] = new StoreQuerySession(session)
+          self.sessions[name] = new StoreQuerySession(data.sessions[name])
         }, this);
       }
 

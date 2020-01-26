@@ -84,6 +84,7 @@
 </template>
 
 <script>
+import classes from "../mixin/classes";
 export default {
   data() {
     return {
@@ -122,6 +123,8 @@ export default {
           : sess_name;
       });
     },
+
+
     select_session(option) {
       let self = this;
       if (option == null) return;
@@ -133,6 +136,8 @@ export default {
         self.filter_word = null;
       }, 100);
     },
+
+
     rename_session() {
       let old_name = this._.cloneDeep(this.$store.query.session_name);
       if (old_name == "default") {
@@ -154,10 +159,6 @@ export default {
 
     create_session() {
       let self = this;
-      let session_data = {
-        db_name: self.$store.query.db_name,
-        session_name: self.new_session_name
-      };
 
       if (self.new_session_name in self.$store.query.sessions) {
         this.$toast.open({
@@ -165,9 +166,10 @@ export default {
           type: "is-danger"
         });
       } else {
-        self.$store.query.sessions[self.new_session_name] = new this.Session(
-          session_data
-        );
+        self.$store.query.sessions[self.new_session_name] = new classes.StoreQuerySession({
+          db_name: self.$store.query.db_name,
+          name: self.new_session_name,
+        });
         this.load_session();
 
         self.new_session_name = null;
@@ -176,9 +178,11 @@ export default {
     },
 
     save_session(toast = false) {
+      let self = this;
+      this.$store.query._session.editor_text = this.$store.query.editor_text;
       this.$store.query.sessions[
         this.session_name
-      ].editor_text = this.$store.query.editor_text;
+      ] = this.$store.query._session
       this.save_state();
       if (toast)
         this.$toast.open({
@@ -186,16 +190,19 @@ export default {
           type: "is-success"
         });
     },
+
+
     load_session(toast = true) {
       /* Load session from backend */
       let self = this;
       this.save_session();
       if (self.new_session_name in self.$store.query.sessions) {
         this.$store.query.session_name = this.new_session_name;
-        this.session_name = this.new_session_name;
+        this.$store.query._session = new classes.StoreQuerySession(this.$store.query.sessions[this.new_session_name])
         this.$store.query.editor_text = this.$store.query.sessions[
-          this.session_name
+          this.new_session_name
         ].editor_text;
+        this.session_name = this.new_session_name;
         this.$forceUpdate();
         self.filter_word = null;
         if (toast)
@@ -209,6 +216,8 @@ export default {
         });
       }
     },
+
+
     delete_session() {
       /* TODO: Delete session from backend */
       let self = this;
@@ -242,6 +251,8 @@ export default {
       });
     }
   },
+
+
   mounted() {
     // this.main_editor.setSize(600, 300);
     // TODO: load up last session

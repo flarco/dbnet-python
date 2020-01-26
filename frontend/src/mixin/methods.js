@@ -1091,7 +1091,9 @@ var methods = {
     let query = new classes.SqlQuery({
       database: this.$store.query.db_name,
       sql: sql,
-      limit: this.$store.settings.default_query_limit
+      limit: this.$store.settings.default_query_limit,
+      ts_start: sql == "" ? 0 : null,
+      ts_end: sql == "" ? 0 : null,
     });
 
     let tab = new classes.Tab({
