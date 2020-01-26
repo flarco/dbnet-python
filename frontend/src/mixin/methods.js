@@ -1042,6 +1042,7 @@ var methods = {
       tab_id == null &&
       !this._.isEmpty(this.$store.query._session._tab) &&
       !this.$store.query._session._tab.pinned &&
+      !this.$store.query._session._tab.loading &&
       this.$store.query._session._tab.type == "data"
     ) {
       // use active unpinned tab
