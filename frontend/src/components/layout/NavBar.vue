@@ -24,19 +24,19 @@
               
           </div>
         </div>
-        <div class="navbar-item is-hoverable" @keyup.27="$store.vars.db_name_filter=null; focus_app()">
-          <a @click="show_db_name_filter()" v-if="$store.vars.db_name_filter == null">
+        <div class="navbar-item is-hoverable" @keyup.27="$store.vars.omnibox_filter=null; focus_app()">
+          <a @click="show_omnibox_filter()" v-if="$store.vars.omnibox_filter == null">
             <b-icon pack="fa" icon="search" ></b-icon>
           </a>
-          <b-field v-if="$store.vars.db_name_filter != null">
+          <b-field v-if="$store.vars.omnibox_filter != null">
               <b-autocomplete
-                id="db-name-filter"
+                id="omnibox-filter"
                 rounded
-                v-model="$store.vars.db_name_filter"
-                :data="db_names_filtered"
-                placeholder="Find database..."
+                v-model="$store.vars.omnibox_filter"
+                :data="omnibox_filtered"
+                placeholder="Omnibox..."
                 icon="magnify"
-                @select="option => {activate_query_db(option); $store.vars.db_name_filter=null}"
+                @select="option => {omnibox_action(option); $store.vars.omnibox_filter=null}"
               >
                   <template slot="empty">No results found</template>
               </b-autocomplete>
@@ -133,6 +133,23 @@ export default {
       setTimeout(() => {
         self.resize_panes();
       }, 60);
+    },
+    omnibox_action(option) {
+      let str_filter = this.$store.vars.omnibox_filter.toLowerCase()
+      console.log(str_filter)
+      console.log(option)
+      if(str_filter.startsWith("@")) {
+        // Connections
+        str_filter = str_filter.substr(1)
+        this.activate_query_db(option)
+      } else if(str_filter.startsWith("!")) {
+        // Sessions
+        str_filter = str_filter.substr(1)
+        this.activate_query_db(option)
+      } else {
+      // Table / View Objects
+
+      }
     }
   }
 };

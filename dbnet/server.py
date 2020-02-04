@@ -31,6 +31,7 @@ WEBAPP_HOST = os.getenv('DBNET_WEBAPP_HOST', default='0.0.0.0')
 WEBAPP_PORT = int(os.getenv('DBNET_WEBAPP_PORT', default=5566))
 DBNET_FOLDER = os.getenv('DBNET_FOLDER', default=get_home_path() + '/dbnet')
 MAX_WORKER_PER_DB = int(os.getenv('DBNET_MAX_WORKER_PER_DB', default=3))
+DBNET_DB_URL = os.getenv('DBNET_DB_URL')
 
 os.makedirs(DBNET_FOLDER, exist_ok=True)
 

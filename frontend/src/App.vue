@@ -157,15 +157,27 @@ export default {
   mounted() {
     const self = this
     self.resize_panes();
+
     window.addEventListener("keydown", function(e) {
-      if(e.keyCode == 113) self.show_db_name_filter()
+      if(e.keyCode == 113) self.show_omnibox_filter()
+
+      if(e.altKey && (e.key == "p" || e.charCode == 16 || e.charCode == 112 || e.keyCode == 80) ){
+        console.log("Omnibox");
+        self.show_omnibox_filter()
+        e.cancelBubble = true;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }  
     });
+
     window.addEventListener("keydown", function(e) {
       if(e.keyCode == 66 && (e.altKey || e.metaKey)) self.navigate_prev_db()
     });
+
     window.addEventListener("keydown", function(e) {
       if(e.keyCode == 79 && (e.altKey || e.metaKey)) self.show_tables_views_filter()
     });
+
   }
 };
 </script>

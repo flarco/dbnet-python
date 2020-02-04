@@ -61,13 +61,54 @@ export default {
   db_names() {
     return Object.keys(this.$store.app.databases)
   },
-  db_names_filtered() {
-    return Object.keys(this.$store.app.databases).filter((option) => {
-      return option
-        .toString()
-        .toLowerCase()
-        .indexOf(this.$store.vars.db_name_filter.toLowerCase()) >= 0
-    })
+  omnibox_filtered() {
+    let self=this
+    let str_filter = this.$store.vars.omnibox_filter.toLowerCase()
+    let options = []
+    if(str_filter == '') {
+      options = [
+        'Type for table / views',
+        '@ for connections',
+        '! for sessions',
+      ]
+    } else if(str_filter.startsWith("@")) {
+      // Connections
+      str_filter = str_filter.substr(1)
+      options = Object.keys(this.$store.app.databases).filter((option) => {
+        return option
+          .toString()
+          .toLowerCase()
+          .indexOf(str_filter) >= 0
+      })
+    } else if(str_filter.startsWith("!")) {
+      // Sessions
+      str_filter = str_filter.substr(1)
+      options = Object.keys(this.$store.query.sessions).filter((option) => {
+        return option
+          .toString()
+          .toLowerCase()
+          .indexOf(str_filter) >= 0
+      })
+      
+    } else {
+      // Table / View Objects
+      let all_obj = []
+
+      self.get_filertered_schemas().forEach(function(schema_nm) {
+        let schema = self.$store.query.meta.schema[schema_nm]
+        all_obj = all_obj.concat(schema.tables.map(t => `${schema_nm}.${t}`))
+        all_obj = all_obj.concat(schema.views.map(v => `${schema_nm}.${v}`))
+      }, this);  
+
+      options = all_obj.filter((option) => {
+        return option
+          .toString()
+          .toLowerCase()
+          .indexOf(str_filter) >= 0
+      })
+    }
+
+    return options
   },
   
   get_schema_select_heigth() {

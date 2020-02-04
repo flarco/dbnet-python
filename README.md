@@ -74,6 +74,7 @@ PG_XENIAL:
 - `DBNET_FOLDER` = local storage / queries folder (default `~/dbnet`) 
 - `DBNET_MAX_WORKER_PER_DB` = the maximum number of workers per database (default is `3`)
 - `DBNET_APPRISE_URL` = the [apprise](https://github.com/caronc/apprise) URL to send notifications to.
+- `DBNET_DB_URL` = the database URL to connect to (only one DB).
 
 
 # Screenshots

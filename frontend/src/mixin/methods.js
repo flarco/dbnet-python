@@ -27,10 +27,10 @@ var methods = {
     }
   },
 
-  show_db_name_filter(){
-    this.$store.vars.db_name_filter = '';
+  show_omnibox_filter(){
+    this.$store.vars.omnibox_filter = '';
     setTimeout(() => {
-      document.getElementById('db-name-filter').focus();
+      document.getElementById('omnibox-filter').focus();
     }, 100);
   },
 
@@ -41,6 +41,28 @@ var methods = {
     }, 100);
   },
 
+
+
+  load_session(session_name, toast = true) {
+    /* Load session from backend */
+    let self = this;
+    if (session_name in self.$store.query.sessions) {
+      this.$store.query.session_name = session_name;
+      this.$store.query._session = new classes.StoreQuerySession(this.$store.query.sessions[session_name])
+      this.$store.query.editor_text = this.$store.query._session.editor_text;
+      this.$forceUpdate();
+      
+      if (toast)
+        this.$toast.open({
+          message: `Session '${session_name}' loaded!`,
+          type: "is-success"
+        });
+    } else {
+      self.notify({
+        error: `Session '${session_name}' not found!`
+      });
+    }
+  },
 
   get_filertered_schemas() {
     // filter schema name by comma delimited keyword
@@ -1092,8 +1114,8 @@ var methods = {
       database: this.$store.query.db_name,
       sql: sql,
       limit: this.$store.settings.default_query_limit,
-      ts_start: sql == "" ? 0 : null,
-      ts_end: sql == "" ? 0 : null,
+      ts_start: sql == "" ? 1 : null,
+      ts_end: sql == "" ? 1 : null,
     });
 
     let tab = new classes.Tab({
@@ -1751,11 +1773,10 @@ var methods = {
 
     let proceed = force || this.$store.query.all_tables_views_refresh == null || this.$store.query.all_tables_views_refresh < now - 3*60*60 // if older than 3 hours, refresh
     if(!proceed) return
-
-    self.get_filertered_schemas().forEach(function(schema) {
-      self.get_tables(schema)
-      self.get_views(schema)
-    }, this);
+    
+    let schemas = self.get_filertered_schemas()
+    self.get_tables(schemas)
+    self.get_views(schemas)
 
     this.$store.query.all_tables_views_refresh = now
   },
@@ -1810,12 +1831,22 @@ var methods = {
         self.$store.query._session.schema_loading = false
       }, 1000);
     }
-    let schema = data.orig_req.options.kwargs.schema;
+    
+    let schema_tables = {}
+    for(let row of data.rows) {
+      let schema = row[0]
+      let table = row[1]
+      if (schema in schema_tables) schema_tables[schema].push(table)
+      else schema_tables[schema] = [table]
+    }
+
     if (data.database == this.curr_database) {
-      let tables = data.rows.map(row => row[1]);
-      this.$store.query.meta.schema[schema].tables = tables;
-      if (schema == this.sess_schema)
-        this.$store.query.meta.schema_objects.tables = tables;
+      Object.keys(schema_tables).forEach(function(schema) {
+        self.$store.query.meta.schema[schema].tables = schema_tables[schema];
+        if (schema == self.sess_schema)
+          self.$store.query.meta.schema_objects.tables = schema_tables[schema];
+      }, this);
+
       this.save_state();
     }
   },
@@ -1841,12 +1872,22 @@ var methods = {
         self.$store.query._session.schema_loading = false
       }, 1000);
     }
-    let schema = data.orig_req.options.kwargs.schema;
+    
+    let schema_views = {}
+    for(let row of data.rows) {
+      let schema = row[0]
+      let view = row[1]
+      if (schema in schema_views) schema_views[schema].push(view)
+      else schema_views[schema] = [view]
+    }
+
     if (data.database == this.curr_database) {
-      let views = data.rows.map(row => row[1]);
-      this.$store.query.meta.schema[schema].views = views;
-      if (schema == this.sess_schema)
-        this.$store.query.meta.schema_objects.views = views;
+      Object.keys(schema_views).forEach(function(schema) {
+        self.$store.query.meta.schema[schema].views = schema_views[schema];
+        if (schema == self.sess_schema)
+          self.$store.query.meta.schema_objects.views = schema_views[schema];
+      }, this);
+
       this.save_state();
     }
   },

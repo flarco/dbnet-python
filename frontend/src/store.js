@@ -145,7 +145,7 @@ export default {
     hot_selection_rows: [],
     hot_selection_rows_full: [],
     tab_row_data: [],
-    db_name_filter: null,
+    omnibox_filter: null,
     table_view_filter: null,
     perf_summary: {
       cpu: 0,

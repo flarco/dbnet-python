@@ -128,9 +128,9 @@ export default {
     select_session(option) {
       let self = this;
       if (option == null) return;
-      this.filter_word = "";
       self.new_session_name = option;
-      this.load_session();
+      this.save_session();
+      this.load_session(option);
       this.$store.query.sessions_name = option;
       setTimeout(function() {
         self.filter_word = null;
@@ -148,8 +148,8 @@ export default {
         self.session_name = this._.cloneDeep(this.$store.query.session_name);
         return;
       }
-      this.$store.query.session_name = this.session_name;
-      this.$store.query.sessions[this.session_name] = this._.cloneDeep(
+      this.$store.query.session_name = this.$store.query.sessions_name;
+      this.$store.query.sessions[this.$store.query.sessions_name] = this._.cloneDeep(
         this.$store.query.sessions[old_name]
       );
       delete this.$store.query.sessions[old_name];
@@ -170,7 +170,7 @@ export default {
           db_name: self.$store.query.db_name,
           name: self.new_session_name,
         });
-        this.load_session();
+        this.load_session(self.new_session_name);
 
         self.new_session_name = null;
         self.form.show_field_new_session = false;
@@ -179,10 +179,8 @@ export default {
 
     save_session(toast = false) {
       let self = this;
-      this.$store.query._session.editor_text = this.$store.query.editor_text;
-      this.$store.query.sessions[
-        this.session_name
-      ] = this.$store.query._session
+      this.$store.query._session.editor_text = this._.cloneDeep(this.$store.query.editor_text);
+      this.$store.query.sessions[this.$store.query.sessions_name] = this.$store.query._session
       this.save_state();
       if (toast)
         this.$toast.open({
@@ -191,31 +189,6 @@ export default {
         });
     },
 
-
-    load_session(toast = true) {
-      /* Load session from backend */
-      let self = this;
-      this.save_session();
-      if (self.new_session_name in self.$store.query.sessions) {
-        this.$store.query.session_name = this.new_session_name;
-        this.$store.query._session = new classes.StoreQuerySession(this.$store.query.sessions[this.new_session_name])
-        this.$store.query.editor_text = this.$store.query.sessions[
-          this.new_session_name
-        ].editor_text;
-        this.session_name = this.new_session_name;
-        this.$forceUpdate();
-        self.filter_word = null;
-        if (toast)
-          this.$toast.open({
-            message: `Session '${self.new_session_name}' loaded!`,
-            type: "is-success"
-          });
-      } else {
-        self.notify({
-          error: `Session '${self.new_session_name}' not found!`
-        });
-      }
-    },
 
 
     delete_session() {
@@ -232,7 +205,7 @@ export default {
 
       let do_delete = function() {
         self.new_session_name = "default";
-        self.load_session(false);
+        self.load_session(old_name, false);
         delete self.$store.query.sessions[old_name];
         self.$toast.open({
           message: `Session '${old_name}' deleted!`,
