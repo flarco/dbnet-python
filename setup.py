@@ -22,7 +22,7 @@ setup(
     "python-socketio==1.8.4",
     "verboselogs==1.7",
     "coloredlogs==10.0",
-    "psutil==5.6.3",
+    "psutil==5.6.6",
     "jmespath==0.9.4",
     "eventlet==0.21.0",
     "PyYAML==5.1.2",
