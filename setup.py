@@ -23,7 +23,7 @@ setup(
     "coloredlogs",
     "psutil",
     "jmespath",
-    "eventlet==0.21.0",
+    "eventlet==0.31.0",
     "PyYAML==5.1.2",
     "flask==0.11.1",
     "Flask-SSLify==0.1.5",
