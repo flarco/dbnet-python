@@ -24,7 +24,7 @@ setup(
     "psutil",
     "jmespath",
     "eventlet==0.21.0",
-    "PyYAML==5.1.2",
+    "PyYAML==5.4",
     "flask==0.11.1",
     "Flask-SSLify==0.1.5",
     "xutil",
