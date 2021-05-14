@@ -19,7 +19,6 @@ setup(
                                      'README.rst')).read(),
   install_requires=[
     "python-dateutil==2.7.5",
-    "python-socketio==1.8.4",
     "verboselogs",
     "coloredlogs",
     "psutil",
