@@ -28,7 +28,7 @@ setup(
     "flask==0.11.1",
     "Flask-SSLify==0.1.5",
     "xutil",
-    "apprise==0.8.4",
+    "apprise==0.9.5.1",
     "ruamel.yaml==0.16.7",
   ],
   entry_points={
